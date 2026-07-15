@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Router v6</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23111827' stroke='%233b82f6' stroke-width='2'/><path d='M10 16l4 4 8-8' fill='none' stroke='%2310b981' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      window._appErrors = [];
+      window.addEventListener('error', function(e) {
+        // Only catch real JS errors, not network/resource errors (like WebSocket)
+        if (!(e instanceof ErrorEvent) || !e.error) return;
+        var msg = e.message || 'Unknown error';
+        var src = e.filename || '';
+        window._appErrors.push({ msg: msg, src: src, line: e.lineno, col: e.colno });
+        var app = document.getElementById('app');
+        app.innerHTML = '<div style="padding:40px;color:#ef4444;font-family:monospace;background:#0a0e17;max-width:800px;margin:40px auto;border-radius:8px"><h3 style="margin-bottom:8px">JS Error</h3><pre style="white-space:pre-wrap;word-break:break-all">' + msg + '</pre><p style="color:#5a6d84;font-size:12px">' + src + ':' + (e.lineno||'?') + ':' + (e.colno||'?') + '</p><pre style="white-space:pre-wrap;word-break:break-all;font-size:11px;color:#5a6d84;margin-top:8px">' + (e.error && e.error.stack || '') + '</pre></div>';
+      }, true);
+      window.onerror = function(msg, url, line, col, err) {
+        window._appErrors.push({ msg: String(msg), src: url, line: line, col: col });
+        var app = document.getElementById('app');
+        app.innerHTML = '<div style="padding:40px;color:#ef4444;font-family:monospace;background:#0a0e17;max-width:800px;margin:40px auto;border-radius:8px"><h3 style="margin-bottom:8px">JS Error (onerror)</h3><pre style="white-space:pre-wrap;word-break:break-all">' + JSON.stringify(msg) + '</pre><p style="color:#5a6d84;font-size:12px">' + (url||'') + ':' + (line||'?') + '</p><pre style="white-space:pre-wrap;word-break:break-all;font-size:11px;color:#5a6d84;margin-top:8px">' + (err && err.stack || '') + '</pre></div>';
+      };
+      setTimeout(function() {
+        var app = document.getElementById('app');
+        if (!app || !app.innerHTML.trim()) {
+          var errInfo = window._appErrors && window._appErrors.length > 0 ? '<p style="margin-top:8px">Captured errors: ' + JSON.stringify(window._appErrors) + '</p>' : '';
+          app.innerHTML = '<div style="padding:40px;color:#f59e0b;font-family:monospace;background:#0a0e17;max-width:800px;margin:40px auto;border-radius:8px"><h3 style="margin-bottom:8px">App Not Mounted</h3><p>Vue app did not mount after 5 seconds.</p>' + errInfo + '<p style="margin-top:12px;font-size:11px;color:#5a6d84">JS module loaded but Vue did not mount.</p></div>';
+        }
+      }, 5000);
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

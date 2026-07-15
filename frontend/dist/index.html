@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Router v6 · 智能路由控制台</title>
+<link rel="icon" href="/favicon.svg">
+<style>
+:root{
+  --bg0:#070b14; --bg1:#0b1020; --card:rgba(255,255,255,.035); --card2:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.08); --border2:rgba(255,255,255,.14);
+  --txt:#e8eef7; --muted:#8595ad; --dim:#5b6b85;
+  --indigo:#6366f1; --cyan:#22d3ee; --green:#34d399; --amber:#fbbf24; --rose:#fb7185; --grey:#64748b;
+  --radius:18px; --radius-sm:12px;
+  --grad:linear-gradient(135deg,#6366f1 0%,#22d3ee 100%);
+  --sidebar-w:236px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  background:var(--bg0); color:var(--txt); min-height:100vh; -webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(900px 500px at 12% -8%,rgba(99,102,241,.16),transparent 60%),radial-gradient(800px 500px at 100% 0%,rgba(34,211,238,.10),transparent 55%);
+  background-attachment:fixed; overflow:hidden;
+}
+a{color:var(--cyan);text-decoration:none}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:6px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ===== 布局 ===== */
+.layout{display:flex;height:100vh;overflow:hidden}
+
+/* ===== 侧边栏 ===== */
+.sidebar{width:var(--sidebar-w);flex:none;background:rgba(8,12,22,.55);backdrop-filter:blur(20px) saturate(160%);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:18px 14px}
+.sb-brand{display:flex;align-items:center;gap:11px;padding:4px 8px 18px}
+.sb-logo{width:36px;height:36px;border-radius:11px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:19px;box-shadow:0 6px 20px rgba(99,102,241,.4);flex:none}
+.sb-brand h1{font-size:15px;font-weight:700;letter-spacing:-.3px;line-height:1.1}
+.sb-brand .sub{font-size:10.5px;color:var(--muted);margin-top:2px}
+.sb-nav{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.sb-group{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;padding:14px 10px 6px}
+.sb-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:11px;color:var(--muted);font-size:13.5px;font-weight:500;cursor:pointer;transition:.16s;border:1px solid transparent}
+.sb-item:hover{background:var(--card);color:var(--txt)}
+.sb-item.active{background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(34,211,238,.10));color:#fff;border-color:rgba(99,102,241,.3)}
+.sb-item .ic{font-size:16px;width:20px;text-align:center;flex:none}
+.sb-item .badge-dot{margin-left:auto;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.sb-foot{margin-top:auto;padding:12px 10px 4px;border-top:1px solid var(--border);font-size:11px;color:var(--dim);display:flex;flex-direction:column;gap:8px}
+.sb-foot .live{display:flex;align-items:center;gap:7px}
+.sb-foot .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);transition:.3s}
+.sb-foot .live-dot.on{transform:scale(1.5)}
+
+/* ===== 主区 ===== */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 24px;background:rgba(8,12,22,.6);backdrop-filter:blur(18px) saturate(160%);border-bottom:1px solid var(--border);flex:none}
+.crumb{display:flex;align-items:center;gap:10px}
+.crumb h2{font-size:16px;font-weight:700;letter-spacing:-.2px}
+.crumb .desc{font-size:12px;color:var(--muted)}
+.top-right{display:flex;align-items:center;gap:10px}
+.btn{border:1px solid var(--border);background:var(--card);color:var(--txt);padding:7px 14px;border-radius:10px;font-size:12.5px;cursor:pointer;transition:.18s;font-weight:500;font-family:inherit}
+.btn:hover{border-color:var(--border2);background:var(--card2)}
+.btn.primary{background:var(--grad);border:none;color:#fff;font-weight:600;box-shadow:0 4px 14px rgba(99,102,241,.35)}
+.btn.danger{background:rgba(251,113,133,.14);border-color:rgba(251,113,133,.35);color:#fda4af}
+.btn.danger:hover{background:rgba(251,113,133,.22)}
+.btn.sm{padding:5px 10px;font-size:11.5px;border-radius:8px}
+.btn.off{opacity:.55}
+.content{flex:1;overflow-y:auto;padding:22px 24px 50px}
+.view{display:none;animation:fade .35s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ===== 通用卡片 ===== */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;backdrop-filter:blur(10px);box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 12px 30px rgba(0,0,0,.28);margin-bottom:16px}
+.sec-title{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.sec-bar{width:4px;height:15px;border-radius:3px;background:var(--grad)}
+.sec-title h3{font-size:13.5px;font-weight:600;letter-spacing:.2px;color:#dbe4f1}
+.sec-title .hint{font-size:11px;color:var(--muted);margin-left:auto}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.col-8{grid-column:span 8}.col-7{grid-column:span 7}.col-6{grid-column:span 6}.col-5{grid-column:span 5}
+.col-4{grid-column:span 4}.col-12{grid-column:span 12}
+@media(max-width:1100px){.col-8,.col-7,.col-6,.col-5,.col-4{grid-column:span 12}}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(8,1fr);gap:14px;margin-bottom:16px}
+@media(max-width:1280px){.kpi-row{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:680px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
+.kpi-card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 16px 14px;overflow:hidden;backdrop-filter:blur(10px)}
+.kpi-card::before{content:'';position:absolute;left:0;top:0;width:100%;height:3px;background:var(--grad);opacity:.8}
+.kpi-card.tone-good::before{background:linear-gradient(90deg,#34d399,#10b981)}
+.kpi-card.tone-warn::before{background:linear-gradient(90deg,#fbbf24,#f59e0b)}
+.kpi-card.tone-bad::before{background:linear-gradient(90deg,#fb7185,#ef4444)}
+.kpi-label{font-size:11.5px;color:var(--muted);letter-spacing:.2px}
+.kpi-value{font-size:25px;font-weight:700;letter-spacing:-.5px;margin-top:7px;line-height:1;font-variant-numeric:tabular-nums}
+.kpi-sub{font-size:11px;color:var(--dim);margin-top:6px}
+
+/* 图表 */
+.chart{width:100%;height:280px}
+.chart-sm{height:230px}
+
+/* 供应商卡 */
+.providers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.prov-card{background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:14px;padding:14px;transition:.2s}
+.prov-card:hover{border-color:var(--border2)}
+.prov-card.down{border-color:rgba(251,113,133,.35);background:rgba(251,113,133,.06)}
+.prov-card.degraded{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05)}
+.prov-head{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none}
+.dot.green{background:var(--green);box-shadow:0 0 8px var(--green)}
+.dot.red{background:var(--rose);box-shadow:0 0 8px var(--rose)}
+.dot.grey{background:var(--grey)}
+.prov-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prov-cool{margin-left:auto;font-size:10px;color:var(--amber);background:rgba(251,191,36,.14);padding:2px 7px;border-radius:8px;white-space:nowrap}
+.prov-metrics{display:flex;justify-content:space-between;gap:6px}
+.prov-metrics>div{display:flex;flex-direction:column;align-items:center;flex:1}
+.m-val{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}
+.m-lab{font-size:10.5px;color:var(--muted);margin-top:3px}
+.prov-actions{display:flex;gap:7px;margin-top:12px}
+
+/* 模型池条 */
+.mp-row{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+.mp-lab{width:42px;font-size:12px;color:var(--muted);flex:none}
+.mp-bar{flex:1;height:9px;background:rgba(255,255,255,.06);border-radius:6px;overflow:hidden}
+.mp-bar i{display:block;height:100%;border-radius:6px;background:var(--grad);transition:width .6s}
+.mp-num{width:26px;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* 延迟/熔断 */
+.mini-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.mini{background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+.mini .v{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+.mini .l{font-size:10.5px;color:var(--muted);margin-top:4px}
+.cb-row{display:flex;gap:10px;margin-top:12px}
+.cb-stat{flex:1;text-align:center;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:12px;padding:11px}
+.cb-stat .v{font-size:20px;font-weight:700}
+.cb-stat .l{font-size:10.5px;color:var(--muted);margin-top:3px}
+.cb-stat.open .v{color:var(--rose)}.cb-stat.half .v{color:var(--amber)}.cb-stat.closed .v{color:var(--green)}
+
+/* Agent */
+.agents-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.agent-card{background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:14px;padding:14px}
+.agent-card.off{opacity:.6}
+.agent-top{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.agent-emoji{font-size:20px}
+.agent-name{font-size:14px;font-weight:600}
+.agent-sys{font-size:11.5px;color:var(--muted);line-height:1.5;min-height:34px}
+.agent-meta{display:flex;gap:14px;margin-top:9px;font-size:11px;color:var(--dim)}
+
+/* 表格 */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+thead th{text-align:left;color:var(--muted);font-weight:500;font-size:11px;letter-spacing:.4px;padding:9px 12px;border-bottom:1px solid var(--border);text-transform:uppercase}
+tbody td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);font-variant-numeric:tabular-nums;vertical-align:middle}
+tbody tr:hover{background:rgba(255,255,255,.03)}
+.t-ts{color:var(--muted);white-space:nowrap}
+.badge{display:inline-block;min-width:42px;text-align:center;padding:2px 9px;border-radius:8px;font-size:11.5px;font-weight:600}
+.badge.ok{background:rgba(52,211,153,.14);color:#6ee7b7}
+.badge.warn{background:rgba(251,191,36,.15);color:#fcd34d}
+.badge.err{background:rgba(251,113,133,.15);color:#fda4af}
+.badge.misc{background:rgba(100,116,139,.18);color:#cbd5e1}
+.badge.cy{background:rgba(99,102,241,.2);color:#a5b4fc}
+.badge.am{background:rgba(34,211,238,.16);color:#67e8f9}
+.tn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.stat-num{font-size:24px;font-weight:700;color:var(--text);line-height:1.1}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+.tn-card{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:16px}
+.tn-name{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text)}
+.tn-row{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px dashed rgba(255,255,255,.06)}
+.tn-row:last-child{border-bottom:none}
+.tn-row .k{color:var(--muted)} .tn-row .v{color:var(--text);font-weight:600}
+.filter-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.filter-row .flabel{font-size:12px;color:var(--muted)}
+.chip{border:1px solid var(--border);background:var(--card);color:var(--muted);padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;transition:.16s;font-family:inherit}
+.chip:hover{border-color:var(--border2);color:var(--txt)}
+.chip.active{background:var(--grad);border:none;color:#fff;font-weight:600}
+.switch{position:relative;display:inline-block;width:38px;height:22px;flex:none}
+.switch input{opacity:0;width:0;height:0}
+.switch .slider{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,.12);border-radius:22px;transition:.2s}
+.switch .slider:before{content:'';position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
+.switch input:checked + .slider{background:var(--grad)}
+.switch input:checked + .slider:before{transform:translateX(16px)}
+.empty{color:var(--dim);font-size:12.5px;padding:24px;text-align:center}
+.tag{display:inline-block;font-size:10.5px;padding:2px 8px;border-radius:7px;background:rgba(99,102,241,.14);color:#a5b4fc;margin:2px}
+.tag.cy{background:rgba(34,211,238,.14);color:#67e8f9}
+.tag.gr{background:rgba(52,211,153,.14);color:#6ee7b7}
+.tag.am{background:rgba(251,191,36,.14);color:#fcd34d}
+.tag.rs{background:rgba(251,113,133,.14);color:#fda4af}
+
+/* 表单 */
+.form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11.5px;color:var(--muted);font-weight:500}
+.field input,.field select,.field textarea{background:#0a0e18;border:1px solid var(--border);color:var(--txt);border-radius:10px;padding:9px 12px;font-size:13px;font-family:inherit;transition:.16s}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--indigo)}
+.field textarea{resize:vertical;min-height:84px;line-height:1.5}
+.form-actions{display:flex;gap:10px;margin-top:6px}
+.inline-form{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:16px}
+
+/* 模态 */
+.modal-mask{position:fixed;inset:0;z-index:120;background:rgba(5,8,15,.7);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;padding:24px}
+.modal-mask.show{display:flex}
+.modal{background:#0d1322;border:1px solid var(--border2);border-radius:18px;padding:24px 26px;width:100%;max-width:520px;max-height:86vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.6);animation:fade .25s ease}
+.modal h3{font-size:16px;margin-bottom:4px}
+.modal .m-sub{font-size:12px;color:var(--muted);margin-bottom:18px}
+.modal .form-actions{margin-top:18px;justify-content:flex-end}
+
+/* Toast */
+#toast-wrap{position:fixed;top:18px;right:18px;z-index:200;display:flex;flex-direction:column;gap:10px}
+.toast{background:#0d1322;border:1px solid var(--border2);border-radius:12px;padding:12px 16px;font-size:13px;min-width:240px;box-shadow:0 14px 40px rgba(0,0,0,.5);animation:fade .25s ease;display:flex;align-items:center;gap:10px}
+.toast.ok{border-color:rgba(52,211,153,.4)}
+.toast.err{border-color:rgba(251,113,133,.4)}
+.toast .ti{font-size:16px}
+
+/* 令牌门 */
+#token-gate{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;background:rgba(5,8,15,.85);backdrop-filter:blur(6px)}
+.gate-box{background:#0d1322;border:1px solid var(--border2);border-radius:18px;padding:30px 34px;width:380px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.gate-box h3{font-size:16px;margin-bottom:8px}
+.gate-box p{font-size:12.5px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.gate-box input{width:100%;padding:11px 13px;border-radius:10px;border:1px solid var(--border);background:#0a0e18;color:var(--txt);font-size:13px;margin-bottom:14px;font-family:monospace}
+.gate-box input:focus{outline:none;border-color:var(--indigo)}
+#auth-banner{display:none;background:rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.4);color:#fda4af;padding:8px 16px;border-radius:10px;font-size:12px;margin:0 24px 14px}
+
+/* 系统 */
+.sysbar{display:flex;align-items:center;gap:22px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.sysbar b{color:var(--txt);font-weight:600}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.chip{font-size:10.5px;padding:3px 9px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--muted)}
+pre.cfg{background:#0a0e18;border:1px solid var(--border);border-radius:12px;padding:16px;font-size:11.5px;line-height:1.6;color:var(--muted);overflow-x:auto;max-height:420px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+</style>
+</head>
+<body>
+<script>window.lijie0821 = "lijie0821";</script>
+
+<div id="auth-banner">⚠️ 需要管理员令牌才能加载数据，请在下方输入（来自 config.json 的 admin_token）。</div>
+
+<div class="layout">
+  <!-- 侧边栏 -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo"><svg viewBox="0 0 36 36" width="22" height="22" aria-hidden="true">
+        <g fill="#fff">
+          <circle cx="11.5" cy="13" r="3.1"/>
+          <circle cx="18" cy="9.5" r="3.1"/>
+          <circle cx="24.5" cy="13" r="3.1"/>
+          <circle cx="18" cy="22.5" r="5.2"/>
+        </g>
+        <g stroke="#fff" stroke-width="1.3" opacity=".45" fill="none" stroke-linecap="round">
+          <path d="M11.5 13 L18 22.5 M18 9.5 L18 22.5 M24.5 13 L18 22.5"/>
+        </g>
+        <circle cx="18" cy="22.5" r="1.5" fill="#a5b4fc"/>
+      </svg></div>
+      <div><h1>Smart Router</h1><div class="sub">智能路由控制台 v6</div></div>
+    </div>
+    <nav class="sb-nav">
+      <a class="sb-item active" data-view="overview"><span class="ic">📊</span>概览监控<span class="badge-dot" id="nav-live"></span></a>
+      <div class="sb-group">配置管理</div>
+      <a class="sb-item" data-view="providers"><span class="ic">🔌</span>供应商端点</a>
+      <a class="sb-item" data-view="models"><span class="ic">🧩</span>模型池</a>
+      <a class="sb-item" data-view="keys"><span class="ic">🔑</span>虚拟密钥</a>
+      <a class="sb-item" data-view="routing"><span class="ic">🛣️</span>路由与提示词</a>
+      <a class="sb-item" data-view="agents"><span class="ic">🤖</span>Agent 管理</a>
+      <a class="sb-item" data-view="guardrails"><span class="ic">🛡️</span>护栏日志</a>
+      <a class="sb-item" data-view="mcp"><span class="ic">🔗</span>MCP 服务器</a>
+      <a class="sb-item" data-view="tenants"><span class="ic">🏢</span>租户统计</a>
+      <a class="sb-item" data-view="topology"><span class="ic">🕸️</span>拓扑图</a>
+      <div class="sb-group">系统</div>
+      <a class="sb-item" data-view="system"><span class="ic">⚙️</span>系统设置</a>
+    </nav>
+    <div class="sb-foot">
+      <div class="live"><span class="live-dot" id="live-dot"></span><span id="sb-status">连接中…</span></div>
+      <div id="sb-uptime">运行时长 —</div>
+    </div>
+  </aside>
+
+  <!-- 主区 -->
+  <main class="main">
+    <header class="topbar">
+      <div class="crumb">
+        <h2 id="crumb-title">概览监控</h2>
+        <span class="desc" id="crumb-desc">实时流量、健康与成本</span>
+      </div>
+      <div class="top-right">
+        <span class="updated" id="updated" style="font-size:12px;color:var(--muted)">—</span>
+        <button class="btn" id="btn-autorefresh">自动刷新 开</button>
+        <button class="btn primary" id="btn-refresh">↻ 刷新</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- 概览 -->
+      <section class="view active" id="view-overview">
+        <div class="kpi-row">
+          <div class="kpi-card" id="kpi-requests"><div class="kpi-label">累计请求</div><div class="kpi-value">—</div><div class="kpi-sub"></div></div>
+          <div class="kpi-card" id="kpi-success"><div class="kpi-label">首轮直连成功率</div><div class="kpi-value">—</div><div class="kpi-sub"></div></div>
+          <div class="kpi-card" id="kpi-latency"><div class="kpi-label">平均延迟</div><div class="kpi-value">—</div><div class="kpi-sub"></div></div>
+          <div class="kpi-card" id="kpi-models"><div class="kpi-label">模型池</div><div class="kpi-value">—</div><div class="kpi-sub"></div></div>
+          <div class="kpi-card" id="kpi-providers"><div class="kpi-label">健康供应商</div><div class="kpi-value">—</div><div class="kpi-sub"></div></div>
+          <div class="kpi-card" id="kpi-tokens"><div class="kpi-label">Token 累计</div><div class="kpi-value">—</div><div class="kpi-sub"></div></div>
+          <div class="kpi-card" id="kpi-cost"><div class="kpi-label">今日成本</div><div class="kpi-value">—</div><div class="kpi-sub"></div></div>
+          <div class="kpi-card" id="kpi-upstream"><div class="kpi-label">兜底上游</div><div class="kpi-value">—</div><div class="kpi-sub"></div></div>
+        </div>
+        <div class="grid">
+          <div class="card col-8">
+            <div class="sec-title"><span class="sec-bar"></span><h3>流量与延迟趋势</h3><span class="hint">近 14 天</span></div>
+            <div id="chart-trend" class="chart"></div>
+          </div>
+          <div class="card col-4">
+            <div class="sec-title"><span class="sec-bar"></span><h3>响应状态分布</h3><span class="hint">近 24h</span></div>
+            <div id="chart-status" class="chart chart-sm"></div>
+          </div>
+          <div class="card col-12">
+            <div class="sec-title"><span class="sec-bar"></span><h3>供应商健康</h3><span class="hint">实时 · 红=离线 黄=降级</span></div>
+            <div class="providers-grid" id="ov-providers"></div>
+          </div>
+          <div class="card col-4">
+            <div class="sec-title"><span class="sec-bar"></span><h3>模型池分布</h3><span class="hint">按能力</span></div>
+            <div id="ov-modelpool"></div>
+          </div>
+          <div class="card col-4">
+            <div class="sec-title"><span class="sec-bar"></span><h3>延迟百分位</h3></div>
+            <div class="mini-grid">
+              <div class="mini"><div class="v" id="lat-p50">—</div><div class="l">P50</div></div>
+              <div class="mini"><div class="v" id="lat-p90">—</div><div class="l">P90</div></div>
+              <div class="mini"><div class="v" id="lat-p99">—</div><div class="l">P99</div></div>
+              <div class="mini"><div class="v" id="lat-max">—</div><div class="l">Max</div></div>
+            </div>
+            <div class="sec-title" style="margin:16px 0 12px"><span class="sec-bar"></span><h3>熔断状态</h3></div>
+            <div class="cb-row">
+              <div class="cb-stat closed"><div class="v" id="cb-closed">—</div><div class="l">闭合</div></div>
+              <div class="cb-stat half"><div class="v" id="cb-half">—</div><div class="l">半开</div></div>
+              <div class="cb-stat open"><div class="v" id="cb-open">—</div><div class="l">断开</div></div>
+            </div>
+            <div style="text-align:center;color:var(--muted);font-size:11.5px;margin-top:10px">模型总数 <b id="cb-total" style="color:var(--txt)">—</b></div>
+          </div>
+          <div class="card col-4">
+            <div class="sec-title"><span class="sec-bar"></span><h3>Top 模型用量</h3></div>
+            <div id="chart-topmodels" class="chart chart-sm"></div>
+          </div>
+          <div class="card col-12">
+            <div class="sec-title"><span class="sec-bar"></span><h3>Agent 舰队</h3><span class="hint" id="agents-summary">—</span></div>
+            <div class="agents-grid" id="ov-agents"></div>
+          </div>
+          <div class="card col-12">
+            <div class="sec-title"><span class="sec-bar"></span><h3>最近请求</h3><span class="hint">实时滚动</span>
+              <select id="recent-agent" style="margin-left:auto;max-width:180px;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:4px 8px;font-size:12px"><option value="">全部来源</option></select>
+            </div>
+            <div class="table-wrap">
+              <table><thead><tr><th>时间</th><th>状态</th><th>模型</th><th>供应商</th><th>延迟</th><th>来源（哪个 Agent 调的）</th></tr></thead>
+              <tbody id="ov-recent"><tr><td colspan="6" class="empty">加载中…</td></tr></tbody></table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 供应商 -->
+      <section class="view" id="view-providers">
+        <div class="inline-form">
+          <div class="sec-title"><span class="sec-bar"></span><h3>新增供应商端点</h3></div>
+          <div class="form-row">
+            <div class="field"><label>名称 (唯一)</label><input id="np-name" placeholder="例如 OpenAI"></div>
+            <div class="field"><label>Base URL</label><input id="np-url" placeholder="https://api.openai.com/v1"></div>
+            <div class="field"><label>API Key</label><input id="np-key" placeholder="sk-... (可空)" type="password"></div>
+          </div>
+          <div class="form-actions"><button class="btn primary" id="np-add">＋ 添加端点</button></div>
+        </div>
+        <div class="card">
+          <div class="sec-title"><span class="sec-bar"></span><h3>已配置端点</h3><span class="hint" id="prov-count">—</span></div>
+          <div class="providers-grid" id="prov-grid"></div>
+        </div>
+      </section>
+
+      <!-- 模型 -->
+      <section class="view" id="view-models">
+        <div class="inline-form">
+          <div class="sec-title"><span class="sec-bar"></span><h3>新增模型</h3></div>
+          <div class="form-row">
+            <div class="field"><label>模型 ID (唯一)</label><input id="nm-id" placeholder="gpt-4o"></div>
+            <div class="field"><label>供应商</label><input id="nm-provider" placeholder="OpenAI"></div>
+            <div class="field"><label>档位 (1-6)</label><input id="nm-tier" type="number" min="1" max="6" value="5"></div>
+            <div class="field"><label>能力</label>
+              <select id="nm-cap"><option value="general">通用</option><option value="coding">代码</option><option value="reasoning">推理</option><option value="vision">视觉</option><option value="fast">高速</option></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>描述</label><input id="nm-desc" placeholder="可选说明"></div>
+          </div>
+          <div class="form-actions"><button class="btn primary" id="nm-add">＋ 添加模型</button></div>
+        </div>
+        <div class="card">
+          <div class="sec-title"><span class="sec-bar"></span><h3>模型池</h3><span class="hint" id="model-count">—</span></div>
+          <div class="table-wrap">
+            <table><thead><tr><th>模型 ID</th><th>供应商</th><th>档位</th><th>能力</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody id="model-body"><tr><td colspan="6" class="empty">加载中…</td></tr></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 虚拟密钥 -->
+      <section class="view" id="view-keys">
+        <div class="inline-form">
+          <div class="sec-title"><span class="sec-bar"></span><h3>新建虚拟密钥</h3></div>
+          <div class="form-row">
+            <div class="field"><label>名称</label><input id="nk-name" placeholder="team-a"></div>
+            <div class="field"><label>月度预算 (¥)</label><input id="nk-budget" type="number" value="100"></div>
+            <div class="field"><label>并发上限</label><input id="nk-conc" type="number" value="5"></div>
+            <div class="field"><label>租户 (可选)</label><input id="nk-tenant" placeholder="留空=默认"></div>
+          </div>
+          <div class="form-actions"><button class="btn primary" id="nk-add">＋ 创建密钥</button></div>
+        </div>
+        <div class="card">
+          <div class="sec-title"><span class="sec-bar"></span><h3>密钥列表</h3><span class="hint" id="key-count">—</span></div>
+          <div class="table-wrap">
+            <table><thead><tr><th>名称</th><th>密钥</th><th>预算/已用</th><th>并发</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody id="key-body"><tr><td colspan="6" class="empty">加载中…</td></tr></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 路由与提示词 -->
+      <section class="view" id="view-routing">
+        <div class="card">
+          <div class="sec-title"><span class="sec-bar"></span><h3>系统提示词</h3><span class="hint">作用于所有请求的前置 system</span></div>
+          <div class="field"><textarea id="rt-system" style="min-height:140px"></textarea></div>
+          <div class="form-actions"><button class="btn primary" id="rt-save-system">保存提示词</button></div>
+        </div>
+        <div class="card">
+          <div class="sec-title"><span class="sec-bar"></span><h3>路由策略</h3><span class="hint">并行竞速 / 兜底 / 加权</span></div>
+          <div class="field"><textarea id="rt-routing" style="min-height:160px;font-family:ui-monospace,monospace"></textarea></div>
+          <div class="form-actions"><button class="btn primary" id="rt-save-routing">保存路由配置</button></div>
+        </div>
+      </section>
+
+      <!-- Agent 管理 -->
+      <section class="view" id="view-agents">
+        <div class="inline-form">
+          <div class="sec-title"><span class="sec-bar"></span><h3>新增 / 绑定 Agent</h3><div class="hint">把某个 Agent 接入路由，可限定它只能用哪些模型（留空=全池）</div></div>
+          <div class="form-row">
+            <div class="field"><label>Agent 名称</label><input id="na-name" placeholder="例如 知夏 / 写手姐 / WorkBuddy"></div>
+            <div class="field"><label>模式</label><select id="na-mode"><option value="group">分组(多模型)</option><option value="single">单模型</option></select></div>
+            <div class="field"><label>描述</label><input id="na-desc" placeholder="可选说明"></div>
+          </div>
+          <div class="form-row">
+            <div class="field" style="flex:1"><label>绑定模型池（Ctrl/⌘ 多选，留空=全部模型）</label><select id="na-models" multiple size="6" style="width:100%"></select></div>
+          </div>
+          <div class="form-actions"><button class="btn primary" id="na-add">＋ 添加 / 更新绑定</button></div>
+        </div>
+        <div class="card">
+          <div class="sec-title"><span class="sec-bar"></span><h3>Agent 舰队</h3><span class="hint" id="agent-count">—</span></div>
+          <div class="filter-row" style="margin:0 0 12px">
+            <span class="flabel">筛选：</span>
+            <button class="chip" data-af="all">全部</button>
+            <button class="chip active" data-af="fleet">舰队 Agent</button>
+            <button class="chip" data-af="source">其他来源</button>
+          </div>
+          <div class="agents-grid" id="agent-grid"></div>
+        </div>
+      </section>
+
+      <!-- 护栏日志 -->
+      <section class="view" id="view-guardrails">
+        <div class="filter-row" style="margin-bottom:14px">
+          <span class="flabel">严重度：</span>
+          <button class="chip active" data-gf="all">全部</button>
+          <button class="chip" data-gf="high">高</button>
+          <button class="chip" data-gf="medium">中</button>
+          <button class="chip" data-gf="low">低</button>
+          <span class="flabel" style="margin-left:14px">动作：</span>
+          <button class="chip active" data-ga="all">全部</button>
+          <button class="chip" data-ga="block">拦截</button>
+          <button class="chip" data-ga="mask">脱敏</button>
+        </div>
+        <div class="card">
+          <div class="sec-title"><span class="sec-bar"></span><h3>护栏触发日志</h3><span class="hint" id="gr-count">—</span></div>
+          <div class="table-wrap">
+            <table><thead><tr><th>时间</th><th>方向</th><th>规则</th><th>严重度</th><th>动作</th><th>来源 IP</th><th>片段</th></tr></thead>
+            <tbody id="gr-body"><tr><td colspan="7" class="empty">加载中…</td></tr></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- MCP 服务器 -->
+      <section class="view" id="view-mcp">
+        <div class="inline-form">
+          <div class="sec-title"><span class="sec-bar"></span><h3>添加 MCP 服务器</h3><div class="hint">接入外部 MCP 工具服务</div></div>
+          <div class="form-row">
+            <div class="field"><label>名称</label><input id="nm-name" placeholder="例如 github-mcp"></div>
+            <div class="field" style="flex:2"><label>服务地址 (URL)</label><input id="nm-url" placeholder="http://localhost:3000/mcp"></div>
+            <div class="field"><label>状态</label><select id="nm-enabled"><option value="true">启用</option><option value="false">停用</option></select></div>
+          </div>
+          <div class="field"><label>自定义请求头 (JSON，可选)</label><input id="nm-headers" placeholder='{"Authorization":"Bearer xxx"}'></div>
+          <div class="form-actions"><button class="btn primary" id="nmc-add">＋ 添加服务器</button></div>
+        </div>
+        <div class="card">
+          <div class="sec-title"><span class="sec-bar"></span><h3>MCP 服务器列表</h3><span class="hint" id="mcp-count">—</span></div>
+          <div class="table-wrap">
+            <table><thead><tr><th>名称</th><th>地址</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody id="mcp-body"><tr><td colspan="4" class="empty">加载中…</td></tr></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 租户统计 -->
+      <section class="view" id="view-tenants">
+        <div class="card">
+          <div class="sec-title"><span class="sec-bar"></span><h3>租户统计</h3><span class="hint" id="tn-count">—</span></div>
+          <div class="tn-grid" id="tn-grid" style="margin-top:12px"></div>
+        </div>
+      </section>
+
+      <!-- 拓扑图 -->
+      <section class="view" id="view-topology">
+        <div class="card">
+          <div class="sec-title"><span class="sec-bar"></span><h3>路由拓扑</h3><span class="hint">供应商 · 模型 · Agent（节点大小=请求量，可拖拽）</span></div>
+          <div id="chart-topo" style="width:100%;height:640px"></div>
+        </div>
+      </section>
+
+      <!-- 系统 -->
+      <section class="view" id="view-system">
+        <div class="card">
+          <div class="sec-title"><span class="sec-bar"></span><h3>配置热重载</h3><span class="hint">修改 config.json 后无需重启</span></div>
+          <p style="font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:14px">重新从磁盘加载 config.json 并重建路由表。写接口保存的配置会自动落盘，此按钮用于手动同步外部修改。</p>
+          <div class="form-actions"><button class="btn primary" id="sys-reload">🔄 重载配置</button></div>
+        </div>
+        <div class="card">
+          <div class="sec-title"><span class="sec-bar"></span><h3>运行状态</h3></div>
+          <div class="sysbar">
+            <span>版本 <b id="sys-version">—</b></span>
+            <span>运行时长 <b id="sys-uptime">—</b></span>
+            <span>缓存 <b id="sys-cache">—</b></span>
+            <span>限流 <b id="sys-rl">—</b></span>
+          </div>
+          <div class="chips" id="sys-features"></div>
+        </div>
+        <div class="card">
+          <div class="sec-title"><span class="sec-bar"></span><h3>当前配置 (只读)</h3><span class="hint">来自 GET /api/config</span></div>
+          <pre class="cfg" id="sys-config">加载中…</pre>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- 模态 -->
+<div class="modal-mask" id="modal-mask">
+  <div class="modal" id="modal-box"></div>
+</div>
+
+<!-- Toast -->
+<div id="toast-wrap"></div>
+
+<!-- 令牌门 -->
+<div id="token-gate">
+  <div class="gate-box">
+    <h3>🔐 管理员令牌</h3>
+    <p>控制台需要管理员令牌读取与保存配置。输入后将本地保存，下次自动使用。</p>
+    <input id="token-input" type="text" placeholder="粘贴 config.json 中的 admin_token" autocomplete="off">
+    <button class="btn primary" id="token-save" style="width:100%">保存并加载</button>
+  </div>
+</div>
+
+<script src="/assets/echarts.min.js?v=20260713c"></script>
+<script src="/assets/dashboard.js?v=20260713c"></script>
+</body>
+</html>

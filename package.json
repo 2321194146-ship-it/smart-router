@@ -1,0 +1,37 @@
+{
+  "name": "smart-router",
+  "version": "6.0.0",
+  "description": "AI Gateway with intelligent model routing, circuit breaker, semantic cache, rate limiting, and real-time dashboard",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "smart-router": "./src/index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "docker:build": "docker build -t smart-router .",
+    "docker:run": "docker run -p 7878:7878 -v $(pwd)/data:/app/data smart-router"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0",
+    "dotenv": "^16.4.0"
+  },
+  "keywords": [
+    "ai-gateway",
+    "llm-router",
+    "model-router",
+    "openai-proxy",
+    "circuit-breaker",
+    "rate-limiting",
+    "semantic-cache"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/smart-router"
+  }
+}

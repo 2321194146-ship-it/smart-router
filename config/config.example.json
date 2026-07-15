@@ -1,0 +1,51 @@
+{
+  "admin_token": "change-me-to-a-secure-token",
+  "providers": {
+    "example_provider": {
+      "display": "Example Provider",
+      "enabled": true,
+      "base_url": "https://api.example.com/v1",
+      "api_key": "${EXAMPLE_API_KEY}",
+      "weight": 1
+    }
+  },
+  "models": [
+    {
+      "name": "example-model",
+      "provider": "example_provider",
+      "tier": 0,
+      "enabled": true
+    }
+  ],
+  "api_keys": [],
+  "agents": [],
+  "mcp_servers": [],
+  "guardrails": {
+    "enabled": true
+  },
+  "routing": {
+    "tier_weights": {
+      "0": 40,
+      "1": 45,
+      "2": 15
+    },
+    "max_retries": 4,
+    "max_concurrent": 2,
+    "per_model_timeout_ms": 20000,
+    "timeout_ms": 120000,
+    "connect_timeout_ms": 5000,
+    "cooldown_seconds": 30,
+    "failure_threshold": 2,
+    "semantic_cache": true,
+    "first_byte_timeout": 15,
+    "health_check_interval": 30,
+    "circuit_breaker": {
+      "failure_threshold": 3,
+      "slow_call_threshold_ms": 5000,
+      "slow_call_ratio": 0.5,
+      "slow_call_window": 10,
+      "half_open_max_probes": 1,
+      "cooldown_base_ms": 30000
+    }
+  }
+}
