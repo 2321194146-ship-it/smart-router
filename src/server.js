@@ -1,23 +1,22 @@
 /**
  * server.js — Smart Router HTTP server
- * Handles all API routes, proxy endpoints, WebSocket, and static file serving
  */
 import http from 'node:http';
-import { readFileSync, existsSync, writeFileSync, statSync } from 'node:fs';
+import { readFileSync, existsSync, writeFileSync, renameSync, statSync } from 'node:fs';
 import { dirname, join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { getConfig, reloadConfig } from './config.js';
-import { routeChatCompletion, getRecentLogs, getStats, getModelLatency, getModelCounts, getStatusDistribution, getProviderHealth } from './provider-client.js';
-import { checkRateLimit, getRateLimitStats } from './rate-limit.js';
-import { checkInput, checkOutput, logGuardrail, getGuardrailLogs } from './guardrails.js';
-import { calculateCost, recordCost, getCostOverview, getCostDaily, getCostByModel } from './cost.js';
+import { getConfig, reloadConfig, loadRawConfig, saveRawConfigAtomic } from './config.js';
+import { routeChatCompletion, getRecentLogs, getStats, getModelLatency, getModelCounts, getStatusDistribution, getProviderHealth, sanitizeConfigForClient } from './provider-client.js';
+import { handleAnthropicMessage, pipeAnthropicSSE } from './anthropic.js';
+import { checkRateLimit } from './rate-limit.js';
+import { checkInput, logGuardrail } from './guardrails.js';
+import { recordCost, getCostOverview, getCostDaily, getCostByModel } from './cost.js';
 import Database from 'better-sqlite3';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
-// ── MIME types ──
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript',
@@ -30,10 +29,8 @@ const MIME = {
   '.woff2': 'font/woff2',
 };
 
-// ── Logger ──
 const log = (...args) => console.log(`[${new Date().toISOString().replace('T', ' ').substring(0, 19)}]`, ...args);
 
-// ── Semantic Cache ──
 const CACHE_TTL = parseInt(process.env.CACHE_TTL) || 3600;
 
 function hashPrompt(messages) {
@@ -41,58 +38,81 @@ function hashPrompt(messages) {
   return createHash('sha256').update(text, 'utf-8').digest('hex').slice(0, 16);
 }
 
-function cacheGet(model, messages) {
+function exactCacheKey(model, _provider, messages, tools, toolChoice, responseFormat, temperature) {
+  const parts = [model, hashPrompt(messages)];
+  if (tools) parts.push('tools:' + hashPrompt(tools));
+  if (toolChoice) parts.push('tc:' + JSON.stringify(toolChoice));
+  if (responseFormat) parts.push('rf:' + JSON.stringify(responseFormat));
+  if (temperature !== undefined) parts.push('t:' + temperature);
+  return createHash('sha256').update(parts.join('|'), 'utf-8').digest('hex');
+}
+
+function shouldSkipCache(body, model, tools, agent) {
+  if (body.stream === true) return true;
+  if (tools && tools.length > 0) return true;
+  if (body.tool_choice) return true;
+  if (!model || model === 'auto') return true;
+  if (agent && agent !== '') return true;
+  return false;
+}
+
+function cacheGet(model, provider, messages, tools, toolChoice, responseFormat, temperature) {
   try {
-    const key = model + ':' + hashPrompt(messages);
+    const key = exactCacheKey(model, provider, messages, tools, toolChoice, responseFormat, temperature);
     const row = db.prepare('SELECT response, tokens_in, tokens_out FROM cache WHERE cache_key = ? AND expires_at > ?').get(key, Date.now() / 1000);
     if (row) {
       db.prepare('UPDATE cache SET hit_count = hit_count + 1 WHERE cache_key = ?').run(key);
       return { response: JSON.parse(row.response), tokens: (row.tokens_in || 0) + (row.tokens_out || 0) };
     }
-  } catch {}
+  } catch (e) { console.error('[cache] get error:', e.message); }
   return null;
 }
 
-function cacheSet(model, messages, response, tokensIn, tokensOut) {
+function cacheSet(model, provider, messages, response, tokensIn, tokensOut, tools, toolChoice, responseFormat, temperature) {
   try {
-    const key = model + ':' + hashPrompt(messages);
-    const snippet = (typeof messages === 'string' ? messages : JSON.stringify(messages)).slice(0, 500);
-    db.prepare('INSERT OR REPLACE INTO cache (cache_key, model, prompt_snippet, response, tokens_in, tokens_out, created_at, expires_at, hit_count) VALUES (?,?,?,?,?,?,?,?,1)').run(key, model, snippet, JSON.stringify(response), tokensIn || 0, tokensOut || 0, Date.now() / 1000, Date.now() / 1000 + CACHE_TTL);
-  } catch {}
+    const key = exactCacheKey(model, provider, messages, tools, toolChoice, responseFormat, temperature);
+    const snippet = JSON.stringify(messages).slice(0, 500);
+    db.prepare('INSERT OR REPLACE INTO cache (cache_key, model, prompt_snippet, response, tokens_in, tokens_out, created_at, expires_at, hit_count) VALUES (?,?,?,?,?,?,?,?,1)').run(
+      key, model, snippet, JSON.stringify(response), tokensIn || 0, tokensOut || 0, Date.now() / 1000, Date.now() / 1000 + CACHE_TTL
+    );
+  } catch (e) { console.error('[cache] set error:', e.message); }
 }
 
-// Periodic cache cleanup
 setInterval(() => {
   try {
     const n = db.prepare('DELETE FROM cache WHERE expires_at < ?').run(Date.now() / 1000);
-    if (n.changes > 0) log(`🧹 Cleaned ${n.changes} expired cache entries`);
-  } catch {}
+    if (n.changes > 0) log(`Cleaned ${n.changes} expired cache entries`);
+  } catch (e) { console.error('[cache] cleanup error:', e.message); }
 }, 300000);
 
-
-// ── Database setup ──
 let db = null;
 
 function initDatabase(dbPath) {
   db = new Database(dbPath);
   db.pragma('journal_mode = WAL');
   db.pragma('synchronous = NORMAL');
-  
+
   db.exec(`
     CREATE TABLE IF NOT EXISTS requests (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      request_id TEXT DEFAULT '',
       timestamp REAL NOT NULL,
       model TEXT NOT NULL,
       provider TEXT DEFAULT '',
       status INTEGER NOT NULL,
       latency_ms INTEGER DEFAULT 0,
+      ttft_ms INTEGER DEFAULT 0,
       tokens_in INTEGER DEFAULT 0,
       tokens_out INTEGER DEFAULT 0,
       agent TEXT DEFAULT '',
       error TEXT DEFAULT '',
-      prompt_hash TEXT DEFAULT ''
+      protocol TEXT DEFAULT 'openai',
+      requested_model TEXT DEFAULT '',
+      final_model TEXT DEFAULT '',
+      attempts TEXT DEFAULT '[]'
     );
     CREATE INDEX IF NOT EXISTS idx_req_ts ON requests(timestamp);
+    CREATE INDEX IF NOT EXISTS idx_req_id ON requests(request_id);
 
     CREATE TABLE IF NOT EXISTS cache (
       cache_key TEXT PRIMARY KEY,
@@ -115,7 +135,7 @@ function initDatabase(dbPath) {
       tokens_in INTEGER DEFAULT 0,
       tokens_out INTEGER DEFAULT 0,
       cost_rmb REAL DEFAULT 0,
-      PRIMARY KEY (date, model)
+      PRIMARY KEY (date, model, provider)
     );
 
     CREATE TABLE IF NOT EXISTS guardrail_logs (
@@ -130,35 +150,53 @@ function initDatabase(dbPath) {
       agent TEXT DEFAULT ''
     );
   `);
-  
-  // Prepared statements
+
+  try { db.exec('ALTER TABLE requests ADD COLUMN request_id TEXT DEFAULT \'\''); } catch (e) { /* column exists */ }
+  try { db.exec('ALTER TABLE requests ADD COLUMN ttft_ms INTEGER DEFAULT 0'); } catch (e) { /* column exists */ }
+  try { db.exec('ALTER TABLE requests ADD COLUMN protocol TEXT DEFAULT \'openai\''); } catch (e) { /* column exists */ }
+  try { db.exec('ALTER TABLE requests ADD COLUMN requested_model TEXT DEFAULT \'\''); } catch (e) { /* column exists */ }
+  try { db.exec('ALTER TABLE requests ADD COLUMN final_model TEXT DEFAULT \'\''); } catch (e) { /* column exists */ }
+  try { db.exec('ALTER TABLE requests ADD COLUMN attempts TEXT DEFAULT \'[]\''); } catch (e) { /* column exists */ }
+
   const stmts = {};
   stmts.dbLogGuardrail = db.prepare(
     'INSERT INTO guardrail_logs (timestamp, direction, rule, severity, ip, snippet, action, agent) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
   );
   stmts.dbUpsertCost = db.prepare(
-    'INSERT INTO cost_daily (date, model, provider, requests, tokens_in, tokens_out, cost_rmb) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(date, model) DO UPDATE SET requests = requests + 1, tokens_in = tokens_in + ?, tokens_out = tokens_out + ?, cost_rmb = cost_rmb + ?'
+    'INSERT INTO cost_daily (date, model, provider, requests, tokens_in, tokens_out, cost_rmb) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(date, model, provider) DO UPDATE SET requests = requests + 1, tokens_in = tokens_in + ?, tokens_out = tokens_out + ?, cost_rmb = cost_rmb + ?'
   );
-  
+  stmts.dbLogRequest = db.prepare(
+    `INSERT INTO requests (request_id, timestamp, model, provider, status, latency_ms, ttft_ms, tokens_in, tokens_out, agent, error, protocol, requested_model, final_model, attempts)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  );
+
   return stmts;
 }
 
-// ── Utilities ──
+const MAX_BODY_SIZE = 100 * 1024 * 1024;
+
+function sanitizeLog(str) {
+  if (!str || typeof str !== 'string') return str;
+  return str.replace(/(sk-|nvapi-|ms-|ak_)[a-zA-Z0-9_-]{10,}/g, '$1***');
+}
+
 function parseJsonBody(req) {
   return new Promise((resolve, reject) => {
     let body = '';
-    req.on('data', chunk => body += chunk);
+    let size = 0;
+    req.on('data', chunk => {
+      size += chunk.length;
+      if (size > MAX_BODY_SIZE) { req.destroy(new Error('Request body too large')); return; }
+      body += chunk;
+    });
     req.on('end', () => {
-      try { 
+      try {
         if (!body || !body.trim()) resolve({});
-        else resolve(JSON.parse(body)); 
-      } catch (e) { 
-        reject(new Error('Invalid JSON: ' + body?.substring(0, 100))); 
-      }
+        else resolve(JSON.parse(body));
+      } catch { reject(new Error('Invalid JSON')); }
     });
     req.on('error', reject);
-    // Timeout safety: if body never ends, reject after 30s
-    setTimeout(() => { if (!req.complete) { req.destroy(); reject(new Error('Request timeout')); } }, 30000);
+    setTimeout(() => { if (!req.complete) { req.destroy(); reject(new Error('Request timeout')); } }, 60000);
   });
 }
 
@@ -187,79 +225,143 @@ function getAgentFromReq(req) {
   return req.headers['x-agent-name'] || req.headers['user-agent']?.split('/')[0] || '';
 }
 
-function authenticate(req, res) {
-  const config = getConfig();
-  if (!config.adminToken) return true;
-  const auth = req.headers['authorization'];
-  if (!auth) return false;
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : auth;
-  return token === config.adminToken;
+function generateId() {
+  const ts = Date.now().toString(36);
+  const r = Math.random().toString(36).substring(2, 8);
+  return `req_${ts}_${r}`;
 }
 
-// ── SSE streaming helper ──
-async function pipeSSEStream(readable, writable, transformFn = null, stallTimeoutMs = 15000) {
+function persistRequest(db, stmts, data) {
+  if (!db || !stmts?.dbLogRequest) return;
   try {
-    const reader = readable.getReader();
+    stmts.dbLogRequest.run(
+      data.requestId || '',
+      data.timestamp || Date.now() / 1000,
+      data.model || '',
+      data.provider || '',
+      data.status || 0,
+      data.latencyMs || 0,
+      data.ttft || 0,
+      data.tokensIn || 0,
+      data.tokensOut || 0,
+      data.agent || '',
+      data.error || '',
+      data.protocol || 'openai',
+      data.requestedModel || '',
+      data.finalModel || '',
+      JSON.stringify(data.attemptLog || [])
+    );
+  } catch (e) { console.error('[persist] request error:', e.message); }
+}
+
+function checkConfigSecurity(cfg) {
+  const warnings = [];
+  if (cfg.host === '0.0.0.0' && !cfg.adminToken) warnings.push('Listening on 0.0.0.0 without admin token');
+  if (cfg.host !== '127.0.0.1' && !cfg.adminToken) warnings.push('Non-loopback binding without admin token');
+  try {
+    const cfgPath = cfg.configFile || join(ROOT, 'config', 'config.json');
+    if (existsSync(cfgPath)) {
+      const mode = statSync(cfgPath).mode;
+      if (mode & 0o004) warnings.push('Config file is world-readable');
+    }
+  } catch { /* stat may fail */ }
+  return warnings;
+}
+
+function authenticate(req, res) {
+  const config = getConfig();
+  const addr = req.socket.localAddress || '127.0.0.1';
+  const localAddrs = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1', 'localhost']);
+  if (!config.adminToken) return localAddrs.has(addr);
+  const authHeader = req.headers['authorization'];
+  if (authHeader) {
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
+    if (token === config.adminToken) return true;
+  }
+  const xKey = req.headers['x-api-key'];
+  if (xKey && xKey === config.adminToken) return true;
+  return false;
+}
+
+function encodeWebSocketTextFrame(text) {
+  const data = Buffer.from(text, 'utf-8');
+  const len = data.length;
+  let frame;
+  if (len < 126) {
+    frame = Buffer.alloc(2 + len);
+    frame[0] = 0x81; frame[1] = len; data.copy(frame, 2);
+  } else if (len < 65536) {
+    frame = Buffer.alloc(4 + len);
+    frame[0] = 0x81; frame[1] = 126; frame.writeUInt16BE(len, 2); data.copy(frame, 4);
+  } else {
+    frame = Buffer.alloc(10 + len);
+    frame[0] = 0x81; frame[1] = 127; frame.writeBigUInt64BE(BigInt(len), 2); data.copy(frame, 10);
+  }
+  return frame;
+}
+
+async function pipeSSEStream(stream, writable, transformFn, options = {}) {
+  const { requestId, onFirstChunk } = options;
+  let doneSent = false;
+  function sendDone() {
+    if (!doneSent) {
+      try { writable.write('data: [DONE]\n\n'); } catch {}
+      doneSent = true;
+    }
+  }
+  function emitError(msg) {
+    if (!doneSent) {
+      try { writable.write(`data: ${JSON.stringify({ error: msg })}\n\n`); } catch {}
+      doneSent = true;
+    }
+  }
+  try {
+    const reader = stream.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
-    let lastChunkTime = Date.now();
+    let hasSentFirst = false;
     let stallTimer = null;
-    
-    // Stall detection: if no data for stallTimeoutMs, abort
+    let lastChunkTime = Date.now();
+    const stallTimeoutMs = options.stallTimeoutMs || 15000;
     const checkStall = () => {
-      if (Date.now() - lastChunkTime > stallTimeoutMs) {
-        log('[SSE] Stream stalled, aborting');
+      if (hasSentFirst && Date.now() - lastChunkTime > stallTimeoutMs) {
+        log(`[${requestId}] SSE stream stalled`);
         try { reader.cancel(); } catch {}
       }
     };
     stallTimer = setInterval(checkStall, 2000);
-    
     while (true) {
-      const { done, value } = await reader.read();
+      let result;
+      try { result = await reader.read(); } catch { break; }
+      const { done, value } = result;
       if (done) break;
-      
       lastChunkTime = Date.now();
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
       buffer = lines.pop() || '';
-      
       for (const line of lines) {
         if (line.startsWith('data: ')) {
           const data = line.slice(6).trim();
-          if (data === '[DONE]') {
-            writable.write('data: [DONE]\n\n');
-            continue;
-          }
+          if (data === '[DONE]') { sendDone(); continue; }
           if (transformFn) {
-            const transformed = transformFn(data);
-            if (transformed) writable.write(transformed);
-          } else {
-            writable.write(line + '\n\n');
-          }
-        } else if (line.trim()) {
-          writable.write(line + '\n');
-        }
+            try { const t = transformFn(data); if (t) writable.write(t); } catch {}
+          } else { writable.write(line + '\n\n'); }
+          if (!hasSentFirst) { hasSentFirst = true; onFirstChunk?.(); }
+        } else if (line.trim()) { writable.write(line + '\n'); }
       }
     }
-    
     clearInterval(stallTimer);
+    sendDone();
   } catch (err) {
-    if (err.name !== 'AbortError') {
-      log('[SSE] Stream error:', err.message);
-    }
+    if (err.name !== 'AbortError') log(`[${requestId}] SSE stream error:`, sanitizeLog(err.message));
+    emitError(err.message);
+    sendDone();
   }
 }
 
-// ── Static file serving ──
 function serveStatic(res, filePath) {
   const normalizedPath = filePath.replace(/\.\./g, '');
-  
-  // Try frontend dist first
-  const paths = [
-    join(ROOT, 'frontend', 'dist', normalizedPath),
-    join(ROOT, 'frontend', 'dist', 'index.html'),
-  ];
-  
+  const paths = [join(ROOT, 'frontend', 'dist', normalizedPath), join(ROOT, 'frontend', 'dist', 'index.html')];
   for (const p of paths) {
     if (existsSync(p) && statSync(p).isFile()) {
       const ext = extname(p);
@@ -275,672 +377,396 @@ function serveStatic(res, filePath) {
   return false;
 }
 
-// ── URL parsing ──
 function parsePath(reqUrl) {
   const idx = reqUrl.indexOf('?');
   return idx === -1 ? reqUrl : reqUrl.slice(0, idx);
 }
 
-// ── Create server ──
+function buildSavePayload(body, action) {
+  const raw = loadRawConfig();
+  if (action === 'upsert-provider') {
+    const providers = raw.providers || {};
+    providers[body.name || body.display] = { api_type: 'openai', ...body };
+    raw.providers = providers;
+  } else if (action === 'upsert-model') {
+    const models = raw.models || [];
+    const idx = models.findIndex(m => m.name === body.name || m.id === body.id);
+    if (idx >= 0) models[idx] = body;
+    else models.push(body);
+    raw.models = models;
+  } else if (action === 'delete-model') {
+    raw.models = (raw.models || []).filter(m => m.name !== body.name && m.id !== body.id);
+  }
+  return raw;
+}
+
 export function createServer() {
   const config = getConfig();
   const stmts = initDatabase(config.dbPath);
-  
-  // WebSocket clients
+
+  for (const w of checkConfigSecurity(config)) log(`[security] ${w}`);
+
   const wsClients = new Set();
-  
+
   function wsBroadcast(data) {
     const msg = JSON.stringify(data);
-    const frame = Buffer.alloc(2 + msg.length);
-    frame[0] = 0x81;
-    if (msg.length < 126) {
-      frame[1] = msg.length;
-      frame.set(Buffer.from(msg), 2);
-    } else if (msg.length < 65536) {
-      frame[1] = 126;
-      frame.writeUInt16BE(msg.length, 2);
-      frame.set(Buffer.from(msg), 4);
-    }
-    for (const ws of wsClients) {
-      try { ws.write(frame); } catch { wsClients.delete(ws); }
-    }
+    const frame = encodeWebSocketTextFrame(msg);
+    for (const ws of wsClients) { try { ws.write(frame); } catch { wsClients.delete(ws); } }
   }
-  
+
+  const allowedHeaders = 'Content-Type, Authorization, X-Request-Id, X-Agent-Name, X-Preferred-Model, X-Excluded-Models, X-Preferred-Provider, X-Excluded-Providers';
+
   const srv = http.createServer(async (req, res) => {
     const method = req.method;
     const path = parsePath(req.url);
     const ip = getClientIP(req);
     const agent = getAgentFromReq(req);
-    
-    // CORS headers
+
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    
-    if (method === 'OPTIONS') {
-      res.writeHead(204);
-      res.end();
-      return;
-    }
-    
+    res.setHeader('Access-Control-Allow-Headers', allowedHeaders);
+
+    if (method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
+
     try {
-      // ── Static & Dashboard ──
       if (path === '/dashboard' || path === '/dashboard/' || path === '/') {
         serveStatic(res, 'index.html');
         return;
       }
-      
-      // Serve static assets
       if (path.startsWith('/assets/') || path.startsWith('/src/') || path === '/favicon.svg' || path === '/icons.svg') {
         serveStatic(res, path);
         return;
       }
-      
-      // ── API routes ──
-      
-      // Health check
+
       if (path === '/health' && method === 'GET') {
         const cfg = getConfig();
-        const providerCount = Object.keys(cfg.providers || {}).filter(k => cfg.providers[k].enabled !== false).length;
-        const modelCount = (cfg.models || []).filter(m => m.enabled !== false).length;
-        const providerHealth = getProviderHealth();
-        
         jsonResponse(res, {
-          status: 'ok',
-          version: '6.0.0',
-          uptime: process.uptime(),
-          models_available: modelCount,
-          providers_available: providerCount,
-          upstream_healthy: Object.keys(providerHealth).length === 0,
-          success_rate: 100,
+          status: 'ok', version: '6.1.0', uptime: process.uptime(),
+          models_available: (cfg.models || []).filter(m => m.enabled !== false).length,
+          providers_available: Object.keys(cfg.providers || {}).filter(k => cfg.providers[k].enabled !== false).length,
         });
         return;
       }
-      
-      // Stats
+
+      if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
+
       if (path === '/stats' && method === 'GET') {
-        if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
         const stats = getStats();
-        const modelLatency = getModelLatency();
-        const modelCounts = getModelCounts();
-        const statusDist = getStatusDistribution();
-        const health = getProviderHealth();
-        
         jsonResponse(res, {
-          overview: {
-            ...stats.overview,
-            pool_size: (getConfig().models || []).filter(m => m.enabled !== false).length,
-          },
-          model_latency: modelLatency,
-          model_counts: modelCounts,
-          status_distribution: statusDist,
-          provider_health: health,
+          overview: { ...stats.overview, pool_size: (getConfig().models || []).filter(m => m.enabled !== false).length },
+          model_latency: getModelLatency(),
+          model_counts: getModelCounts(),
+          status_distribution: getStatusDistribution(),
+          provider_health: getProviderHealth(),
         });
         return;
       }
-      
-      // Recent requests
+
       if (path === '/api/recent' && method === 'GET') {
-        if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
         const params = getQueryParams(req.url);
-        const limit = parseInt(params.limit) || 20;
-        const agentFilter = params.agent || '';
-        const logs = getRecentLogs(limit, agentFilter);
-        jsonResponse(res, { recent: logs });
+        jsonResponse(res, { recent: getRecentLogs(parseInt(params.limit) || 20, params.agent || '') });
         return;
       }
-      
-      // Provider CRUD
+
       if (path === '/api/providers') {
         if (method === 'GET') {
-          if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
-          const cfg = getConfig();
-          // Strip API keys from response
-          const safeProviders = {};
-          for (const [name, prov] of Object.entries(cfg.providers || {})) {
-            safeProviders[name] = { ...prov, api_key: prov.api_key ? '***' + prov.api_key.slice(-4) : '' };
-          }
-          jsonResponse(res, safeProviders);
+          jsonResponse(res, sanitizeConfigForClient(getConfig().providers || {}));
           return;
         }
         if (method === 'POST') {
-          if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
           const body = await parseJsonBody(req);
-          const cfg = getConfig();
-          if (!cfg.providers) cfg.providers = {};
-          cfg.providers[body.name || body.display] = body;
-          if (body.api_key && body.api_key.startsWith('***')) {
-            // Preserve existing key if masked
-            log('[providers] Masked key preserved');
-          }
+          const payload = buildSavePayload(body, 'upsert-provider');
           try {
-            writeFileSync(cfg.configFile, JSON.stringify({
-              providers: cfg.providers,
-              models: cfg.models,
-              api_keys: cfg.apiKeys,
-              agents: cfg.agents,
-              mcp_servers: cfg.mcpServers,
-              guardrails: cfg.guardrails,
-              admin_token: cfg.adminToken,
-              routing: cfg.routing,
-            }, null, 2));
-          } catch (e) {
-            sendError(res, 'Failed to save config: ' + e.message, 500);
-            return;
-          }
-          jsonResponse(res, { success: true, message: 'Provider saved' });
+            saveRawConfigAtomic(payload);
+            jsonResponse(res, { success: true });
+          } catch (e) { sendError(res, 'Failed to save: ' + e.message, 500); }
           return;
         }
         sendError(res, 'Method not allowed', 405);
         return;
       }
-      
-      // Models CRUD
+
       if (path === '/api/models') {
         if (method === 'GET') {
-          if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
-          const cfg = getConfig();
-          const modelLatency = getModelLatency();
-          const modelCounts = getModelCounts();
-          jsonResponse(res, {
-            models: (cfg.models || []).map(m => ({
-              ...m,
-              avg_latency_ms: modelLatency[m.name] || null,
-              request_count: modelCounts[m.name]?.total || 0,
-            })),
-          });
+          jsonResponse(res, { models: (getConfig().models || []) });
           return;
         }
         if (method === 'POST') {
-          if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
           const body = await parseJsonBody(req);
-          const cfg = getConfig();
-          if (!cfg.models) cfg.models = [];
-          const idx = cfg.models.findIndex(m => m.name === body.name);
-          if (idx >= 0) cfg.models[idx] = body;
-          else cfg.models.push(body);
+          const payload = buildSavePayload(body, 'upsert-model');
           try {
-            writeFileSync(cfg.configFile, JSON.stringify({
-              providers: cfg.providers,
-              models: cfg.models,
-              api_keys: cfg.apiKeys,
-              agents: cfg.agents,
-              mcp_servers: cfg.mcpServers,
-              guardrails: cfg.guardrails,
-              admin_token: cfg.adminToken,
-              routing: cfg.routing,
-            }, null, 2));
-          } catch (e) {
-            sendError(res, 'Failed to save config: ' + e.message, 500);
-            return;
-          }
-          jsonResponse(res, { success: true, message: 'Model saved' });
+            saveRawConfigAtomic(payload);
+            jsonResponse(res, { success: true });
+          } catch (e) { sendError(res, 'Failed to save: ' + e.message, 500); }
           return;
         }
         sendError(res, 'Method not allowed', 405);
         return;
       }
-      
-      // Delete model
+
       if (path.startsWith('/api/models/') && method === 'DELETE') {
-        if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
         const modelName = decodeURIComponent(path.slice('/api/models/'.length));
-        const cfg = getConfig();
-        cfg.models = (cfg.models || []).filter(m => m.name !== modelName);
+        const payload = buildSavePayload({ name: modelName, id: modelName }, 'delete-model');
         try {
-          writeFileSync(cfg.configFile, JSON.stringify({
-            providers: cfg.providers,
-            models: cfg.models,
-            api_keys: cfg.apiKeys,
-            agents: cfg.agents,
-            mcp_servers: cfg.mcpServers,
-            guardrails: cfg.guardrails,
-            admin_token: cfg.adminToken,
-            routing: cfg.routing,
-          }, null, 2));
-        } catch (e) {
-          sendError(res, 'Failed to save config: ' + e.message, 500);
-          return;
-        }
-        jsonResponse(res, { success: true });
+          saveRawConfigAtomic(payload);
+          jsonResponse(res, { success: true });
+        } catch (e) { sendError(res, 'Failed to save', 500); }
         return;
       }
-      
-      // Routes
+
       if (path === '/api/routes') {
-        if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
-        const cfg = getConfig();
         if (method === 'GET') {
+          const cfg = getConfig();
           jsonResponse(res, {
-            tier_weights: cfg.routing.tierWeights || {},
-            max_retries: cfg.routing.maxRetries || 4,
-            max_concurrent: cfg.routing.maxConcurrent || 2,
-            cooldown_seconds: cfg.routing.cooldownSeconds || 30,
-            circuit_breaker: cfg.circuitBreaker || {},
+            tier_weights: cfg.routing?.tierWeights || {},
+            max_retries: cfg.routing?.maxRetries || 4,
+            cooldown_seconds: cfg.routing?.cooldownSeconds || 30,
           });
           return;
         }
-        if (method === 'POST') {
-          const body = await parseJsonBody(req);
-          if (body.tier_weights) cfg.routing.tierWeights = body.tier_weights;
-          if (body.max_retries) cfg.routing.maxRetries = body.max_retries;
-          try {
-            writeFileSync(cfg.configFile, JSON.stringify({
-              providers: cfg.providers,
-              models: cfg.models,
-              api_keys: cfg.apiKeys,
-              agents: cfg.agents,
-              mcp_servers: cfg.mcpServers,
-              guardrails: cfg.guardrails,
-              admin_token: cfg.adminToken,
-              routing: cfg.routing,
-            }, null, 2));
-          } catch (e) {
-            sendError(res, 'Failed to save config: ' + e.message, 500);
-            return;
-          }
-          jsonResponse(res, { success: true });
-          return;
-        }
         sendError(res, 'Method not allowed', 405);
         return;
       }
-      
-      // API Keys
-      if (path === '/api/keys') {
-        if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
-        const cfg = getConfig();
-        if (method === 'GET') {
-          jsonResponse(res, (cfg.apiKeys || []).map(k => ({ ...k, key: k.key ? '***' + k.key.slice(-4) : '' })));
-          return;
-        }
-        if (method === 'POST') {
-          const body = await parseJsonBody(req);
-          if (!cfg.apiKeys) cfg.apiKeys = [];
-          const idx = cfg.apiKeys.findIndex(k => k.name === body.name);
-          if (idx >= 0) cfg.apiKeys[idx] = body;
-          else cfg.apiKeys.push(body);
-          try {
-            writeFileSync(cfg.configFile, JSON.stringify({
-              providers: cfg.providers,
-              models: cfg.models,
-              api_keys: cfg.apiKeys,
-              agents: cfg.agents,
-              mcp_servers: cfg.mcpServers,
-              guardrails: cfg.guardrails,
-              admin_token: cfg.adminToken,
-              routing: cfg.routing,
-            }, null, 2));
-          } catch (e) {
-            sendError(res, 'Failed to save config: ' + e.message, 500);
-            return;
-          }
-          jsonResponse(res, { success: true });
-          return;
-        }
-        sendError(res, 'Method not allowed', 405);
-        return;
-      }
-      
-      // Delete key
-      if (path.startsWith('/api/keys/') && method === 'DELETE') {
-        if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
-        const keyName = decodeURIComponent(path.slice('/api/keys/'.length));
-        const cfg = getConfig();
-        cfg.apiKeys = (cfg.apiKeys || []).filter(k => k.name !== keyName);
-        try {
-          writeFileSync(cfg.configFile, JSON.stringify({
-            providers: cfg.providers,
-            models: cfg.models,
-            api_keys: cfg.apiKeys,
-            agents: cfg.agents,
-            mcp_servers: cfg.mcpServers,
-            guardrails: cfg.guardrails,
-            admin_token: cfg.adminToken,
-            routing: cfg.routing,
-          }, null, 2));
-        } catch (e) {
-          sendError(res, 'Failed to save config: ' + e.message, 500);
-          return;
-        }
-        jsonResponse(res, { success: true });
-        return;
-      }
-      
-      // Cost
+
       if (path === '/api/cost' && method === 'GET') {
-        if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
-        const overview = getCostOverview(db);
-        const daily = getCostDaily(db);
-        const byModel = getCostByModel(db);
-        jsonResponse(res, { ...overview, daily, top_models: byModel });
+        jsonResponse(res, { ...getCostOverview(db), daily: getCostDaily(db), top_models: getCostByModel(db) });
         return;
       }
-      
-      // Stats trend
-      if (path === '/api/stats/trend' && method === 'GET') {
-        if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
-        const params = getQueryParams(req.url);
-        const days = parseInt(params.days) || 7;
-        const trend = db.prepare(
-          `SELECT date, SUM(requests) as total, SUM(CASE WHEN status < 400 THEN 1 ELSE 0 END) as success, SUM(tokens_in) as tokens_in, SUM(tokens_out) as tokens_out, ROUND(SUM(cost_rmb), 4) as cost_rmb
-           FROM cost_daily WHERE date >= date('now', '-' || ? || ' days', '+8 hours')
-           GROUP BY date ORDER BY date`
-        ).all(days);
-        jsonResponse(res, { trend });
+
+      if (path === '/api/config' && method === 'GET') {
+        jsonResponse(res, sanitizeConfigForClient(getConfig()));
         return;
       }
-      
-      // Errors distribution
-      if (path === '/api/stats/errors' && method === 'GET') {
-        if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
-        const params = getQueryParams(req.url);
-        const days = parseInt(params.days) || 1;
-        const statusDist = getStatusDistribution();
-        jsonResponse(res, { status_dist: statusDist });
-        return;
-      }
-      
-      // Latency stats
-      if (path === '/api/stats/latency' && method === 'GET') {
-        if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
-        jsonResponse(res, getModelLatency());
-        return;
-      }
-      
-      // Circuit breaker status
-      if (path === '/api/circuit-breaker/status' && method === 'GET') {
-        if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
-        const health = getProviderHealth();
-        jsonResponse(res, health);
-        return;
-      }
-      
-      // Agents overview
-      if (path === '/api/agents-overview' && method === 'GET') {
-        if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
-        const cfg = getConfig();
-        const agents = (cfg.agents || []).map(a => ({
-          ...a,
-          status: 'running',
-        }));
-        jsonResponse(res, {
-          agents: agents.length > 0 ? agents : [
-            { name: 'smart-router', label: 'Smart Router', emoji: '🔀', status: 'running', kind: 'system', skillCount: (cfg.models || []).length, system: 'AI Gateway' },
-          ],
-          summary: { onlineCount: agents.length || 1, totalMainAgents: agents.length || 1 },
-        });
-        return;
-      }
-      
-      // Guardrails logs
-      if (path === '/api/guardrails/logs' && method === 'GET') {
-        if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
-        const params = getQueryParams(req.url);
-        const limit = parseInt(params.limit) || 50;
-        jsonResponse(res, { logs: getGuardrailLogs(db, limit) });
-        return;
-      }
-      
-      // Guardrails config
-      if (path === '/api/guardrails/config') {
-        if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
-        const cfg = getConfig();
-        if (method === 'GET') {
-          jsonResponse(res, cfg.guardrails || { enabled: true });
-          return;
-        }
-        if (method === 'POST') {
-          const body = await parseJsonBody(req);
-          cfg.guardrails = { ...cfg.guardrails, ...body };
-          jsonResponse(res, { success: true });
-          return;
-        }
-        sendError(res, 'Method not allowed', 405);
-        return;
-      }
-      
-      // MCP servers
-      if (path === '/api/mcp/servers') {
-        if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
-        const cfg = getConfig();
-        if (method === 'GET') {
-          jsonResponse(res, cfg.mcpServers || []);
-          return;
-        }
-        if (method === 'POST') {
-          const body = await parseJsonBody(req);
-          if (!cfg.mcpServers) cfg.mcpServers = [];
-          cfg.mcpServers.push(body);
-          jsonResponse(res, { success: true });
-          return;
-        }
-        sendError(res, 'Method not allowed', 405);
-        return;
-      }
-      
-      // Delete MCP server
-      if (path.startsWith('/api/mcp/servers/') && method === 'DELETE') {
-        if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
-        const serverName = decodeURIComponent(path.slice('/api/mcp/servers/'.length));
-        const cfg = getConfig();
-        cfg.mcpServers = (cfg.mcpServers || []).filter(s => s.name !== serverName);
-        jsonResponse(res, { success: true });
-        return;
-      }
-      
-      // System reload
+
       if (path === '/api/system/reload' && method === 'POST') {
-        if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
         reloadConfig();
         jsonResponse(res, { success: true, message: 'Config reloaded' });
         return;
       }
-      
-      // Get full config (redacted)
-      if (path === '/api/config' && method === 'GET') {
-        if (!authenticate(req, res)) { sendError(res, 'Unauthorized', 401); return; }
-        const cfg = getConfig();
-        // Deep clone and redact secrets
-        const safe = JSON.parse(JSON.stringify(cfg));
-        if (safe.providers) {
-          for (const key of Object.keys(safe.providers)) {
-            if (safe.providers[key].api_key) safe.providers[key].api_key = '***' + safe.providers[key].api_key.slice(-4);
-          }
-        }
-        jsonResponse(res, safe);
-        return;
-      }
-      
+
       // ── Chat Completions Proxy ──
       if ((path === '/v1/chat/completions' || path === '/chat/completions') && method === 'POST') {
-        // Rate limit check
+        const requestId = generateId();
+
         const rlResult = checkRateLimit(ip, path);
         if (!rlResult.allowed) {
           res.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': String(rlResult.retryAfter || 1) });
           res.end(JSON.stringify({ error: 'Rate limited', retry_after: rlResult.retryAfter }));
           return;
         }
-        
+
         const body = await parseJsonBody(req);
-        
-        // Guardrails check
-        const lastMessage = body.messages?.[body.messages.length - 1]?.content || '';
-        let guardResults = [];
-        if (lastMessage) {
-          guardResults = checkInput(lastMessage);
+
+        const lastMsg = body.messages?.[body.messages.length - 1]?.content || '';
+        if (lastMsg) {
+          const guardResults = checkInput(lastMsg);
           if (guardResults.blocked) {
-            logGuardrail(db, stmts.dbLogGuardrail, 'input', 'Critical block', 'critical', ip, lastMessage.slice(0, 100), 'block', agent);
+            logGuardrail(db, stmts.dbLogGuardrail, 'input', 'Critical block', 'critical', ip, lastMsg.slice(0, 100), 'block', agent);
             res.writeHead(451, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Content blocked by guardrails', guardrails: guardResults.rules }));
+            res.end(JSON.stringify({ error: 'Content blocked by guardrails' }));
             return;
           }
           for (const r of guardResults.rules) {
-            logGuardrail(db, stmts.dbLogGuardrail, 'input', r.rule, r.severity, ip, r.snippet || lastMessage.slice(0, 100), r.action, agent);
+            logGuardrail(db, stmts.dbLogGuardrail, 'input', r.rule, r.severity, ip, r.snippet || lastMsg.slice(0, 100), r.action, agent);
           }
         }
-        
-        const cfgCache = getConfig();
-        // Semantic cache check
-        const modelId = body.model || body.messages?.[0]?.model || '';
-        const noCache = body.stream === true || body.headers?.['x-no-cache'] === 'true';
-        if (!noCache && modelId && cfgCache.routing?.semantic_cache !== false) {
-          const cached = cacheGet(modelId, body.messages);
+
+        const cacheEnabled = getConfig().routing?.exact_response_cache !== false;
+
+        if (cacheEnabled && !shouldSkipCache(body, body.model, body.tools, agent)) {
+          const cached = cacheGet(body.model, null, body.messages, body.tools, body.tool_choice, body.response_format, body.temperature);
           if (cached) {
-            log(`💾 Cache hit [${modelId}], saved ${cached.tokens} tokens`);
+            log(`[${requestId}] Cache hit`);
             res.writeHead(200, { 'Content-Type': 'application/json', 'X-Cache': 'HIT' });
             res.end(JSON.stringify(cached.response));
             return;
           }
         }
 
+        const preferredModel = req.headers['x-preferred-model'] || '';
+        const excludedModels = (req.headers['x-excluded-models'] || '').split(',').map(s => s.trim()).filter(Boolean);
+        const preferredProvider = req.headers['x-preferred-provider'] || '';
+        const excludedProviders = (req.headers['x-excluded-providers'] || '').split(',').map(s => s.trim()).filter(Boolean);
+
         try {
-          const result = await routeChatCompletion(body, agent);
-          const { response: upstream, model, provider: providerName, latencyMs } = result;
-          
-          // Record cost
-          const usage = { prompt_tokens: 0, completion_tokens: 0 };
-          
-          if (body.stream) {
-            // SSE streaming
+          const result = await routeChatCompletion(body, agent, {
+            requestId, preferredModel, excludedModels, preferredProvider, excludedProviders,
+          });
+
+          if (result.error) {
+            res.writeHead(result.status, { 'Content-Type': 'application/json' });
+            res.end(result.body);
+            persistRequest(db, stmts, {
+              requestId, status: result.status, model: result.model, provider: result.provider,
+              latencyMs: result.latencyMs, agent, error: result.status === 400 ? 'Bad request' : 'Unprocessable',
+              requestedModel: body.model, finalModel: result.model, protocol: 'openai', attemptLog: result.attemptLog,
+            });
+            return;
+          }
+
+          const { provider: providerName, model, latencyMs, isStream } = result;
+
+          if (isStream) {
             res.writeHead(200, {
-              'Content-Type': 'text/event-stream',
-              'Cache-Control': 'no-cache',
-              'Connection': 'keep-alive',
-              'X-Accel-Buffering': 'no',
-              'X-Model': model,
-              'X-Provider': providerName,
+              'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive',
+              'X-Accel-Buffering': 'no', 'X-Model': model, 'X-Provider': providerName, 'X-Request-Id': requestId,
             });
-            
             let totalIn = 0, totalOut = 0;
-            const userAgent = agent;
-            
-            await pipeSSEStream(upstream.body, res, (data) => {
-              try {
-                const parsed = JSON.parse(data);
-                totalIn = parsed.usage?.prompt_tokens || totalIn;
-                totalOut = parsed.usage?.completion_tokens || totalOut;
-                const choice = parsed.choices?.[0];
-                if (choice?.delta?.content) {
-                  return `data: ${data}\n\n`;
-                }
-              } catch {}
+            await pipeSSEStream(result.remainingStream, res, (data) => {
+              try { const p = JSON.parse(data); totalIn = p.usage?.prompt_tokens || totalIn; totalOut = p.usage?.completion_tokens || totalOut; } catch {}
               return `data: ${data}\n\n`;
+            }, { requestId, onFirstChunk: () => {} });
+            log(`[${requestId}] ${model} (${providerName}) stream ${latencyMs}ms`);
+            if (totalIn > 0 || totalOut > 0) recordCost(db, stmts.dbUpsertCost, model, providerName, totalIn, totalOut, agent);
+            persistRequest(db, stmts, {
+              requestId, status: 200, model, provider: providerName,
+              latencyMs, ttft: result.ttft || 0, tokensIn: totalIn, tokensOut: totalOut,
+              agent, requestedModel: body.model, finalModel: model, protocol: 'openai', attemptLog: result.attemptLog,
             });
-            
-            // End stream
-            res.write('data: [DONE]\n\n');
-            res.end();
-            
-            // Record cost
-            if (totalIn > 0 || totalOut > 0) {
-              recordCost(db, stmts.dbUpsertCost, model, providerName, totalIn, totalOut, userAgent);
-            }
           } else {
-            // Non-streaming - pass through
-            const responseData = await upstream.json();
+            const responseData = JSON.parse(result.body);
             const tokensIn = responseData.usage?.prompt_tokens || 0;
             const tokensOut = responseData.usage?.completion_tokens || 0;
-            
-            // Save to semantic cache
-            if (cfgCache.routing?.semantic_cache !== false && tokensIn > 0) {
-              cacheSet(model, body.messages, responseData, tokensIn, tokensOut);
+            if (cacheEnabled && !shouldSkipCache(body, body.model, body.tools, agent) && tokensIn > 0) {
+              cacheSet(body.model, null, body.messages, responseData, tokensIn, tokensOut,
+                body.tools, body.tool_choice, body.response_format, body.temperature);
             }
-            
             recordCost(db, stmts.dbUpsertCost, model, providerName, tokensIn, tokensOut, agent);
-            
             res.writeHead(200, {
-              'Content-Type': 'application/json',
-              'X-Model': model,
-              'X-Provider': providerName,
+              'Content-Type': 'application/json', 'X-Model': model, 'X-Provider': providerName, 'X-Request-Id': requestId,
             });
-            res.end(JSON.stringify(responseData));
+            res.end(result.body);
+            log(`[${requestId}] ${model} (${providerName}) ${latencyMs}ms`);
+            persistRequest(db, stmts, {
+              requestId, status: 200, model, provider: providerName,
+              latencyMs, tokensIn, tokensOut,
+              agent, requestedModel: body.model, finalModel: model, protocol: 'openai', attemptLog: result.attemptLog,
+            });
           }
-          
-          log(`✅ ${model} (${providerName}) ${latencyMs}ms`);
-          
         } catch (err) {
-          log(`❌ Chat completion failed:`, err.message);
+          log(`[${requestId}] Failed:`, sanitizeLog(err.message));
+          persistRequest(db, stmts, {
+            requestId, status: 502, model: body.model || 'unknown', provider: '',
+            latencyMs: 0, agent, error: sanitizeLog(err.message),
+            requestedModel: body.model, finalModel: '', protocol: 'openai',
+            attemptLog: err.attemptLog || [],
+          });
           res.writeHead(502, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: err.message || 'All providers unavailable' }));
+          res.end(JSON.stringify({ error: sanitizeLog(err.message) || 'All providers unavailable' }));
         }
         return;
       }
-      
-      // ── 404 ──
+
+      // ── Anthropic Messages API ──
+      if ((path === '/v1/messages' || path === '/messages') && method === 'POST') {
+        const requestId = generateId();
+        const rlResult = checkRateLimit(ip, path);
+        if (!rlResult.allowed) {
+          res.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': String(rlResult.retryAfter || 1) });
+          res.end(JSON.stringify({ type: 'error', error: { type: 'rate_limit_error', message: 'Rate limited' } }));
+          return;
+        }
+        const body = await parseJsonBody(req);
+        const result = await handleAnthropicMessage(body, agent, { requestId });
+
+        if (result.error) {
+          res.writeHead(result.status, { 'Content-Type': 'application/json' });
+          res.end(result.body);
+          persistRequest(db, stmts, {
+            requestId, status: result.status, model: body.model || 'unknown', provider: result.provider || '',
+            latencyMs: result.latencyMs || 0, agent, error: 'Anthropic error',
+            requestedModel: body.model, finalModel: result.model || '', protocol: 'anthropic',
+          });
+          return;
+        }
+
+        if (result.isStream) {
+          const providerName = result.provider;
+          const model = result.model;
+          res.writeHead(200, {
+            'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no', 'X-Model': model, 'X-Provider': providerName, 'X-Request-Id': requestId,
+          });
+          await pipeAnthropicSSE(result.response, res, {
+            requestId, nativeAnthropic: result.nativeAnthropic,
+            reader: result.reader, firstChunk: result.firstChunk,
+          });
+          log(`[${requestId}] Anthropic stream: ${model} (${providerName})`);
+          persistRequest(db, stmts, {
+            requestId, status: 200, model, provider: providerName,
+            latencyMs: result.latencyMs || 0, agent,
+            requestedModel: body.model, finalModel: model, protocol: 'anthropic',
+          });
+        } else {
+          res.writeHead(200, {
+            'Content-Type': 'application/json', 'X-Model': result.model, 'X-Provider': result.provider, 'X-Request-Id': requestId,
+          });
+          res.end(result.body);
+          log(`[${requestId}] Anthropic: ${result.model} (${result.provider})`);
+          persistRequest(db, stmts, {
+            requestId, status: 200, model: result.model, provider: result.provider,
+            latencyMs: result.latencyMs || 0, agent,
+            requestedModel: body.model, finalModel: result.model, protocol: 'anthropic',
+          });
+        }
+        return;
+      }
+
       sendError(res, 'Not found', 404);
-      
+
     } catch (err) {
-      log('💥 Request error:', err.message);
-      sendError(res, 'Internal server error: ' + err.message, 500);
+      log('Request error:', sanitizeLog(err.message));
+      sendError(res, 'Internal server error', 500);
     }
   });
-  
-  // ── WebSocket support ──
+
   srv.on('upgrade', (req, socket, head) => {
     if (req.url !== '/ws') { socket.destroy(); return; }
+    const wsAddr = req.socket.remoteAddress || '127.0.0.1';
+    const localAddrs = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1', 'localhost']);
+    const cfg = getConfig();
+    if (cfg.adminToken) {
+      const wsAuth = req.headers['authorization'] || req.headers['sec-websocket-protocol'] || '';
+      const wsKey = req.headers['x-api-key'] || '';
+      const authed = wsAuth.startsWith('Bearer ') ? wsAuth.slice(7) === cfg.adminToken : wsAuth === cfg.adminToken;
+      if (!authed && wsKey !== cfg.adminToken && !localAddrs.has(wsAddr)) {
+        socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+        socket.destroy();
+        return;
+      }
+    }
     const key = req.headers['sec-websocket-key'];
     if (!key) { socket.destroy(); return; }
-    
     const accept = createHash('sha1').update(key + '258EAFA5-E914-47DA-95CA-C5AB0DC85B11').digest('base64');
     socket.write(
       'HTTP/1.1 101 Switching Protocols\r\n' +
-      'Upgrade: websocket\r\n' +
-      'Connection: Upgrade\r\n' +
+      'Upgrade: websocket\r\nConnection: Upgrade\r\n' +
       'Sec-WebSocket-Accept: ' + accept + '\r\n\r\n'
     );
-    
     wsClients.add(socket);
     socket.on('close', () => wsClients.delete(socket));
     socket.on('error', () => wsClients.delete(socket));
-    
-    // Send initial snapshot
     try {
       const stats = getStats();
       const cfg = getConfig();
-      const msgBody = JSON.stringify({
+      socket.write(encodeWebSocketTextFrame(JSON.stringify({
         type: 'snapshot',
-        data: {
-          overview: stats.overview,
-          provider_count: Object.keys(cfg.providers || {}).length,
-          model_count: (cfg.models || []).length,
-          uptime: process.uptime(),
-          timestamp: Date.now() / 1000,
-        }
-      });
-      const len = msgBody.length;
-      const f = Buffer.alloc(len < 126 ? 2 : 4);
-      f[0] = 0x81;
-      if (len < 126) { f[1] = len; socket.write(Buffer.concat([f, Buffer.from(msgBody)])); }
-      else { f[1] = 126; f.writeUInt16BE(len, 2); socket.write(Buffer.concat([f, Buffer.from(msgBody)])); }
-    } catch {}
+        data: { overview: stats.overview, provider_count: Object.keys(cfg.providers || {}).length, model_count: (cfg.models || []).length, uptime: process.uptime(), timestamp: Date.now() / 1000 }
+      })));
+    } catch { /* ws write may fail */ }
   });
-  
-  // Periodic WebSocket broadcast
+
   setInterval(() => {
     if (wsClients.size === 0) return;
     try {
       const stats = getStats();
-      const msgBody = JSON.stringify({
-        type: 'snapshot',
-        data: {
-          overview: stats.overview,
-          recent: stats.recent.slice(0, 10),
-          timestamp: Date.now() / 1000,
-        }
-      });
-      const len = msgBody.length;
-      const f = Buffer.alloc(len < 126 ? 2 : 4);
-      f[0] = 0x81;
-      if (len < 126) { f[1] = len; socket.write(Buffer.concat([f, Buffer.from(msgBody)])); }
-      else { f[1] = 126; f.writeUInt16BE(len, 2); }
-    } catch {}
+      wsBroadcast({ type: 'snapshot', data: { overview: stats.overview, recent: stats.recent.slice(0, 10), timestamp: Date.now() / 1000 } });
+    } catch { /* broadcast error */ }
   }, 5000);
-  
-  // ── Server timeouts ──
+
   srv.keepAliveTimeout = 120000;
   srv.headersTimeout = 121000;
   srv.timeout = 0;
-  
+
   return srv;
 }

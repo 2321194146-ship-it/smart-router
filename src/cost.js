@@ -1,19 +1,14 @@
 /**
  * cost.mjs — v6 成本计算模块
- * Token → 金额换算，按日/模型统计
+ * Token → 金额换算，按日/模型/Provider统计
  */
 
-// ═══════════ 模型价格表 (¥ / 百万 token) ═══════════
-// 格式：{ 模型ID匹配关键词: { input: 输入价格, output: 输出价格 } }
 const PRICING = {
-  // DeepSeek 系列
   'DeepSeek-V3': { input: 2.0, output: 8.0 },
   'DeepSeek-V4-Flash': { input: 0.5, output: 1.5 },
   'DeepSeek-V4-Pro': { input: 3.0, output: 12.0 },
   'deepseek-v4-flash': { input: 0.5, output: 1.5 },
   'deepseek-v4-pro': { input: 3.0, output: 12.0 },
-
-  // Qwen 系列
   'Qwen3-Coder': { input: 1.5, output: 6.0 },
   'Qwen3-Next': { input: 1.0, output: 4.0 },
   'Qwen3-235B': { input: 2.0, output: 8.0 },
@@ -25,24 +20,16 @@ const PRICING = {
   'Qwen3.7-plus': { input: 2.0, output: 8.0 },
   'Qwen3.7-max': { input: 6.0, output: 24.0 },
   'Qwen3-VL': { input: 3.0, output: 12.0 },
-
-  // Kimi / Moonshot
   'Kimi-K2': { input: 2.0, output: 8.0 },
   'kimi-k2': { input: 2.0, output: 8.0 },
-
-  // GLM 系列
   'glm-5.2': { input: 10.0, output: 10.0 },
   'glm-5.1': { input: 4.0, output: 4.0 },
   'glm-4.7': { input: 1.5, output: 1.5 },
   'glm-4.6': { input: 0.5, output: 0.5 },
-
-  // 豆包系列
   'doubao-seed-2-0-pro': { input: 2.0, output: 8.0 },
   'doubao-seed-2-0-code': { input: 1.0, output: 4.0 },
   'doubao-seed-2-0-lite': { input: 0.3, output: 1.2 },
   'doubao-seed-2-0-mini': { input: 0.1, output: 0.5 },
-
-  // 其他
   'MiniMax-M3': { input: 1.0, output: 4.0 },
   'MiniMax-M2': { input: 0.5, output: 2.0 },
   'Mistral-Large': { input: 2.0, output: 6.0 },
@@ -56,15 +43,12 @@ const PRICING = {
   'meta/llama': { input: 0.3, output: 1.0 },
 };
 
-// 默认价格（不匹配时使用）
 const DEFAULT_PRICE = { input: 1.0, output: 4.0 };
 
-// ── 时区：统一用北京时间(UTC+8)做日期分桶，避免"今天"被 UTC 切错 ──
 export function getBeijingDate(d = new Date()) {
   return new Date(d.getTime() + 8 * 3600 * 1000).toISOString().slice(0, 10);
 }
 
-// ── 免费模型识别：id 含 'free'（覆盖 -free / :free）或明确免费 provider ──
 const FREE_PROVIDERS = new Set(['opencode-zen']);
 export function isFreeModel(modelId, provider) {
   if (!modelId) return false;
@@ -74,26 +58,15 @@ export function isFreeModel(modelId, provider) {
   return false;
 }
 
-/**
- * 根据模型ID匹配价格
- */
 export function getModelPrice(modelId) {
   if (!modelId) return DEFAULT_PRICE;
   const id = modelId.toLowerCase();
-  // 优先精准匹配（长关键词）
   for (const [key, price] of Object.entries(PRICING)) {
     if (id.includes(key.toLowerCase())) return price;
   }
   return DEFAULT_PRICE;
 }
 
-/**
- * 计算请求成本 (人民币)
- * @param {string} modelId - 模型ID
- * @param {number} tokensIn - 输入token数
- * @param {number} tokensOut - 输出token数
- * @returns {{ costRmb: number, inputPrice: number, outputPrice: number }}
- */
 export function calculateCost(modelId, tokensIn, tokensOut) {
   const price = getModelPrice(modelId);
   const ti = tokensIn || 0;
@@ -102,50 +75,41 @@ export function calculateCost(modelId, tokensIn, tokensOut) {
   return { costRmb, inputPrice: price.input, outputPrice: price.output };
 }
 
-/**
- * 记录成本到 SQLite
- */
 export function recordCost(db, dbUpsertCost, modelId, provider, tokensIn, tokensOut, agent) {
-  try {
-    const today = getBeijingDate();
-    const costRmb = isFreeModel(modelId, provider) ? 0 : calculateCost(modelId, tokensIn, tokensOut).costRmb;
-    dbUpsertCost.run(today, modelId, provider || '', tokensIn || 0, tokensOut || 0, costRmb);
-  } catch {}
+  const today = getBeijingDate();
+  const costRmb = isFreeModel(modelId, provider) ? 0 : calculateCost(modelId, tokensIn, tokensOut).costRmb;
+  dbUpsertCost.run(today, modelId, provider || '', 1, tokensIn || 0, tokensOut || 0, costRmb, tokensIn || 0, tokensOut || 0, costRmb);
 }
 
-/**
- * 查询成本概览
- */
 export function getCostOverview(db) {
+  const today = getBeijingDate();
+  const monthStart = today.slice(0, 7) + '-01';
+  let todayRow, monthRow, totalRow;
   try {
-    const today = getBeijingDate();
-    const monthStart = today.slice(0, 7) + '-01';
-    const todayRow = db.prepare('SELECT COALESCE(SUM(cost_rmb),0) as cost, COALESCE(SUM(requests),0) as reqs, COALESCE(SUM(tokens_in),0) as ti, COALESCE(SUM(tokens_out),0) as tok FROM cost_daily WHERE date = ?').get(today);
-    const monthRow = db.prepare('SELECT COALESCE(SUM(cost_rmb),0) as cost, COALESCE(SUM(requests),0) as reqs FROM cost_daily WHERE date >= ?').get(monthStart);
-    const totalRow = db.prepare('SELECT COALESCE(SUM(cost_rmb),0) as cost, COALESCE(SUM(requests),0) as reqs FROM cost_daily').get();
-    return {
-      today: { cost_rmb: +(todayRow?.cost || 0).toFixed(6), requests: todayRow?.reqs || 0, tokens_in: todayRow?.ti || 0, tokens_out: todayRow?.tok || 0 },
-      this_month: { cost_rmb: +(monthRow?.cost || 0).toFixed(6), requests: monthRow?.reqs || 0 },
-      total: { cost_rmb: +(totalRow?.cost || 0).toFixed(6), requests: totalRow?.reqs || 0 },
-    };
-  } catch { return { today: { cost_rmb: 0, requests: 0, tokens_in: 0, tokens_out: 0 }, this_month: { cost_rmb: 0, requests: 0 }, total: { cost_rmb: 0, requests: 0 } }; }
+    todayRow = db.prepare('SELECT COALESCE(SUM(cost_rmb),0) as cost, COALESCE(SUM(requests),0) as reqs, COALESCE(SUM(tokens_in),0) as ti, COALESCE(SUM(tokens_out),0) as tok FROM cost_daily WHERE date = ?').get(today);
+  } catch (e) { console.error('[cost] today query failed:', e.message); todayRow = null; }
+  try {
+    monthRow = db.prepare('SELECT COALESCE(SUM(cost_rmb),0) as cost, COALESCE(SUM(requests),0) as reqs FROM cost_daily WHERE date >= ?').get(monthStart);
+  } catch (e) { console.error('[cost] month query failed:', e.message); monthRow = null; }
+  try {
+    totalRow = db.prepare('SELECT COALESCE(SUM(cost_rmb),0) as cost, COALESCE(SUM(requests),0) as reqs FROM cost_daily').get();
+  } catch (e) { console.error('[cost] total query failed:', e.message); totalRow = null; }
+  return {
+    today: { cost_rmb: +(todayRow?.cost || 0).toFixed(6), requests: todayRow?.reqs || 0, tokens_in: todayRow?.ti || 0, tokens_out: todayRow?.tok || 0 },
+    this_month: { cost_rmb: +(monthRow?.cost || 0).toFixed(6), requests: monthRow?.reqs || 0 },
+    total: { cost_rmb: +(totalRow?.cost || 0).toFixed(6), requests: totalRow?.reqs || 0 },
+  };
 }
 
-/**
- * 每日成本明细
- */
 export function getCostDaily(db, days = 30) {
   try {
     return db.prepare('SELECT date, model, provider, requests, tokens_in, tokens_out, ROUND(cost_rmb, 6) as cost_rmb FROM cost_daily ORDER BY date DESC, cost_rmb DESC LIMIT ?').all(days * 10);
-  } catch { return []; }
+  } catch (e) { console.error('[cost] getCostDaily failed:', e.message); return []; }
 }
 
-/**
- * 按模型成本排行
- */
 export function getCostByModel(db, days = 30) {
   try {
     const since = getBeijingDate(new Date(Date.now() - days * 86400000));
     return db.prepare('SELECT model, SUM(requests) as requests, SUM(tokens_in) as tokens_in, SUM(tokens_out) as tokens_out, ROUND(SUM(cost_rmb), 6) as cost_rmb FROM cost_daily WHERE date >= ? GROUP BY model ORDER BY cost_rmb DESC').all(since);
-  } catch { return []; }
+  } catch (e) { console.error('[cost] getCostByModel failed:', e.message); return []; }
 }
