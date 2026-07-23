@@ -98,13 +98,23 @@ let db = null;
  */
 export function migrateCostDaily(db) {
   if (!db) return { migrated: false, reason: 'no-db' };
-  let cols = [];
+  let info = [];
   try {
-    cols = db.pragma('table_info(cost_daily)').map((r) => r.name);
+    info = db.pragma('table_info(cost_daily)');
   } catch {
     return { migrated: false, reason: 'no-table' };
   }
-  if (cols.includes('provider')) return { migrated: false, reason: 'already-current' };
+  const cols = info.map((r) => r.name);
+  // Determine the actual primary-key columns (table_info().pk > 0 marks key columns).
+  const pkCols = info.filter((r) => r.pk > 0).map((r) => r.name).sort().join(',');
+  const targetPk = 'date,model,provider';
+  // Migration is required when EITHER the provider column is missing OR the primary key is
+  // not exactly (date, model, provider). A table that has a provider column but an outdated
+  // PK (e.g. (date, model)) must still be rebuilt, otherwise the upsert's
+  // `ON CONFLICT(date, model, provider)` references a non-unique column and the server crashes
+  // at startup. (This is what pure "provider column present?" checks got wrong.)
+  const needsMigration = !cols.includes('provider') || pkCols !== targetPk;
+  if (!needsMigration) return { migrated: false, reason: 'already-current' };
 
   // Clean up any leftover temp table from a previously aborted run.
   db.exec('DROP TABLE IF EXISTS cost_daily_new');
@@ -123,12 +133,20 @@ export function migrateCostDaily(db) {
     );
   `);
 
-  // Aggregate to avoid PK collisions from duplicate (date, model) rows in the old table.
-  db.prepare(
-    `INSERT INTO cost_daily_new (date, model, provider, requests, tokens_in, tokens_out, cost_rmb)
-     SELECT date, model, '', SUM(requests), SUM(tokens_in), SUM(tokens_out), SUM(cost_rmb)
-     FROM cost_daily GROUP BY date, model`
-  ).run();
+  // Aggregate to avoid PK collisions. Preserve provider when the source table already has it.
+  if (cols.includes('provider')) {
+    db.prepare(
+      `INSERT INTO cost_daily_new (date, model, provider, requests, tokens_in, tokens_out, cost_rmb)
+       SELECT date, model, COALESCE(provider, ''), SUM(requests), SUM(tokens_in), SUM(tokens_out), SUM(cost_rmb)
+       FROM cost_daily GROUP BY date, model, provider`
+    ).run();
+  } else {
+    db.prepare(
+      `INSERT INTO cost_daily_new (date, model, provider, requests, tokens_in, tokens_out, cost_rmb)
+       SELECT date, model, '', SUM(requests), SUM(tokens_in), SUM(tokens_out), SUM(cost_rmb)
+       FROM cost_daily GROUP BY date, model`
+    ).run();
+  }
 
   const before = db.prepare('SELECT COUNT(*) AS c FROM cost_daily').get().c;
   const after = db.prepare('SELECT COUNT(*) AS c FROM cost_daily_new').get().c;
