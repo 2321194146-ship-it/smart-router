@@ -78,17 +78,89 @@ function cacheSet(model, provider, messages, response, tokensIn, tokensOut, tool
   } catch (e) { console.error('[cache] set error:', e.message); }
 }
 
-setInterval(() => {
-  try {
-    const n = db.prepare('DELETE FROM cache WHERE expires_at < ?').run(Date.now() / 1000);
-    if (n.changes > 0) log(`Cleaned ${n.changes} expired cache entries`);
-  } catch (e) { console.error('[cache] cleanup error:', e.message); }
-}, 300000);
-
 let db = null;
 
-function initDatabase(dbPath) {
+/**
+ * Idempotent, rollback-safe migration of `cost_daily` from the legacy primary key
+ * (date, model) — which has no `provider` column — to the current primary key
+ * (date, model, provider).
+ *
+ * Steps:
+ *   1. Detect old schema (no `provider` column / table missing). If already current, return early.
+ *   2. Create `cost_daily_new` with the new schema.
+ *   3. Copy aggregated rows from the old table (duplicates are summed so the new PK cannot collide).
+ *   4. Validate row counts match (throw if not — the original table is left untouched).
+ *   5. Atomically swap inside a transaction: rename old → cost_daily_backup, new → cost_daily.
+ *      A backup of the original rows is retained as cost_daily_backup.
+ *
+ * Idempotent: on a fresh / already-migrated DB the `provider` column exists and we
+ * return early, so repeated starts never re-migrate or error.
+ */
+export function migrateCostDaily(db) {
+  if (!db) return { migrated: false, reason: 'no-db' };
+  let cols = [];
+  try {
+    cols = db.pragma('table_info(cost_daily)').map((r) => r.name);
+  } catch {
+    return { migrated: false, reason: 'no-table' };
+  }
+  if (cols.includes('provider')) return { migrated: false, reason: 'already-current' };
+
+  // Clean up any leftover temp table from a previously aborted run.
+  db.exec('DROP TABLE IF EXISTS cost_daily_new');
+  db.exec('DROP TABLE IF EXISTS cost_daily_backup');
+
+  db.exec(`
+    CREATE TABLE cost_daily_new (
+      date TEXT NOT NULL,
+      model TEXT NOT NULL,
+      provider TEXT DEFAULT '',
+      requests INTEGER DEFAULT 1,
+      tokens_in INTEGER DEFAULT 0,
+      tokens_out INTEGER DEFAULT 0,
+      cost_rmb REAL DEFAULT 0,
+      PRIMARY KEY (date, model, provider)
+    );
+  `);
+
+  // Aggregate to avoid PK collisions from duplicate (date, model) rows in the old table.
+  db.prepare(
+    `INSERT INTO cost_daily_new (date, model, provider, requests, tokens_in, tokens_out, cost_rmb)
+     SELECT date, model, '', SUM(requests), SUM(tokens_in), SUM(tokens_out), SUM(cost_rmb)
+     FROM cost_daily GROUP BY date, model`
+  ).run();
+
+  const before = db.prepare('SELECT COUNT(*) AS c FROM cost_daily').get().c;
+  const after = db.prepare('SELECT COUNT(*) AS c FROM cost_daily_new').get().c;
+  if (before !== after) {
+    db.exec('DROP TABLE IF EXISTS cost_daily_new');
+    throw new Error(`cost_daily migration aborted: row count mismatch (before=${before}, after=${after}). Original table untouched.`);
+  }
+
+  db.exec('BEGIN');
+  try {
+    db.exec('ALTER TABLE cost_daily RENAME TO cost_daily_backup');
+    db.exec('ALTER TABLE cost_daily_new RENAME TO cost_daily');
+    db.exec('COMMIT');
+  } catch (e) {
+    try { db.exec('ROLLBACK'); } catch { /* ignore rollback error */ }
+    throw new Error('cost_daily migration failed during atomic swap: ' + e.message);
+  }
+
+  return { migrated: true, rows: after };
+}
+
+export function initDatabase(dbPath) {
   db = new Database(dbPath);
+  // Cache cleanup timer. Started only once the DB is initialised (i.e. when the
+  // server actually starts), NOT at module load — a module-load timer kept the
+  // event loop alive and prevented `node --test` from exiting after tests ran.
+  setInterval(() => {
+    try {
+      const n = db.prepare('DELETE FROM cache WHERE expires_at < ?').run(Date.now() / 1000);
+      if (n.changes > 0) log(`Cleaned ${n.changes} expired cache entries`);
+    } catch (e) { console.error('[cache] cleanup error:', e.message); }
+  }, 300000);
   db.pragma('journal_mode = WAL');
   db.pragma('synchronous = NORMAL');
 
@@ -151,12 +223,21 @@ function initDatabase(dbPath) {
     );
   `);
 
-  try { db.exec('ALTER TABLE requests ADD COLUMN request_id TEXT DEFAULT \'\''); } catch (e) { /* column exists */ }
-  try { db.exec('ALTER TABLE requests ADD COLUMN ttft_ms INTEGER DEFAULT 0'); } catch (e) { /* column exists */ }
-  try { db.exec('ALTER TABLE requests ADD COLUMN protocol TEXT DEFAULT \'openai\''); } catch (e) { /* column exists */ }
-  try { db.exec('ALTER TABLE requests ADD COLUMN requested_model TEXT DEFAULT \'\''); } catch (e) { /* column exists */ }
-  try { db.exec('ALTER TABLE requests ADD COLUMN final_model TEXT DEFAULT \'\''); } catch (e) { /* column exists */ }
-  try { db.exec('ALTER TABLE requests ADD COLUMN attempts TEXT DEFAULT \'[]\''); } catch (e) { /* column exists */ }
+  // ── Migration: legacy cost_daily (PK date,model) → (date,model,provider) ──
+  try {
+    const m = migrateCostDaily(db);
+    if (m.migrated) log(`[db-migrate] cost_daily migrated: ${m.rows} rows (backup retained as cost_daily_backup)`);
+  } catch (e) {
+    // Database migration failure must surface loudly — never silently continue.
+    throw new Error('Database migration failed: ' + e.message);
+  }
+
+  try { db.exec('ALTER TABLE requests ADD COLUMN request_id TEXT DEFAULT \'\''); } catch (e) { log('[db] ensure column skipped (idempotent): ' + e.message); }
+  try { db.exec('ALTER TABLE requests ADD COLUMN ttft_ms INTEGER DEFAULT 0'); } catch (e) { log('[db] ensure column skipped (idempotent): ' + e.message); }
+  try { db.exec('ALTER TABLE requests ADD COLUMN protocol TEXT DEFAULT \'openai\''); } catch (e) { log('[db] ensure column skipped (idempotent): ' + e.message); }
+  try { db.exec('ALTER TABLE requests ADD COLUMN requested_model TEXT DEFAULT \'\''); } catch (e) { log('[db] ensure column skipped (idempotent): ' + e.message); }
+  try { db.exec('ALTER TABLE requests ADD COLUMN final_model TEXT DEFAULT \'\''); } catch (e) { log('[db] ensure column skipped (idempotent): ' + e.message); }
+  try { db.exec('ALTER TABLE requests ADD COLUMN attempts TEXT DEFAULT \'[]\''); } catch (e) { log('[db] ensure column skipped (idempotent): ' + e.message); }
 
   const stmts = {};
   stmts.dbLogGuardrail = db.prepare(
@@ -268,11 +349,17 @@ function checkConfigSecurity(cfg) {
   return warnings;
 }
 
-function authenticate(req, res) {
+export const CORS_ALLOWED_HEADERS = 'Content-Type, Authorization, X-Api-Key, X-Request-Id, X-Agent-Name, X-Preferred-Model, X-Excluded-Models, X-Preferred-Provider, X-Excluded-Providers';
+
+// Determine whether a request is allowed. Localhost detection must be based on the
+// CLIENT (remote) address — never req.socket.localAddress, which is the server's own
+// bind address and is always 127.0.0.1 for loopback listeners (a bug that wrongly
+// authenticated every request as "local").
+export function authenticate(req, res) {
   const config = getConfig();
-  const addr = req.socket.localAddress || '127.0.0.1';
+  const clientAddr = req.socket.remoteAddress || '127.0.0.1';
   const localAddrs = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1', 'localhost']);
-  if (!config.adminToken) return localAddrs.has(addr);
+  if (!config.adminToken) return localAddrs.has(clientAddr);
   const authHeader = req.headers['authorization'];
   if (authHeader) {
     const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
@@ -414,7 +501,7 @@ export function createServer() {
     for (const ws of wsClients) { try { ws.write(frame); } catch { wsClients.delete(ws); } }
   }
 
-  const allowedHeaders = 'Content-Type, Authorization, X-Request-Id, X-Agent-Name, X-Preferred-Model, X-Excluded-Models, X-Preferred-Provider, X-Excluded-Providers';
+  const allowedHeaders = CORS_ALLOWED_HEADERS;
 
   const srv = http.createServer(async (req, res) => {
     const method = req.method;

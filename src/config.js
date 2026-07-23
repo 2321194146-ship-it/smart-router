@@ -84,6 +84,10 @@ export function normalizeConfig(raw) {
       semanticCache: raw.routing?.semantic_cache !== false,
       healthCheckInterval: raw.routing?.health_check_interval || 30,
       rateLimit: raw.routing?.rate_limit || {},
+      maxAttemptsPerKey: raw.routing?.max_attempts_per_key ?? 2,
+      maxKeysPerProvider: raw.routing?.max_keys_per_provider ?? 0,
+      maxProvidersPerRequest: raw.routing?.max_providers_per_request ?? 0,
+      maxTotalUpstreamCalls: raw.routing?.max_total_upstream_calls ?? 20,
     },
     models: raw.models || [],
     apiKeys: raw.api_keys || [],
@@ -107,6 +111,47 @@ export function normalizeConfig(raw) {
   };
 }
 
+// ---- Environment-variable placeholder expansion ------------------------------
+// Recursively resolve ${ENV_NAME} in the raw config. Missing vars disable the
+// affected key/provider; the literal placeholder is NEVER forwarded to a provider.
+const ENV_PLACEHOLDER = /\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g;
+
+export function expandEnv(raw) {
+  const missing = [];
+  function expandStr(value) {
+    if (typeof value !== 'string') return value;
+    return value.replace(ENV_PLACEHOLDER, (m, name) => {
+      if (name in process.env && process.env[name] !== '') return process.env[name];
+      missing.push(name);
+      return ''; // never send the literal placeholder upstream
+    });
+  }
+  function walk(node) {
+    if (Array.isArray(node)) return node.map(walk);
+    if (node && typeof node === 'object') {
+      const out = {};
+      for (const [k, v] of Object.entries(node)) out[k] = walk(v);
+      return out;
+    }
+    return expandStr(node);
+  }
+  const result = walk(raw);
+  if (missing.length) {
+    const names = [...new Set(missing)];
+    console.warn(`[config] ${missing.length} env placeholder(s) unresolved: ${names.join(', ')}. Affected keys are disabled and their placeholders are NOT sent to providers.`);
+    const providers = result.providers || {};
+    for (const p of Object.values(providers)) {
+      if (p && typeof p.api_key === 'string' && p.api_key === '') { p.enabled = false; p.api_key = undefined; }
+      if (p && Array.isArray(p.keys)) {
+        for (const k of p.keys) {
+          if (k && typeof k.api_key === 'string' && k.api_key === '') { k.enabled = false; k.api_key = undefined; }
+        }
+      }
+    }
+  }
+  return result;
+}
+
 /**
  * Load everything from scratch
  */
@@ -120,6 +165,7 @@ export function loadConfig() {
   }
 
   rawConfig = loadRawConfig();
+  rawConfig = expandEnv(rawConfig);
   runtimeConfig = normalizeConfig(rawConfig);
   return runtimeConfig;
 }

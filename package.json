@@ -15,7 +15,11 @@
     "dev": "node --watch src/index.js",
     "test": "node --test test/*.test.js",
     "test:watch": "node --test --watch test/*.test.js",
-    "lint": "for f in src/*.js test/*.js; do node --check \"$f\" || exit 1; done"
+    "lint": "eslint src/*.js test/*.js",
+    "syntax:check": "for f in src/*.js test/*.js; do node --check \"$f\" || exit 1; done"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0"
   },
   "dependencies": {
     "better-sqlite3": "^11.0.0",

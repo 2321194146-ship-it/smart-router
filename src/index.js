@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Smart Router v6 — AI Gateway
+ * Smart Router v6.1.0 — AI Gateway
  * Intelligent model routing with circuit breaker, rate limiting, caching, and dashboard
  * 
  * Usage:
@@ -27,7 +27,7 @@ srv.on('error', (e) => {
 srv.listen(PORT, HOST, () => {
   console.log(`
 ╔══════════════════════════════════════╗
-║     Smart Router v6 — AI Gateway     ║
+║     Smart Router v6.1.0 — AI Gateway     ║
 ╠══════════════════════════════════════╣
 ║  📡 ${HOST}:${PORT}                    ║
 ║  📊 Dashboard: http://${HOST}:${PORT}/dashboard  ║

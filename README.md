@@ -1,4 +1,4 @@
-# Smart Router v6 🔀
+# Smart Router v6.1.0 🔀
 
 **AI Gateway** — Intelligent model routing, circuit breaker, rate limiting, semantic cache, and real-time dashboard.
 
@@ -110,10 +110,7 @@ Client → Smart Router → Provider 1 (Tier 0)
 | DELETE | `/api/models/:name` | Delete model |
 | GET | `/api/routes` | Get routing config |
 | POST | `/api/routes` | Update routing config |
-| GET | `/api/keys` | List API keys |
-| POST | `/api/keys` | Add/update key |
 | GET | `/api/cost` | Cost overview & daily breakdown |
-| GET | `/api/guardrails/logs` | Guardrail logs |
 | POST | `/api/system/reload` | Hot reload config |
 | GET | `/api/config` | Current config (read-only) |
 
