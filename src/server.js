@@ -609,6 +609,22 @@ export function createServer() {
         return;
       }
 
+      // OpenAI-compatible model listing. Same source as /api/models, reshaped to the
+      // OpenAI `{ object: 'list', data: [...] }` contract so standard clients work.
+      if (path === '/v1/models' && method === 'GET') {
+        const cfg = getConfig();
+        const data = (cfg.models || [])
+          .filter((m) => m.enabled !== false)
+          .map((m) => ({
+            id: m.id || m.name,
+            object: 'model',
+            created: m.created || 0,
+            owned_by: m.owned_by || m.provider || 'smart-router',
+          }));
+        jsonResponse(res, { object: 'list', data });
+        return;
+      }
+
       if (path.startsWith('/api/models/') && method === 'DELETE') {
         const modelName = decodeURIComponent(path.slice('/api/models/'.length));
         const payload = buildSavePayload({ name: modelName, id: modelName }, 'delete-model');
