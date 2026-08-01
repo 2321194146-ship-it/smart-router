@@ -321,6 +321,7 @@ export function createStreamState() {
     messageStopped: false,
     stopReason: null,
     messageId: null,
+    validTerminalReceived: false,
   };
 }
 
@@ -561,6 +562,7 @@ export function chatChunkToAnthropicEvents(chunk, state, context = {}) {
 
     events.push({ type: 'message_stop' });
     state.messageStopped = true;
+    state.validTerminalReceived = true;
   }
 
   return events;
@@ -653,6 +655,8 @@ export async function openaiSSEToAnthropicSSE(upstreamResponse, res, options = {
   let clientAborted = false;
   let firstByteReceived = false;
   let sseBuffer = '';
+  let doneMarkerReceived = false;
+  let missingTerminalEvent = false;
 
   // 注册取消监听
   const cancelUnsub = cancelToken?.onCancel(() => {
@@ -767,6 +771,7 @@ export async function openaiSSEToAnthropicSSE(upstreamResponse, res, options = {
         for (const evt of events) {
           // 检测 [DONE]
           if (isDoneMarker(evt.data)) {
+            doneMarkerReceived = true;
             continue;
           }
 
@@ -805,7 +810,10 @@ export async function openaiSSEToAnthropicSSE(upstreamResponse, res, options = {
     if (!clientAborted && sseBuffer.trim()) {
       const events = parseSSEChunk(sseBuffer);
       for (const evt of events) {
-        if (isDoneMarker(evt.data)) continue;
+        if (isDoneMarker(evt.data)) {
+          doneMarkerReceived = true;
+          continue;
+        }
         if (!evt.data) continue;
 
         let chunk;
@@ -828,31 +836,47 @@ export async function openaiSSEToAnthropicSSE(upstreamResponse, res, options = {
 
     // 判断流是否正常完成
     if (!clientAborted && !hadError) {
-      // 如果 message 已开始但未发送 message_stop（异常 EOF 或流正常结束但无 finish_reason）
-      if (state.messageStarted && !state.messageStopped) {
-        const stopReason = state.stopReason || 'end_turn';
-        const outputTokens = state.lastUsage
-          ? state.lastUsage.output_tokens
-          : 0;
-        sendStreamEnd(stopReason, outputTokens);
-      } else if (!state.messageStarted) {
-        // 完全没有收到任何 chunk：发送完整的空响应
-        const fakeChunk = {
-          id: `msg_${Date.now()}`,
-          model: model || originalBody?.model || '',
-          choices: [{
-            index: 0,
-            delta: {},
-            finish_reason: 'stop',
-          }],
-        };
-        const anthropicEvents = chatChunkToAnthropicEvents(fakeChunk, state, { model });
-        for (const anthEvt of anthropicEvents) {
-          writeEvent(anthEvt);
-        }
-      }
+      const hasValidTerminal = state.validTerminalReceived || doneMarkerReceived;
 
-      completed = true;
+      if (state.messageStarted && !state.messageStopped) {
+        if (!hasValidTerminal) {
+          // 异常 EOF：不伪造 end_turn，标记为 incomplete
+          missingTerminalEvent = true;
+          completed = false;
+          if (res && !res.writableEnded && !res.destroyed) {
+            try {
+              writeEvent({
+                type: 'error',
+                error: {
+                  type: 'api_error',
+                  message: 'upstream stream ended without a valid terminal event',
+                },
+              });
+            } catch { /* client may have disconnected */ }
+          }
+        } else {
+          const stopReason = state.stopReason || 'end_turn';
+          const outputTokens = state.lastUsage ? state.lastUsage.output_tokens : 0;
+          sendStreamEnd(stopReason, outputTokens);
+          completed = true;
+        }
+      } else if (!state.messageStarted) {
+        if (!hasValidTerminal) {
+          missingTerminalEvent = true;
+          completed = false;
+        } else {
+          const fakeChunk = {
+            id: `msg_${Date.now()}`,
+            model: model || originalBody?.model || '',
+            choices: [{ index: 0, delta: {}, finish_reason: 'stop' }],
+          };
+          const anthropicEvents = chatChunkToAnthropicEvents(fakeChunk, state, { model });
+          for (const anthEvt of anthropicEvents) { writeEvent(anthEvt); }
+          completed = true;
+        }
+      } else {
+        completed = true;
+      }
     }
   } catch (err) {
     // 区分客户端取消和其他错误
@@ -863,10 +887,17 @@ export async function openaiSSEToAnthropicSSE(upstreamResponse, res, options = {
       hadError = true;
       protocolLog(`SSE conversion error: ${err.message}`);
 
-      // 异常 EOF：发送 message_delta + message_stop
+      // 异常错误：不伪造 end_turn
+      missingTerminalEvent = true;
+      completed = false;
       if (!clientAborted && res && !res.writableEnded && !res.destroyed) {
         if (state.messageStarted && !state.messageStopped) {
-          sendStreamEnd('end_turn', state.lastUsage ? state.lastUsage.output_tokens : 0);
+          try {
+            writeEvent({
+              type: 'error',
+              error: { type: 'api_error', message: 'stream error: ' + (err.message || 'unknown') },
+            });
+          } catch { /* client may have disconnected */ }
         }
       }
 
@@ -890,6 +921,7 @@ export async function openaiSSEToAnthropicSSE(upstreamResponse, res, options = {
       hadError,
       lastUsage: state.lastUsage,
       clientAborted,
+      missingTerminalEvent,
     });
   }
 
@@ -899,6 +931,7 @@ export async function openaiSSEToAnthropicSSE(upstreamResponse, res, options = {
     hadError,
     lastUsage: state.lastUsage,
     clientAborted,
+    missingTerminalEvent,
   };
 }
 
@@ -1123,6 +1156,10 @@ async function handleStreamSuccess(
     // 流错误
     outcome = Outcome.INCOMPLETE;
     protocolLog(`[${requestId}] stream error, bytes=${convertResult.bytesTransferred}`);
+  } else if (convertResult.missingTerminalEvent) {
+    // 异常 EOF：上游未发送合法终止事件
+    outcome = Outcome.INCOMPLETE;
+    protocolLog(`[${requestId}] stream incomplete (missing terminal event), bytes=${convertResult.bytesTransferred}`);
   } else if (convertResult.completed) {
     // 流正常完成
     outcome = Outcome.COMPLETED;

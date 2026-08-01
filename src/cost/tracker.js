@@ -250,7 +250,9 @@ export class CostTracker {
   /**
    * @param {object} config 已加载的配置对象（含 budget / agent_bindings / models）
    */
-  constructor(config) {
+  constructor(config, store = null) {
+    this.store = store || null;
+
     // 全局 budget（规范化后）
     this.globalBudget = normalizeBudget(config?.budget);
 

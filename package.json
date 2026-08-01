@@ -6,12 +6,14 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "test": "node --test test/",
-    "test:unit": "node --test test/unit/",
-    "test:integration": "node --test test/integration/",
-    "test:audit": "node --test test/audit/"
+    "test": "node --test test/unit/*.test.js test/integration/*.test.js test/audit/*.test.js",
+    "test:unit": "node --test test/unit/*.test.js",
+    "test:integration": "node --test test/integration/*.test.js",
+    "test:audit": "node --test test/audit/*.test.js",
+    "test:all": "node --test test/unit/*.test.js test/integration/*.test.js test/audit/*.test.js",
+    "syntax:check": "node --check src/index.js && node --check src/server.js"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   }
 }

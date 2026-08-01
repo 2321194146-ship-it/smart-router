@@ -495,7 +495,7 @@ export class ExecutionEngine {
         );
         return {
           success: false, response: null, error,
-          firstByteReceived: false, attemptLog,
+          headersReceived: false, firstByteReceived: false, attemptLog,
         };
       }
     }
@@ -546,12 +546,16 @@ export class ExecutionEngine {
       let usage = null;
       let cost = null;
       const isStreaming = body?.stream === true;
+      let firstByteSentToClient = false;
+      let firstContentByteMs = null;
+      let bodyValid = false;
 
       if (!isStreaming) {
         try {
           const cloned = result.response.clone();
           const bodyText = await cloned.text();
           if (bodyText) {
+            bodyValid = true;
             usage = this.providerClient.parseUsage(bodyText, provider);
             if (usage && this.costTracker) {
               cost = this.costTracker.calculateCost(modelConfig, usage);
@@ -560,18 +564,29 @@ export class ExecutionEngine {
         } catch {
           // 流式响应或解析失败：usage 未知
         }
+        // 非流式：body 有效则视为首字节已发送（内容已就绪）
+        firstByteSentToClient = bodyValid;
+        firstContentByteMs = bodyValid ? latency : null;
       }
+      // 流式：firstByteSentToClient 保持 false，由协议处理器通过 onFirstByte 回调设置
 
       const attemptLog = this._buildAttemptLog(
         candidate, result.keyId, attemptNumber, 'success',
         null, usage, cost, latency
       );
+      // 附加首字节语义字段
+      attemptLog.headersReceived = true;
+      attemptLog.firstContentByteMs = firstContentByteMs;
+      attemptLog.firstByteSentToClient = firstByteSentToClient;
 
       return {
         success: true,
         response: result.response,
         error: null,
-        firstByteReceived: true, // 收到 Response 表示首字节已到达
+        // headersReceived: 收到上游 Response 对象（仅表示 HTTP 连接成功）
+        headersReceived: true,
+        // firstByteReceived: 是否已向客户端发送有效内容（true 时禁止切换模型）
+        firstByteReceived: firstByteSentToClient,
         attemptLog,
         keyId: result.keyId,
         usage,
@@ -598,6 +613,7 @@ export class ExecutionEngine {
       success: false,
       response: null,
       error,
+      headersReceived: false,
       firstByteReceived: false,
       attemptLog,
       keyId: null,
@@ -643,6 +659,10 @@ export class ExecutionEngine {
       usage: usage || null,
       cost: cost || null,
       latencyMs: latency || 0,
+      // 首字节语义：区分 headersReceived 与 firstByteSentToClient
+      headersReceived: false,
+      firstContentByteMs: null,
+      firstByteSentToClient: false,
       timestamp: new Date().toISOString(),
     };
   }

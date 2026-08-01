@@ -13,3 +13,7 @@ config/secrets.*
 *.zip
 test-output/
 coverage/
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm

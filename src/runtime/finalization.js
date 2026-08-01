@@ -56,10 +56,11 @@ export class Finalizer {
   /**
    * @param {object} costTracker CostTracker 实例（用于成本记录）
    */
-  constructor(costTracker) {
+  constructor(costTracker, store = null) {
     this.costTracker = costTracker || null;
+    this.store = store || null;
 
-    // 幂等保护：已收尾的 requestId 集合
+    // 幂等保护：已收尾的 requestId 集合（内存缓存，store 存在时由 DB 唯一约束保证）
     this._finalizedIds = new Set();
 
     // 审计记录存储（内存版，未来迁移到 DB）
@@ -97,10 +98,31 @@ export class Finalizer {
    * @returns {Promise<{finalized: boolean, reason?: string, auditRecord?: object}>}
    */
   async finalize(requestId, attemptLog, finalOutcome, options = {}) {
-    // 1. 幂等检查
-    if (this._finalizedIds.has(requestId)) {
-      log(`[finalizer] finalize already executed, skipping: ${requestId}`);
-      return { finalized: false, reason: 'already_finalized' };
+    // 1. 幂等检查：优先使用 store 的唯一约束，回退到内存 Set
+    if (this.store) {
+      try {
+        const result = await this.store.saveFinalized({
+          requestId,
+          outcome: finalOutcome,
+          agentId: options.agentId || null,
+          protocol: options.protocol || null,
+          timestamp: new Date().toISOString(),
+        });
+        if (!result.finalized) {
+          log(`[finalizer] finalize already executed (store), skipping: ${requestId}`);
+          return { finalized: false, reason: 'already_finalized' };
+        }
+      } catch (err) {
+        log(`[finalizer] store saveFinalized error, falling back to memory: ${err.message}`);
+        if (this._finalizedIds.has(requestId)) {
+          return { finalized: false, reason: 'already_finalized' };
+        }
+      }
+    } else {
+      if (this._finalizedIds.has(requestId)) {
+        log(`[finalizer] finalize already executed, skipping: ${requestId}`);
+        return { finalized: false, reason: 'already_finalized' };
+      }
     }
     this._finalizedIds.add(requestId);
 
@@ -133,6 +155,15 @@ export class Finalizer {
       requestId, attemptLog, finalOutcome, options
     );
     this._auditRecords.push(auditRecord);
+
+    // 持久化审计记录到 store（如果可用）
+    if (this.store) {
+      try {
+        await this.store.saveAuditRecord(auditRecord);
+      } catch (err) {
+        log(`[finalizer] store saveAuditRecord error: ${err.message}`);
+      }
+    }
 
     // 5. 回写模型质量反馈（仅 QUALITY_OUTCOMES）
     if (shouldRecordQualityFeedback(finalOutcome) && successfulAttempt) {
@@ -167,10 +198,31 @@ export class Finalizer {
    * @returns {Promise<{finalized: boolean, reason?: string, auditRecord?: object}>}
    */
   async finalizeNoCandidate(requestId, requestedModel, options = {}) {
-    // 幂等检查
-    if (this._finalizedIds.has(requestId)) {
-      log(`[finalizer] finalize already executed, skipping: ${requestId}`);
-      return { finalized: false, reason: 'already_finalized' };
+    // 幂等检查：优先使用 store
+    if (this.store) {
+      try {
+        const result = await this.store.saveFinalized({
+          requestId,
+          outcome: Outcome.NO_CANDIDATE,
+          agentId: options.agentId || null,
+          protocol: options.protocol || null,
+          timestamp: new Date().toISOString(),
+        });
+        if (!result.finalized) {
+          log(`[finalizer] finalize already executed (store), skipping: ${requestId}`);
+          return { finalized: false, reason: 'already_finalized' };
+        }
+      } catch (err) {
+        log(`[finalizer] store saveFinalized error, falling back to memory: ${err.message}`);
+        if (this._finalizedIds.has(requestId)) {
+          return { finalized: false, reason: 'already_finalized' };
+        }
+      }
+    } else {
+      if (this._finalizedIds.has(requestId)) {
+        log(`[finalizer] finalize already executed, skipping: ${requestId}`);
+        return { finalized: false, reason: 'already_finalized' };
+      }
     }
     this._finalizedIds.add(requestId);
 
@@ -189,6 +241,16 @@ export class Finalizer {
     };
 
     this._auditRecords.push(auditRecord);
+
+    // 持久化到 store
+    if (this.store) {
+      try {
+        await this.store.saveAuditRecord(auditRecord);
+      } catch (err) {
+        log(`[finalizer] store saveAuditRecord error: ${err.message}`);
+      }
+    }
+
     log(`[finalizer] no_candidate audit record: ${requestId}`);
 
     return { finalized: true, auditRecord };
@@ -365,6 +427,14 @@ export class Finalizer {
   // --------------------------------------------------------------------------
   // 测试与诊断辅助
   // --------------------------------------------------------------------------
+
+  /**
+   * 设置存储后端（用于延迟注入或切换存储）。
+   * @param {object} store StorageInterface 实现
+   */
+  setStore(store) {
+    this.store = store || null;
+  }
 
   /**
    * 重置内部状态（主要用于测试隔离）。

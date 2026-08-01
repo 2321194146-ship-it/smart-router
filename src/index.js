@@ -37,7 +37,7 @@ const configPath =
 let server;
 
 try {
-  server = createServer(configPath);
+  server = await createServer(configPath);
 } catch (err) {
   log(`server: 启动失败: ${err.message}`);
   if (err.stack) {

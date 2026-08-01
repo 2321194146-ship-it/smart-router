@@ -20,6 +20,7 @@
 
 import http from 'node:http';
 import { randomBytes } from 'node:crypto';
+import { join } from 'node:path';
 import { loadConfig, getConfig, log } from './config/loader.js';
 import { validateConfig } from './config/validator.js';
 import { resolveAgent } from './agent/identity.js';
@@ -36,6 +37,7 @@ import { ExecutionEngine } from './router/execution.js';
 import { CostTracker } from './cost/tracker.js';
 import { CancelToken } from './runtime/cancellation.js';
 import { Finalizer } from './runtime/finalization.js';
+import { MemoryStore, SQLiteStore } from './storage/index.js';
 import { handleChatCompletion } from './protocols/chat.js';
 import { handleChatCompletionStream } from './protocols/chat-stream.js';
 import { handleResponse, responsesToChat } from './protocols/responses.js';
@@ -74,7 +76,7 @@ const DEFAULT_MAX_BODY_BYTES = 10 * 1024 * 1024; // 10MB
  * @returns {http.Server} HTTP 服务器实例（附加了 _config 和 _components）
  * @throws {Error} 配置加载或验证失败时抛出
  */
-export function createServer(configPath) {
+export async function createServer(configPath) {
   // 1. 加载配置
   const config = loadConfig(configPath);
   log('server: config loaded');
@@ -92,13 +94,27 @@ export function createServer(configPath) {
   }
   log('server: config validated');
 
-  // 3. 初始化所有组件
-  const keyPool = new KeyPool(config);
+  // 3. 初始化存储后端
+  //    测试环境（port=0 或无 data_dir）使用 MemoryStore
+  //    生产环境使用 SQLiteStore
+  let store = null;
+  const dataDir = config.server?.data_dir || config.data_dir || null;
+  if (dataDir) {
+    const dbPath = join(dataDir, 'smart-router.db');
+    store = new SQLiteStore(dbPath);
+  } else {
+    store = new MemoryStore();
+  }
+  await store.init();
+  log('server: storage initialized');
+
+  // 4. 初始化所有组件（注入 store）
+  const keyPool = new KeyPool(config, store);
   const health = new ProviderHealth(config);
   const circuitBreaker = new CircuitBreaker(config.circuit_breaker || {});
   const providerClient = new ProviderClient(config, keyPool, health);
-  const costTracker = new CostTracker(config);
-  const finalizer = new Finalizer(costTracker);
+  const costTracker = new CostTracker(config, store);
+  const finalizer = new Finalizer(costTracker, store);
   const executionEngine = new ExecutionEngine(
     config,
     providerClient,
@@ -110,7 +126,7 @@ export function createServer(configPath) {
 
   log('server: all components initialized');
 
-  // 4. 启动健康检查
+  // 5. 启动健康检查
   //    优先使用 routing.health_check_interval_sec，回退到 300s
   const healthCheckIntervalSec =
     config.routing?.health_check_interval_sec ??
@@ -122,6 +138,7 @@ export function createServer(configPath) {
   // 组件集合（供 handleRequest 使用）
   const components = {
     config,
+    store,
     keyPool,
     health,
     circuitBreaker,
@@ -131,12 +148,12 @@ export function createServer(configPath) {
     executionEngine,
   };
 
-  // 5. 创建 HTTP 服务器
+  // 6. 创建 HTTP 服务器
   const server = http.createServer(async (req, res) => {
     await handleRequest(req, res, components);
   });
 
-  // 6. 配置服务器超时参数
+  // 7. 配置服务器超时参数
   server.timeout = config.server?.request_timeout_ms || DEFAULT_REQUEST_TIMEOUT_MS;
   server.keepAliveTimeout =
     config.server?.keep_alive_timeout_ms || DEFAULT_KEEP_ALIVE_TIMEOUT_MS;
@@ -144,7 +161,7 @@ export function createServer(configPath) {
   server.headersTimeout =
     (config.server?.keep_alive_timeout_ms || DEFAULT_KEEP_ALIVE_TIMEOUT_MS) + 1000;
 
-  // 7. 将配置和组件附加到 server 对象，供 index.js 访问
+  // 8. 将配置和组件附加到 server 对象，供 index.js 访问
   server._config = config;
   server._components = components;
 

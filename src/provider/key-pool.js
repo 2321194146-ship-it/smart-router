@@ -60,8 +60,9 @@ export class KeyPool {
   /**
    * @param {object} config 已加载的配置对象
    */
-  constructor(config) {
+  constructor(config, store = null) {
     this.config = config;
+    this.store = store || null;
     /** @type {Map<string, object>} keyId → key 记录 */
     this._keys = new Map();
     /** @type {Map<string, string[]>} providerName → keyId 数组（保持插入顺序） */
