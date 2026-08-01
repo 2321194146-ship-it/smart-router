@@ -1,0 +1,17 @@
+{
+  "name": "smart-router-mainline",
+  "version": "1.0.0-phase1",
+  "description": "Smart Router Mainline - Phase 1 Production Core Base (intelligence.mode=off)",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test test/",
+    "test:unit": "node --test test/unit/",
+    "test:integration": "node --test test/integration/",
+    "test:audit": "node --test test/audit/"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

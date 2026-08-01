@@ -1,0 +1,15 @@
+node_modules/
+data/
+logs/
+*.db
+*.db-wal
+*.db-shm
+*.log
+.env
+secrets/
+config/local.*
+config/secrets.*
+.DS_Store
+*.zip
+test-output/
+coverage/

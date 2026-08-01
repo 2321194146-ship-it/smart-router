@@ -1,0 +1,120 @@
+{
+  "server": {
+    "host": "127.0.0.1",
+    "port": 28788,
+    "request_timeout_ms": 300000,
+    "shutdown_grace_ms": 5000,
+    "max_request_body_bytes": 10485760
+  },
+  "intelligence": {
+    "mode": "off",
+    "fallback_to_routing": true
+  },
+  "routing": {
+    "strategy": "tier_weighted",
+    "tier_weights": {
+      "tier1": 10,
+      "tier2": 5,
+      "tier3": 1
+    },
+    "max_concurrent": 16,
+    "max_retries": 3,
+    "retry_backoff_ms": 500,
+    "cooldown_default_sec": 60,
+    "health_check_interval_sec": 30,
+    "failover_on_error": true
+  },
+  "models": [
+    {
+      "id": "anthropic-claude-sonnet",
+      "provider": "anthropic",
+      "apiModel": "claude-sonnet-4-20250514",
+      "tier": "tier1",
+      "paid": true,
+      "capability": ["chat", "vision", "tool_use", "streaming"],
+      "max_tokens": 200000,
+      "enabled": true
+    },
+    {
+      "id": "openai-gpt-4.1",
+      "provider": "openai",
+      "apiModel": "gpt-4.1-2025-04-14",
+      "tier": "tier1",
+      "paid": true,
+      "capability": ["chat", "vision", "tool_use", "streaming", "responses"],
+      "max_tokens": 1047576,
+      "enabled": true
+    },
+    {
+      "id": "deepseek-chat",
+      "provider": "deepseek",
+      "apiModel": "deepseek-chat",
+      "tier": "tier2",
+      "paid": false,
+      "capability": ["chat", "tool_use", "streaming"],
+      "max_tokens": 64000,
+      "enabled": true
+    }
+  ],
+  "providers": [
+    {
+      "name": "anthropic",
+      "base_url": "https://api.anthropic.com",
+      "api_key": "REPLACE_WITH_ANTHROPIC_API_KEY",
+      "auth_header": "x-api-key",
+      "version_header": "anthropic-version",
+      "version_value": "2023-06-01"
+    },
+    {
+      "name": "openai",
+      "base_url": "https://api.openai.com",
+      "api_key": "REPLACE_WITH_OPENAI_API_KEY",
+      "auth_header": "Authorization",
+      "auth_prefix": "Bearer "
+    },
+    {
+      "name": "deepseek",
+      "base_url": "https://api.deepseek.com",
+      "api_key": "REPLACE_WITH_DEEPSEEK_API_KEY",
+      "auth_header": "Authorization",
+      "auth_prefix": "Bearer "
+    }
+  ],
+  "agent_bindings": {
+    "claude-code": {
+      "model_ids": ["anthropic-claude-sonnet", "deepseek-chat"],
+      "budget": {
+        "allowPaid": true,
+        "maxRequestCost": 1.0,
+        "allowedModels": ["anthropic-claude-sonnet", "deepseek-chat"],
+        "allowedProviders": ["anthropic", "deepseek"],
+        "strictModel": false
+      }
+    },
+    "codex": {
+      "model_ids": ["openai-gpt-4.1", "deepseek-chat"],
+      "budget": {
+        "allowPaid": true,
+        "maxRequestCost": 1.0,
+        "allowedModels": ["openai-gpt-4.1", "deepseek-chat"],
+        "allowedProviders": ["openai", "deepseek"],
+        "strictModel": false
+      }
+    }
+  },
+  "budget": {
+    "allowPaid": true,
+    "maxRequestCost": 1.0,
+    "allowedModels": [],
+    "allowedProviders": [],
+    "strictModel": false
+  },
+  "circuit_breaker": {
+    "enabled": true,
+    "failure_threshold": 5,
+    "failure_window_sec": 60,
+    "open_state_sec": 120,
+    "half_open_max_calls": 2,
+    "key_disable_on_auth_invalid": true
+  }
+}
