@@ -795,6 +795,7 @@ export async function handleAnthropicMessage(req, res, body, context) {
       budget,
       protocol: context.protocol || 'anthropic',
       requestId,
+      externalRequestId: context.externalRequestId || null,
       timeoutMs: config?.server?.request_timeout_ms,
     });
 

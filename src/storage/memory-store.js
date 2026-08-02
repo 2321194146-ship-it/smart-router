@@ -42,6 +42,16 @@ export class MemoryStore extends StorageInterface {
     return r ? { ...r } : null;
   }
 
+  async getRequestByExternalId(externalRequestId) {
+    if (!externalRequestId) return null;
+    for (const [id, r] of this._requests) {
+      if (r.externalRequestId === externalRequestId) {
+        return { ...r };
+      }
+    }
+    return null;
+  }
+
   // --- attempts ---
 
   async saveAttempt(attempt, transaction) {
@@ -86,7 +96,7 @@ export class MemoryStore extends StorageInterface {
 
   // --- key_status ---
 
-  async saveKeyStatus(keyStatus) {
+  async saveKeyStatus(keyStatus, transaction) {
     if (!keyStatus?.provider || !keyStatus?.keyId) return;
     const key = `${keyStatus.provider}:${keyStatus.keyId}`;
     this._keyStatus.set(key, { ...keyStatus });

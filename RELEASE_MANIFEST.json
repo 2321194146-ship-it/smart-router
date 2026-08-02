@@ -1,0 +1,106 @@
+{
+  "package": "smart-router-mainline",
+  "version": "1.0.0-phase1-sealed",
+  "date": "2026-08-02T21:48:32.760Z",
+  "description": "Smart Router Mainline Phase 1 Sealed - true transaction atomicity, streaming pre-first-content fallback, key cooldown persistence, streaming audit consistency, externalRequestId persistence, corrected evidence naming",
+  "test_summary": {
+    "unit": {
+      "tests": 345,
+      "suites": 75,
+      "failures": 0
+    },
+    "integration": {
+      "tests": 59,
+      "suites": 15,
+      "failures": 0
+    },
+    "audit": {
+      "tests": 33,
+      "suites": 15,
+      "failures": 0
+    },
+    "total": {
+      "tests": 437,
+      "suites": 105,
+      "failures": 0
+    }
+  },
+  "pilot_summary": {
+    "status": "pending_external_pilot",
+    "note": "本地 Mock Provider 测试只称为 HTTP Provider Failure/Fallback Integration；未实际运行真实外部 Provider Pilot，无 pilot-evidence.json，因此不填写 5/5 通过结论。复跑脚本 scripts/pilot-sanitized.mjs 不含任何 Key，可复跑。",
+    "scripts": [
+      "scripts/pilot-sanitized.mjs"
+    ]
+  },
+  "regression_fixes": [
+    "事务原子性：finalizeRequestTransaction 内依次写 finalized_requests/requests/attempts/cost_records/audit_records，任一步失败整体回滚；CostTracker 纯计算 + 事务成功后更新内存",
+    "流式协议统一事务收尾：chat-stream/responses-stream/anthropic-stream 全部走 finalizeRequestTransaction",
+    "流式首内容前 Fallback：空 SSE/无效首事件/首合法事件前异常 EOF → 关闭上游继续下一候选（三协议集成测试）",
+    "Key 冷却状态持久化：key_status 增加 cooldown_until/failure_count/last_error_type/last_failure_at/last_success_at，重启完整恢复，冷却到期自动恢复 active，COOLING+cooldownUntil=null 不永久卡死",
+    "流式审计一致性：completed/incomplete/client_aborted 与最终成功 Attempt 的 validatedOutcome 对齐",
+    "externalRequestId 持久化：requests 表新增 external_request_id，按外部 ID 可关联内部 requestId"
+  ],
+  "source_files": {
+    ".gitignore": "8df601f2fa14b88b6d3ade8fd92d239cc7699546619d7c40c505da6999302479",
+    "README.md": "94384564ada29be6c422aeef9042233e77f2b212bf9181cf109a6520c18877ef",
+    "config/config.example.json": "d2fb50a52711b5045ad65c1081c1be5ccff873d3d88d0920855b25c552c21be8",
+    "package-lock.json": "6977397067365dd3ee214d1f4b5c6db3a53265be8bc317097348fb01783b5ecd",
+    "package.json": "99adca94583aca800739c857be37876d80c1781719280d7407b3bd005879d994",
+    "scripts/pilot-sanitized.mjs": "1699a261e416d885abe60e26f65039745d527397eeb6cecbae997dcf12380042",
+    "src/agent/compatibility.js": "9ae2bf023796af50cb6eb234310fd5ce3c5d8287731ff41f6783a450a76ce91a",
+    "src/agent/identity.js": "cdf17de3dfefddb52b09b03f8d1043782bfd15062568552ae2674d3f0792dc99",
+    "src/config/loader.js": "e6e0551c78ef3898e10d6a2ce478b844a679c8d30bec7c2b9918a1bca95ae2e5",
+    "src/config/validator.js": "8966de4a28a21352eb1db8acfb78f739e043cf2eb24e5214565ab7090b25b0c3",
+    "src/cost/tracker.js": "63761e72bbb2fe7589e513fff0f0b7151d0b79e6e76a79e0a154a2500c6d46dd",
+    "src/index.js": "9e58f767ca1719379879dd82411c3aaf8be60da9530b9d80945922cc0aaf904f",
+    "src/protocols/anthropic-stream.js": "a4a9aad8a63cf5cc0eb4db33bf205b603273e7ef4fd7a148d661b6bd05b0d725",
+    "src/protocols/anthropic.js": "1f68ad3c1269b6c8503020d6586ebde72b7d7f489a3156385f04bd65842864dc",
+    "src/protocols/chat-stream.js": "3bc92f33a037a88f62de724a59e84fab7e492153153c8ed7780ca3423255fe02",
+    "src/protocols/chat.js": "a4f0487bd5f812d92998aaea76408840f68d79ce9791641ce328fabd3f54de1a",
+    "src/protocols/responses-stream.js": "fb8495c0e9ff31faf599d2b1abdb7ac4a6d4653cabc5af18f0af307ac737e78e",
+    "src/protocols/responses.js": "0925011257d36f476a9b732f11782d135edfad317497532639fbbb28c9c39736",
+    "src/provider/client.js": "2aead24d6aabd4d866a2465f892b3a5ddd4cd5e384adcda11546f4ab1e2f6a86",
+    "src/provider/errors.js": "01495b49e22b7089ce21600259dabe9e169215537a6b7c42c1eaa8c5a44a19f5",
+    "src/provider/health.js": "54d0187339cfe980ea7befe3b71666e97359dc009e54e27e50f98269e33a4016",
+    "src/provider/key-pool.js": "e0d3068ca22aa4f63752b7bd75db908189e39c2d25f3bd45d2402d12fb718cd5",
+    "src/router/candidates.js": "6627b6069131d431126d07c0558e52f0e864dce461a7c491a67383add56b08ed",
+    "src/router/execution.js": "2d00daaf1f2de700c2658bfb55d0955558dce5749c7681eda872237edd2cd112",
+    "src/router/fallback.js": "cb2de21ef13430036242d19e88e0863824a8f0eb62caca956c49c742805651e9",
+    "src/runtime/attempts.js": "d8b67fc97bcbf4d4a5a9f0de0a07ea0771a2b679009536be4a47a52802d1420d",
+    "src/runtime/cancellation.js": "d54004020e9fe61a5e7cfdb58dfbd1354f3126b4377ef34064ca340ac8af60de",
+    "src/runtime/finalization.js": "9ca382a2df3d82704b054aa9fcf87adfd7e5dd09f8f94f5f87c804f365215c88",
+    "src/runtime/outcomes.js": "32748d878462b1741723c9c8ff9a949076ddc5870e40531c1fbb64a7980829ff",
+    "src/server.js": "81fa96676272204ff1128747d6ef533dc9b869b189b110f1d8eb3359a98a4aeb",
+    "src/storage/index.js": "146b1e4e61a880d65b08e33e24af109ac656d979c1f9452fdf1d4778b91af7d2",
+    "src/storage/interface.js": "fa453d301ba6a60dbfd79edaca30f93a8180d8f42a09643c7078f5aa16b98dce",
+    "src/storage/memory-store.js": "72f6ce3a01804b7eac700258462a8ffc6739b44e9f8e71bfd162bb38343334ca",
+    "src/storage/sqlite-store.js": "2aa3ab7472837f77dede45368df6ba83a46efff6631a5bb986af12af2daf43dd",
+    "test/audit/release-gate.test.js": "3e2bd8285284748773bb0b1f9aeefe27070f530247e9cf16c6300ad68fd886d7",
+    "test/integration/anthropic-integration.test.js": "3bc27cf622f6a822beed7e02ba0b0eb3a38541bee0b34ac881d0859876006a10",
+    "test/integration/chat-integration.test.js": "45cb205e9ece24ce984bb50f06c6151d410c4c3a0500ef2c5d1a1381b6eadd54",
+    "test/integration/helpers.js": "525c4d39c28314a6ad99337a966532b6e2658a4e5947987bf2308e588d27c57e",
+    "test/integration/key-cooldown-recovery.test.js": "b52ac19930710dc08a357608db3b62e9c9d5e5619c55884ab99095f3a5c67c0e",
+    "test/integration/persistence.test.js": "3aafb2c8c3474206b369dfea06e6ce070c286e5ce278a4abf237f95c174f02c2",
+    "test/integration/provider-fallback-integration.test.js": "1dd84d7931d73ec3e4736c029f8033e8865690ca35a8559633cd8e9d8430f51d",
+    "test/integration/responses-integration.test.js": "2b3553bd27ccfcac9278db982d2b90b6100bef16fd33e0364b18a1cc099be6b3",
+    "test/integration/stream-empty-fallback.test.js": "4092167a728bd5c649aa5b9aef768afac5415b60aadd4de4d3bacb82f0d26baa",
+    "test/integration/transaction-rollback.test.js": "8d792798a36dff42b599313033f4a88328533ed5db8ca2919538a4dab916908a",
+    "test/integration/verified-closure.test.js": "6f455e94dff9aa596a5d91a7cec0cf53e75b1837694cbf764fb592b0ec6040e6",
+    "test/unit/audit.test.js": "a9f1af07ad0675eb1c0c4f89288450a6943bde1f105c3d7230cb3551e17d6189",
+    "test/unit/cancellation.test.js": "957fe1e75c0602c1b322c86f25611e4dc9a135d7cdd30dfcba6cc7f2417191e4",
+    "test/unit/claude-code-compat.test.js": "54798d7aa7d5108bd506735f91f4d6d90fd34e16a196aaa93f61ad84b220d689",
+    "test/unit/protocol-anthropic.test.js": "5e5a5a5ba96422b2430dfe6fb828e4a734cbce9305a095bc82fe390b9cc715aa",
+    "test/unit/protocol-chat.test.js": "e25445d6530c6de5455429e085d912a59f50eda91b3464bc8eb4db5ddf5c6346",
+    "test/unit/protocol-responses.test.js": "9243287c1c14d7dc6ce0fa6a2f6f21cda5a7879f680c8f36b9d13574a89b02c7",
+    "test/unit/provider-errors.test.js": "c44e8335a091f113ce27c7d5b8e02e691c79e1e4710214ca969165974d4c260b",
+    "test/unit/provider-health.test.js": "6e892776f8edf681627789b154b502691b0686b5f684a11b64823319ff08afce",
+    "test/unit/provider-key-pool.test.js": "3711744740cc77840cd5663aa61dc49f6083f237bc681561bc480e9a62742fa2"
+  },
+  "release_consistency": {
+    "package_lock_version": "1.0.0-phase1",
+    "config_example_data_dir": "./data",
+    "readme_sqlite_path": "README.md 包含 SQLite 路径说明",
+    "manifest_coverage": "覆盖全部 src、test、config、package.json、package-lock.json、README.md、scripts/",
+    "pilot_status_honest": true
+  }
+}

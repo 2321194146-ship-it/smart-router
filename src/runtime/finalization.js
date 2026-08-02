@@ -221,28 +221,22 @@ export class Finalizer {
     const successfulAttempt = attemptLog ? attemptLog.getSuccessful() : null;
     const allAttempts = attemptLog ? attemptLog.toJSON() : [];
 
-    // 预构建审计记录
+    // 预构建审计记录（不写任何状态）
     const auditRecord = this._buildAuditRecord(requestId, attemptLog, finalOutcome, options);
 
-    // 预记录成本（内存去重 + store 持久化在事务中完成）
+    // 纯计算 costRecord（不写内存、不写数据库）
     let costRecord = null;
     if (successfulAttempt && successfulAttempt.usage && this.costTracker) {
       try {
-        const costResult = this.costTracker.recordCost(
+        costRecord = this.costTracker.calculateCostRecord(
           requestId,
           successfulAttempt.model,
           successfulAttempt.provider,
           successfulAttempt.usage,
           successfulAttempt.cost
         );
-        if (costResult.recorded) {
-          costRecord = costResult.record;
-          log(`[finalizer] transaction: cost recorded: ${successfulAttempt.provider}/${successfulAttempt.model}`);
-        } else {
-          costRecord = costResult.record;
-        }
       } catch (err) {
-        log(`[finalizer] transaction: cost recording failed: ${err.message}`);
+        log(`[finalizer] transaction: cost calculation failed: ${err.message}`);
       }
     }
 
@@ -281,10 +275,10 @@ export class Finalizer {
           keyId: attempt.keyId,
           transportOutcome: attempt.transportOutcome,
           validatedOutcome: attempt.validatedOutcome,
-          errorType: attempt.error?.type || null,
-          errorMessage: attempt.error?.message || null,
+          errorType: attempt.errorType || null,
+          errorMessage: attempt.errorMessage || null,
           latencyMs: attempt.latencyMs,
-          firstByteMs: attempt.firstContentByteMs,
+          firstByteMs: attempt.firstByteMs,
           headersReceived: attempt.headersReceived,
           firstByteSentToClient: attempt.firstByteSentToClient,
           usage: attempt.usage,
@@ -293,27 +287,28 @@ export class Finalizer {
         }, transaction);
       }
 
-      // 4. 保存 cost_records（如果有）
+      // 4. 保存 cost_records（事务内，失败则整体回滚）
       if (costRecord) {
-        try {
-          await this.store.saveCost(costRecord, transaction);
-        } catch (err) {
-          log(`[finalizer] transaction: saveCost (may be dup): ${err.message}`);
-        }
+        await this.store.saveCost(costRecord, transaction);
       }
 
-      // 5. 保存 audit_records
+      // 5. 保存 audit_records（事务内，失败则整体回滚）
       await this.store.saveAuditRecord(auditRecord, transaction);
 
       // 提交事务
       await this.store.commitTransaction(transaction);
       transaction = null;
 
-      // 更新内存状态
+      // 事务成功后：更新内存状态
       this._finalizedIds.add(requestId);
       this._auditRecords.push(auditRecord);
 
-      // 回写模型质量反馈
+      // 事务成功后：更新 CostTracker 内存聚合
+      if (costRecord && this.costTracker) {
+        this.costTracker.updateMemoryAggregation(costRecord);
+      }
+
+      // 事务成功后：回写模型质量反馈
       if (shouldRecordQualityFeedback(finalOutcome) && successfulAttempt) {
         this._recordQualityFeedback(successfulAttempt, finalOutcome, options);
       }
@@ -334,6 +329,7 @@ export class Finalizer {
           log(`[finalizer] transaction: rollback failed: ${rollbackErr.message}`);
         }
       }
+      // 事务失败：内存 Cost、日度统计和质量反馈均不改变
       log(`[finalizer] transaction: failed for ${requestId}: ${err.message}`);
       throw err;
     }

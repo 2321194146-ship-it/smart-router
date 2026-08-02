@@ -60,6 +60,10 @@ export class StorageInterface {
     throw new Error('StorageInterface.getRequest() not implemented');
   }
 
+  async getRequestByExternalId(externalRequestId) {
+    throw new Error('StorageInterface.getRequestByExternalId() not implemented');
+  }
+
   // --- attempts ---
 
   /**

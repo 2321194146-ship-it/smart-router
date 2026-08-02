@@ -583,7 +583,69 @@ export class CostTracker {
   // --------------------------------------------------------------------------
 
   /**
+   * 纯计算方法：生成 costRecord 但不写内存、不写数据库。
+   *
+   * 用于事务收尾场景：在事务开启前预计算 costRecord，
+   * 事务成功后才通过 updateMemoryAggregation 更新内存。
+   *
+   * @param {string} requestId 请求唯一标识
+   * @param {string|object} model 模型 id 或模型对象
+   * @param {string} provider provider 名称
+   * @param {object} usage token 用量
+   * @param {object} [cost] 预计算成本（优先于 usage 自动计算）
+   * @returns {object} costRecord（含 requestId, modelId, provider, usage, cost, dateKey, timestamp）
+   */
+  calculateCostRecord(requestId, model, provider, usage, cost) {
+    if (!requestId || typeof requestId !== 'string') {
+      throw new Error('[tracker] calculateCostRecord: requestId 必须为非空字符串');
+    }
+
+    const { modelId } = resolveModel(model, this.models);
+    const finalCost =
+      cost && typeof cost === 'object'
+        ? normalizeCost(cost)
+        : this.calculateCost(model, usage);
+
+    const now = new Date();
+    const dateKey = getUtc8DateString(now);
+
+    return {
+      requestId,
+      modelId,
+      provider: typeof provider === 'string' ? provider : null,
+      usage: {
+        prompt_tokens: pickTokens(usage, ['prompt_tokens', 'input_tokens']),
+        completion_tokens: pickTokens(usage, [
+          'completion_tokens',
+          'output_tokens',
+        ]),
+      },
+      cost: finalCost,
+      dateKey,
+      timestamp: now.toISOString(),
+    };
+  }
+
+  /**
+   * 更新内存聚合（事务成功后调用）。
+   *
+   * 将已计算的 costRecord 写入内存 records Map 和 daily 聚合。
+   * 不写数据库（数据库写入由事务内部完成）。
+   *
+   * @param {object} costRecord calculateCostRecord 返回的记录
+   */
+  updateMemoryAggregation(costRecord) {
+    if (!costRecord || !costRecord.requestId) return;
+    if (this.records.has(costRecord.requestId)) return;
+    this.records.set(costRecord.requestId, costRecord);
+    this._addToDaily(costRecord.dateKey, costRecord.modelId, costRecord.provider, costRecord.cost);
+  }
+
+  /**
    * 记录请求成本（finalize 时调用，以 requestId 去重，不重复扣除）。
+   *
+   * 兼容旧调用路径：同时写内存和 store。
+   * 新代码应使用 calculateCostRecord + updateMemoryAggregation 分离计算与写入。
    *
    * @param {string} requestId 请求唯一标识（去重键）
    * @param {string|object} model 模型 id 或模型对象
@@ -599,44 +661,15 @@ export class CostTracker {
       throw new Error('[tracker] recordCost: requestId 必须为非空字符串');
     }
 
-    // 去重：同一 requestId 仅记录一次
     if (this.records.has(requestId)) {
       return { recorded: false, record: this.records.get(requestId) };
     }
 
-    const { modelId } = resolveModel(model, this.models);
-    const finalCost =
-      cost && typeof cost === 'object'
-        ? normalizeCost(cost)
-        : this.calculateCost(model, usage);
+    const record = this.calculateCostRecord(requestId, model, provider, usage, cost);
+    this.updateMemoryAggregation(record);
 
-    const now = new Date();
-    const dateKey = getUtc8DateString(now);
-
-    const record = {
-      requestId,
-      modelId,
-      provider: typeof provider === 'string' ? provider : null,
-      usage: {
-        prompt_tokens: pickTokens(usage, ['prompt_tokens', 'input_tokens']),
-        completion_tokens: pickTokens(usage, [
-          'completion_tokens',
-          'output_tokens',
-        ]),
-      },
-      cost: finalCost,
-      dateKey,
-      timestamp: now.toISOString(),
-    };
-
-    this.records.set(requestId, record);
-    this._addToDaily(dateKey, modelId, provider, finalCost);
-
-    // 持久化到 store（异步，不阻塞主路径；DB UNIQUE 约束保证幂等）
     if (this.store && typeof this.store.saveCost === 'function') {
-      this.store.saveCost(record).catch((err) => {
-        // store 写入失败不影响内存记录
-      });
+      this.store.saveCost(record).catch(() => {});
     }
 
     return { recorded: true, record };

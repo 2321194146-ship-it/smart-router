@@ -473,7 +473,13 @@ export class KeyPool {
       return false;
     }
     if (rec.status === KeyStatus.COOLING) {
-      if (rec.cooldownUntil && now >= rec.cooldownUntil) {
+      // COOLING 但 cooldownUntil 缺失：不允许永久卡死，视为可用
+      if (!rec.cooldownUntil) {
+        log(`key "${rec.keyId}" cooling without cooldownUntil, treating as ACTIVE`);
+        rec.status = KeyStatus.ACTIVE;
+        return true;
+      }
+      if (now >= rec.cooldownUntil) {
         // 冷却到期，自动恢复
         rec.status = KeyStatus.ACTIVE;
         rec.cooldownUntil = null;
@@ -561,15 +567,43 @@ export class KeyPool {
   async _restoreKeyStatus() {
     if (!this.store || typeof this.store.getKeyStatuses !== 'function') return;
     try {
+      const now = Date.now();
       for (const [providerName, keyIds] of this._providerKeyIds) {
         const statuses = await this.store.getKeyStatuses(providerName);
         for (const s of statuses) {
           const rec = this._keys.get(s.keyId);
           if (!rec) continue;
+
+          // 恢复基本状态
           if (s.status && s.status !== KeyStatus.ACTIVE) {
             rec.status = s.status;
             log('restored key "' + s.keyId + '" as ' + s.status + ' from store');
           }
+
+          // 恢复冷却状态
+          if (s.cooldownUntil) {
+            rec.cooldownUntil = s.cooldownUntil;
+            // 检查冷却是否已过期
+            if (now > s.cooldownUntil) {
+              log('key "' + s.keyId + '" cooldown expired, restoring to active');
+              rec.status = KeyStatus.ACTIVE;
+              rec.cooldownUntil = null;
+              // 持久化恢复状态
+              this._persistKeyStatus(providerName, s.keyId);
+            }
+          } else if (s.status === KeyStatus.COOLING) {
+            // COOLING 但 cooldownUntil 缺失：不允许永久卡死，恢复为 active
+            log('key "' + s.keyId + '" cooling without cooldownUntil, restoring to active');
+            rec.status = KeyStatus.ACTIVE;
+            rec.cooldownUntil = null;
+            this._persistKeyStatus(providerName, s.keyId);
+          }
+
+          // 恢复失败计数和错误类型
+          if (s.failureCount) rec.failureCount = s.failureCount;
+          if (s.lastErrorType) rec.lastErrorType = s.lastErrorType;
+          if (s.lastFailureAt) rec.lastFailure = new Date(s.lastFailureAt).getTime();
+          if (s.lastSuccessAt) rec.lastSuccess = new Date(s.lastSuccessAt).getTime();
         }
       }
     } catch (err) {
@@ -592,6 +626,11 @@ export class KeyPool {
       keyId,
       status: rec.status,
       reason: rec.lastErrorType,
+      cooldownUntil: rec.cooldownUntil || null,
+      failureCount: rec.failureCount || 0,
+      lastErrorType: rec.lastErrorType || null,
+      lastFailureAt: rec.lastFailure ? new Date(rec.lastFailure).toISOString() : null,
+      lastSuccessAt: rec.lastSuccess ? new Date(rec.lastSuccess).toISOString() : null,
       updatedAt: new Date().toISOString(),
     }).catch((err) => {
       log('persistKeyStatus error for ' + keyId + ': ' + err.message);

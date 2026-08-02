@@ -196,6 +196,7 @@ export class ExecutionEngine {
         protocol,
         model: body?.model || null,
         provider: null,
+        externalRequestId: options.externalRequestId || null,
         timestamp: new Date().toISOString(),
       }).catch((err) => {
         log('saveRequest error: ' + err.message);
@@ -614,7 +615,87 @@ export class ExecutionEngine {
         firstByteSentToClient = bodyValid;
         firstContentByteMs = bodyValid ? latency : null;
       }
-      // 流式：firstByteSentToClient 保持 false，由协议处理器通过 onFirstByte 回调设置
+      // 流式：预读验证 + firstByteSentToClient 保持 false
+      if (isStreaming && !contentInvalid) {
+        // 预读流式响应的第一个有效 SSE 事件
+        const preReadResult = await this._validateStreamFirstChunk(
+          result.response, protocol, 5000
+        );
+
+        if (!preReadResult.valid) {
+          // 流式预读失败：空 SSE、无效首事件、异常 EOF
+          log('stream pre-read invalid: ' + preReadResult.reason + '; allowing fallback');
+          contentInvalid = true;
+
+          // 记录 key 成功（HTTP 层面确实成功了）
+          if (this.keyPool && result.keyId) {
+            await this.keyPool.markKeySucceeded(provider, result.keyId);
+          }
+
+          const attemptLog = this._buildAttemptLog(
+            candidate, result.keyId, attemptNumber, 'error',
+            {
+              type: 'content_invalid',
+              message: 'stream pre-read failed: ' + preReadResult.reason,
+              httpStatus: 200,
+            },
+            null, null, latency
+          );
+          attemptLog.headersReceived = true;
+          attemptLog.firstContentByteMs = null;
+          attemptLog.firstByteSentToClient = false;
+
+          // 持久化 Attempt
+          if (this.store && options.requestId) {
+            this.store.saveAttempt({
+              requestId: options.requestId,
+              attemptNumber,
+              model: candidate.modelId,
+              provider: candidate.provider,
+              keyId: result.keyId,
+              transportOutcome: 'success',
+              validatedOutcome: 'error',
+              errorType: 'content_invalid',
+              errorMessage: 'stream pre-read: ' + preReadResult.reason,
+              latencyMs: latency,
+              firstByteMs: null,
+              headersReceived: true,
+              firstByteSentToClient: false,
+              timestamp: new Date().toISOString(),
+            }).catch(() => {});
+          }
+
+          return {
+            success: false,
+            response: null,
+            error: new ProviderError(
+              ErrorType.CONTENT_INVALID,
+              'stream pre-read failed: ' + preReadResult.reason,
+              { provider, model: modelId }
+            ),
+            headersReceived: true,
+            firstByteReceived: false,
+            attemptLog,
+            keyId: result.keyId,
+            usage: null,
+            cost: null,
+          };
+        }
+
+        // 预读成功：用合并流替换原始 response.body
+        // 创建新的 Response 对象，body 为预读 chunks + 剩余流
+        if (preReadResult.restStream && preReadResult.chunks.length > 0) {
+          const combinedStream = preReadResult.restStream;
+          // 用 Object.defineProperty 替换 body（Response.body 是只读的）
+          result.response = new Response(combinedStream, {
+            status: result.response.status,
+            statusText: result.response.statusText,
+            headers: result.response.headers,
+          });
+        }
+
+        log('stream pre-read valid, ' + preReadResult.chunks.length + ' chunks buffered');
+      }
 
       // 如果内容无效且尚未向客户端发送任何内容，允许 Fallback
       if (contentInvalid && !firstByteSentToClient) {
@@ -717,6 +798,234 @@ export class ExecutionEngine {
       usage: null,
       cost: null,
     };
+  }
+
+  // --------------------------------------------------------------------------
+  // 流式预读验证
+  // --------------------------------------------------------------------------
+
+  /**
+   * 预读流式响应的第一个有效 SSE 事件。
+   *
+   * 在返回给协议处理器前，预读上游流的前几个 chunk，
+   * 验证至少包含一个合法协议事件。
+   *
+   * 验证通过时：
+   *   - 返回 { valid: true, chunks: Buffer[], restStream: ReadableStream }
+   *   - chunks 是预读的数据块，协议处理器必须先写入这些再继续 pipe
+   *   - restStream 是原始流的剩余部分
+   *
+   * 验证失败时：
+   *   - 返回 { valid: false, reason: string }
+   *   - 调用方应关闭上游并允许 Fallback
+   *
+   * @param {Response} response 上游 fetch Response
+   * @param {string} protocol 协议类型
+   * @param {number} timeoutMs 预读超时（默认 5000ms）
+   * @returns {Promise<{valid: boolean, chunks?: Buffer[], restStream?: ReadableStream, reason?: string}>}
+   */
+  async _validateStreamFirstChunk(response, protocol, timeoutMs = 5000) {
+    if (!response || !response.body) {
+      return { valid: false, reason: 'no response body' };
+    }
+
+    const body = response.body;
+    const chunks = [];
+    let sseBuffer = '';
+    let validEventFound = false;
+
+    // 获取 reader
+    let reader;
+    if (typeof body.getReader === 'function') {
+      reader = body.getReader();
+    } else if (typeof body[Symbol.asyncIterator] === 'function') {
+      // Node.js readable stream - wrap in a simple reader
+      const iter = body[Symbol.asyncIterator]();
+      reader = {
+        read: async () => {
+          const { done, value } = await iter.next();
+          return { done, value };
+        },
+        releaseLock: () => {},
+      };
+    } else {
+      return { valid: false, reason: 'unsupported stream type' };
+    }
+
+    try {
+      // 预读循环：最多读取 3 个 chunk 或找到有效事件
+      for (let i = 0; i < 3 && !validEventFound; i++) {
+        // 带超时的读取
+        const readPromise = reader.read();
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('pread_timeout')), timeoutMs);
+        });
+
+        let readResult;
+        try {
+          readResult = await Promise.race([readPromise, timeoutPromise]);
+        } catch (err) {
+          if (err.message === 'pread_timeout') {
+            log('stream pre-read timeout, no data received');
+            break;
+          }
+          throw err;
+        }
+
+        if (readResult.done) {
+          // 流已结束
+          break;
+        }
+
+        if (!readResult.value) continue;
+
+        const buf = Buffer.isBuffer(readResult.value)
+          ? readResult.value
+          : Buffer.from(readResult.value);
+        chunks.push(buf);
+        sseBuffer += buf.toString('utf8');
+
+        // 检查是否有完整的 SSE 事件（以 \n\n 分隔）
+        while (sseBuffer.includes('\n\n')) {
+          const idx = sseBuffer.indexOf('\n\n');
+          const block = sseBuffer.slice(0, idx);
+          sseBuffer = sseBuffer.slice(idx + 2);
+
+          // 验证事件是否为合法协议事件
+          if (this._isValidSSEEvent(block, protocol)) {
+            validEventFound = true;
+            break;
+          }
+        }
+      }
+
+      // 检查缓冲区中剩余的不完整事件
+      if (!validEventFound && sseBuffer.trim()) {
+        if (this._isValidSSEEvent(sseBuffer, protocol)) {
+          validEventFound = true;
+        }
+      }
+
+      if (!validEventFound) {
+        // 没有找到有效事件
+        try { reader.releaseLock(); } catch {}
+        try { await reader.cancel?.(); } catch {}
+        return {
+          valid: false,
+          reason: chunks.length === 0 ? 'empty_stream' : 'no_valid_events',
+        };
+      }
+
+      // 验证通过：创建合并流（预读 chunks + 剩余原始流）
+      let restStream;
+      if (typeof body.getReader === 'function') {
+        // Web ReadableStream：创建新的 ReadableStream
+        const originalReader = reader;
+        restStream = new ReadableStream({
+          start(controller) {
+            // 先输出预读的 chunks
+            for (const chunk of chunks) {
+              controller.enqueue(chunk);
+            }
+          },
+          async pull(controller) {
+            try {
+              const { done, value } = await originalReader.read();
+              if (done) {
+                controller.close();
+              } else if (value) {
+                controller.enqueue(value);
+              }
+            } catch (err) {
+              controller.error(err);
+            }
+          },
+          async cancel() {
+            try { await originalReader.cancel(); } catch {}
+          },
+        });
+      } else {
+        // Node.js stream：无法完美创建合并流，但预读 chunks 会被返回
+        // 协议处理器需要先写入 chunks 再继续读取原始流
+        restStream = body; // 原始流可能已被部分消费，但 Node.js stream 有缓冲
+        // 对于 Node.js stream，我们标记需要先写入 chunks
+      }
+
+      return { valid: true, chunks, restStream };
+    } catch (err) {
+      log('stream pre-read error: ' + err.message);
+      try { reader.releaseLock(); } catch {}
+      try { await reader.cancel?.(); } catch {}
+      return { valid: false, reason: 'pread_error: ' + err.message };
+    }
+  }
+
+  /**
+   * 验证 SSE 事件块是否为合法协议事件。
+   *
+   * @param {string} block SSE 事件块（以 \n\n 分隔的部分）
+   * @param {string} protocol 协议类型
+   * @returns {boolean}
+   */
+  _isValidSSEEvent(block, protocol) {
+    if (!block || !block.trim()) return false;
+
+    // 跳过注释行
+    const lines = block.split('\n').filter(l => l && !l.startsWith(':'));
+    if (lines.length === 0) return false;
+
+    // 解析 data 字段
+    let dataStr = null;
+    let eventType = null;
+    for (const line of lines) {
+      const colonIdx = line.indexOf(':');
+      if (colonIdx === -1) continue;
+      const field = line.slice(0, colonIdx);
+      let value = line.slice(colonIdx + 1);
+      if (value.startsWith(' ')) value = value.slice(1);
+      if (field === 'data') {
+        dataStr = dataStr === null ? value : dataStr + '\n' + value;
+      } else if (field === 'event') {
+        eventType = value;
+      }
+    }
+
+    // [DONE] 是流终止标记，不是内容事件；
+    // 若首事件仅为 [DONE]，说明上游返回了空 SSE，应允许 Fallback
+    if (dataStr && dataStr.trim() === '[DONE]') return false;
+
+    if (!dataStr) return false;
+
+    // 根据协议验证
+    try {
+      const parsed = JSON.parse(dataStr);
+      if (!parsed || typeof parsed !== 'object') return false;
+
+      switch (protocol) {
+        case 'chat':
+          // Chat SSE: 应有 choices 数组或 error 对象
+          return Array.isArray(parsed.choices) ||
+                 (parsed.error && typeof parsed.error === 'object');
+        case 'anthropic':
+          // Anthropic SSE: 原生事件有 type 字段；
+          // 兼容上游为 Chat 格式（choices）经 adapter 转换的场景
+          return (typeof parsed.type === 'string' && parsed.type.length > 0) ||
+                 Array.isArray(parsed.choices) ||
+                 typeof parsed.object === 'string';
+        case 'responses':
+          // Responses SSE: 原生事件有 type 字段；
+          // 兼容上游为 Chat 格式（choices）经 adapter 转换的场景
+          return (typeof parsed.type === 'string' && parsed.type.length > 0) ||
+                 Array.isArray(parsed.choices) ||
+                 typeof parsed.object === 'string';
+        default:
+          // 通用：只要能解析为 JSON 对象即可
+          return true;
+      }
+    } catch {
+      // 非 JSON data，但有 event 字段也视为有效
+      return !!eventType;
+    }
   }
 
   // --------------------------------------------------------------------------

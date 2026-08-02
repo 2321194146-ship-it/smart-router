@@ -406,6 +406,7 @@ export async function handleChatCompletion(req, res, body, context) {
       budget,
       protocol: context.protocol || 'chat',
       requestId,
+      externalRequestId: context.externalRequestId || null,
       timeoutMs: config?.server?.request_timeout_ms,
     });
 

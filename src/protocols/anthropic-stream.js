@@ -1040,6 +1040,7 @@ export async function handleAnthropicMessageStream(req, res, body, context) {
       budget,
       protocol: context.protocol || 'anthropic',
       requestId,
+      externalRequestId: context.externalRequestId || null,
       timeoutMs: config?.server?.request_timeout_ms,
     });
 
@@ -1193,8 +1194,24 @@ async function handleStreamSuccess(
     protocolLog(`[${requestId}] no usage found in SSE stream`);
   }
 
+  // 更新最后一个成功 attempt 的 validatedOutcome 以匹配最终结果
+  const lastAttempt = attemptLog.getLast();
+  if (lastAttempt && lastAttempt.transportOutcome === 'success') {
+    if (outcome === Outcome.COMPLETED) {
+      lastAttempt.setValidatedResult('completed');
+    } else if (outcome === Outcome.INCOMPLETE) {
+      lastAttempt.setValidatedResult('incomplete');
+    } else if (outcome === Outcome.CLIENT_ABORTED) {
+      lastAttempt.setValidatedResult('incomplete');
+      lastAttempt.transportOutcome = 'aborted';
+    }
+  }
+
   // 收尾（幂等：以 requestId 去重）
-  await finalizer.finalize(requestId, attemptLog, outcome, {
+  const finalizeMethod = (typeof finalizer.finalizeRequestTransaction === 'function')
+    ? finalizer.finalizeRequestTransaction.bind(finalizer)
+    : finalizer.finalize.bind(finalizer);
+  await finalizeMethod(requestId, attemptLog, outcome, {
     model: executionResult.finalCandidate?.modelId,
     provider: executionResult.finalCandidate?.provider,
     agentId,
@@ -1219,7 +1236,10 @@ async function handleStreamFailure(
   const outcome = mapExecutionOutcome(executionResult.outcome);
 
   // 收尾
-  await finalizer.finalize(requestId, attemptLog, outcome, {
+  const finalizeMethod = (typeof finalizer.finalizeRequestTransaction === 'function')
+    ? finalizer.finalizeRequestTransaction.bind(finalizer)
+    : finalizer.finalize.bind(finalizer);
+  await finalizeMethod(requestId, attemptLog, outcome, {
     model: executionResult.finalCandidate?.modelId,
     provider: executionResult.finalCandidate?.provider,
     agentId,

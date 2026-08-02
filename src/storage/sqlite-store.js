@@ -41,8 +41,10 @@ export class SQLiteStore extends StorageInterface {
         model TEXT,
         provider TEXT,
         status TEXT,
+        external_request_id TEXT,
         timestamp TEXT NOT NULL
       );
+      CREATE INDEX IF NOT EXISTS idx_requests_external_id ON requests(external_request_id);
 
       CREATE TABLE IF NOT EXISTS attempts (
         request_id TEXT NOT NULL,
@@ -81,6 +83,11 @@ export class SQLiteStore extends StorageInterface {
         key_id TEXT NOT NULL,
         status TEXT NOT NULL,
         reason TEXT,
+        cooldown_until INTEGER,
+        failure_count INTEGER DEFAULT 0,
+        last_error_type TEXT,
+        last_failure_at TEXT,
+        last_success_at TEXT,
         updated_at TEXT NOT NULL,
         PRIMARY KEY (provider, key_id)
       );
@@ -115,6 +122,17 @@ export class SQLiteStore extends StorageInterface {
       );
       CREATE INDEX IF NOT EXISTS idx_audit_request_id ON audit_records(request_id);
     `);
+
+    // --- Schema migrations for existing databases ---
+    // key_status: add cooldown and failure tracking columns
+    try { this._db.exec('ALTER TABLE key_status ADD COLUMN cooldown_until INTEGER'); } catch {}
+    try { this._db.exec('ALTER TABLE key_status ADD COLUMN failure_count INTEGER DEFAULT 0'); } catch {}
+    try { this._db.exec('ALTER TABLE key_status ADD COLUMN last_error_type TEXT'); } catch {}
+    try { this._db.exec('ALTER TABLE key_status ADD COLUMN last_failure_at TEXT'); } catch {}
+    try { this._db.exec('ALTER TABLE key_status ADD COLUMN last_success_at TEXT'); } catch {}
+    // requests: add external_request_id column
+    try { this._db.exec('ALTER TABLE requests ADD COLUMN external_request_id TEXT'); } catch {}
+    try { this._db.exec('CREATE INDEX IF NOT EXISTS idx_requests_external_id ON requests(external_request_id)'); } catch {}
   }
 
   async close() {
@@ -131,13 +149,14 @@ export class SQLiteStore extends StorageInterface {
     const db = (transaction?.db) || this._db;
     try {
       db.prepare(
-        'INSERT OR IGNORE INTO requests (request_id, agent_id, protocol, model, provider, timestamp) VALUES (?, ?, ?, ?, ?, ?)'
+        'INSERT OR IGNORE INTO requests (request_id, agent_id, protocol, model, provider, external_request_id, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)'
       ).run(
         request.requestId,
         request.agentId || null,
         request.protocol || null,
         request.model || null,
         request.provider || null,
+        request.externalRequestId || null,
         request.timestamp || new Date().toISOString()
       );
       return true;
@@ -148,7 +167,7 @@ export class SQLiteStore extends StorageInterface {
 
   async getRequest(requestId) {
     const row = this._db.prepare(
-      'SELECT request_id, agent_id, protocol, model, provider, timestamp FROM requests WHERE request_id = ?'
+      'SELECT request_id, agent_id, protocol, model, provider, status, external_request_id, timestamp FROM requests WHERE request_id = ?'
     ).get(requestId);
     if (!row) return null;
     return {
@@ -157,6 +176,26 @@ export class SQLiteStore extends StorageInterface {
       protocol: row.protocol,
       model: row.model,
       provider: row.provider,
+      status: row.status || null,
+      externalRequestId: row.external_request_id || null,
+      timestamp: row.timestamp,
+    };
+  }
+
+  async getRequestByExternalId(externalRequestId) {
+    if (!externalRequestId) return null;
+    const row = this._db.prepare(
+      'SELECT request_id, agent_id, protocol, model, provider, status, external_request_id, timestamp FROM requests WHERE external_request_id = ?'
+    ).get(externalRequestId);
+    if (!row) return null;
+    return {
+      requestId: row.request_id,
+      agentId: row.agent_id,
+      protocol: row.protocol,
+      model: row.model,
+      provider: row.provider,
+      status: row.status || null,
+      externalRequestId: row.external_request_id || null,
       timestamp: row.timestamp,
     };
   }
@@ -293,15 +332,21 @@ export class SQLiteStore extends StorageInterface {
 
   // --- key_status ---
 
-  async saveKeyStatus(keyStatus) {
+  async saveKeyStatus(keyStatus, transaction) {
     if (!keyStatus?.provider || !keyStatus?.keyId) return;
-    this._db.prepare(
-      'INSERT OR REPLACE INTO key_status (provider, key_id, status, reason, updated_at) VALUES (?, ?, ?, ?, ?)'
+    const db = (transaction?.db) || this._db;
+    db.prepare(
+      'INSERT OR REPLACE INTO key_status (provider, key_id, status, reason, cooldown_until, failure_count, last_error_type, last_failure_at, last_success_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     ).run(
       keyStatus.provider,
       keyStatus.keyId,
       keyStatus.status,
       keyStatus.reason || null,
+      keyStatus.cooldownUntil || null,
+      keyStatus.failureCount || 0,
+      keyStatus.lastErrorType || null,
+      keyStatus.lastFailureAt || null,
+      keyStatus.lastSuccessAt || null,
       keyStatus.updatedAt || new Date().toISOString()
     );
   }
@@ -315,6 +360,11 @@ export class SQLiteStore extends StorageInterface {
       keyId: r.key_id,
       status: r.status,
       reason: r.reason,
+      cooldownUntil: r.cooldown_until || null,
+      failureCount: r.failure_count || 0,
+      lastErrorType: r.last_error_type || null,
+      lastFailureAt: r.last_failure_at || null,
+      lastSuccessAt: r.last_success_at || null,
       updatedAt: r.updated_at,
     }));
   }
@@ -329,6 +379,11 @@ export class SQLiteStore extends StorageInterface {
       keyId: row.key_id,
       status: row.status,
       reason: row.reason,
+      cooldownUntil: row.cooldown_until || null,
+      failureCount: row.failure_count || 0,
+      lastErrorType: row.last_error_type || null,
+      lastFailureAt: row.last_failure_at || null,
+      lastSuccessAt: row.last_success_at || null,
       updatedAt: row.updated_at,
     };
   }
