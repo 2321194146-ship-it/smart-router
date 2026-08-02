@@ -1,0 +1,40 @@
+{
+  "startTime": "2026-08-02T22:36:57.701Z",
+  "endTime": "2026-08-02T22:36:58.952Z",
+  "router": "http://127.0.0.1:28788",
+  "config": "pilot-config-strict.json (budget.strictModel=true)",
+  "summary": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0,
+    "passRate": "100.0%"
+  },
+  "note": "strict 模型真实测试：存在模型精确匹配真实成功；不存在模型 no_candidate 503。脱敏：不含任何 Key。",
+  "tests": [
+    {
+      "name": "8a-strict-exact-model",
+      "timestamp": "2026-08-02T22:36:58.947Z",
+      "status": 200,
+      "success": true,
+      "details": {
+        "model": "deepseek-ai/DeepSeek-V4-Flash",
+        "content_preview": "STRICT_OK",
+        "usage": {
+          "prompt_tokens": 11,
+          "completion_tokens": 26,
+          "total_tokens": 37
+        }
+      }
+    },
+    {
+      "name": "8b-strict-nonexistent-model",
+      "timestamp": "2026-08-02T22:36:58.952Z",
+      "status": 503,
+      "success": true,
+      "details": {
+        "error_type": "service_unavailable",
+        "error_message": "No available models for the requested model: nonexistent-strict-model"
+      }
+    }
+  ]
+}

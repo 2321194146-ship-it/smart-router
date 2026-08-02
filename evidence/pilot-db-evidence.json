@@ -1,0 +1,459 @@
+{
+  "timestamp": "2026-08-02T22:36:18.163Z",
+  "db": "pilot-data/smart-router.db",
+  "counts": {
+    "requests": 8,
+    "attempts": 10,
+    "cost_records": 6,
+    "audit_records": 8,
+    "finalized": 8
+  },
+  "audits": [
+    {
+      "request_id": "sr_1785710165940_e40522",
+      "outcome": "completed",
+      "final_model": "deepseek-ai/DeepSeek-V4-Flash",
+      "final_provider": "modelscope",
+      "attempt_count": 1,
+      "protocol": "chat"
+    },
+    {
+      "request_id": "sr_1785710166931_479238",
+      "outcome": "completed",
+      "final_model": "gateway-auto",
+      "final_provider": "gateway",
+      "attempt_count": 1,
+      "protocol": "anthropic"
+    },
+    {
+      "request_id": "sr_1785710169583_7891b1",
+      "outcome": "completed",
+      "final_model": "gateway-auto",
+      "final_provider": "gateway",
+      "attempt_count": 1,
+      "protocol": "responses"
+    },
+    {
+      "request_id": "sr_1785710170890_1eefa5",
+      "outcome": "completed",
+      "final_model": "deepseek-ai/DeepSeek-V4-Flash",
+      "final_provider": "modelscope",
+      "attempt_count": 1,
+      "protocol": "chat"
+    },
+    {
+      "request_id": "sr_1785710172442_3c96a9",
+      "outcome": "completed",
+      "final_model": "deepseek-ai/DeepSeek-V4-Flash",
+      "final_provider": "modelscope",
+      "attempt_count": 1,
+      "protocol": "chat"
+    },
+    {
+      "request_id": "sr_1785710173282_cab692",
+      "outcome": "client_aborted",
+      "final_model": "deepseek-ai/DeepSeek-V4-Flash",
+      "final_provider": "modelscope",
+      "attempt_count": 1,
+      "protocol": "chat"
+    },
+    {
+      "request_id": "sr_1785710174489_a917fb",
+      "outcome": "completed",
+      "final_model": "gateway-auto",
+      "final_provider": "gateway",
+      "attempt_count": 3,
+      "protocol": "chat"
+    },
+    {
+      "request_id": "sr_1785710178031_7f475c",
+      "outcome": "budget_exceeded",
+      "final_model": null,
+      "final_provider": null,
+      "attempt_count": 1,
+      "protocol": "chat"
+    }
+  ],
+  "costs": [
+    {
+      "requestId": "sr_1785710165940_e40522",
+      "modelId": "deepseek-ai/DeepSeek-V4-Flash",
+      "provider": "modelscope",
+      "usage": {
+        "prompt_tokens": 11,
+        "completion_tokens": 27
+      },
+      "cost": {
+        "inputCost": 0,
+        "outputCost": 0,
+        "totalCost": 0,
+        "currency": "USD"
+      }
+    },
+    {
+      "requestId": "sr_1785710166931_479238",
+      "modelId": "gateway-auto",
+      "provider": "gateway",
+      "usage": {
+        "prompt_tokens": 147,
+        "completion_tokens": 26
+      },
+      "cost": {
+        "inputCost": 0,
+        "outputCost": 0,
+        "totalCost": 0,
+        "currency": "USD"
+      }
+    },
+    {
+      "requestId": "sr_1785710169583_7891b1",
+      "modelId": "gateway-auto",
+      "provider": "gateway",
+      "usage": {
+        "prompt_tokens": 100,
+        "completion_tokens": 5
+      },
+      "cost": {
+        "inputCost": 0,
+        "outputCost": 0,
+        "totalCost": 0,
+        "currency": "USD"
+      }
+    },
+    {
+      "requestId": "sr_1785710170890_1eefa5",
+      "modelId": "deepseek-ai/DeepSeek-V4-Flash",
+      "provider": "modelscope",
+      "usage": {
+        "prompt_tokens": 293,
+        "completion_tokens": 79
+      },
+      "cost": {
+        "inputCost": 0,
+        "outputCost": 0,
+        "totalCost": 0,
+        "currency": "USD"
+      }
+    },
+    {
+      "requestId": "sr_1785710172442_3c96a9",
+      "modelId": "deepseek-ai/DeepSeek-V4-Flash",
+      "provider": "modelscope",
+      "usage": {
+        "prompt_tokens": 88,
+        "completion_tokens": 23
+      },
+      "cost": {
+        "inputCost": 0,
+        "outputCost": 0,
+        "totalCost": 0,
+        "currency": "USD"
+      }
+    },
+    {
+      "requestId": "sr_1785710174489_a917fb",
+      "modelId": "gateway-auto",
+      "provider": "gateway",
+      "usage": {
+        "prompt_tokens": 148,
+        "completion_tokens": 26
+      },
+      "cost": {
+        "inputCost": 0,
+        "outputCost": 0,
+        "totalCost": 0,
+        "currency": "USD"
+      }
+    }
+  ],
+  "attempts": [
+    {
+      "requestId": "sr_1785710165940_e40522",
+      "attemptNumber": 1,
+      "model": "deepseek-ai/DeepSeek-V4-Flash",
+      "provider": "modelscope",
+      "transportOutcome": "success",
+      "validatedOutcome": "completed",
+      "errorType": null,
+      "usage": {
+        "prompt_tokens": 11,
+        "completion_tokens": 27,
+        "total_tokens": 38,
+        "raw": {
+          "prompt_tokens": 11,
+          "completion_tokens": 27,
+          "total_tokens": 38
+        }
+      }
+    },
+    {
+      "requestId": "sr_1785710166931_479238",
+      "attemptNumber": 1,
+      "model": "gateway-auto",
+      "provider": "gateway",
+      "transportOutcome": "success",
+      "validatedOutcome": "completed",
+      "errorType": null,
+      "usage": {
+        "prompt_tokens": 147,
+        "completion_tokens": 26,
+        "total_tokens": 173,
+        "raw": {
+          "input_tokens": 147,
+          "output_tokens": 26
+        }
+      }
+    },
+    {
+      "requestId": "sr_1785710169583_7891b1",
+      "attemptNumber": 1,
+      "model": "gateway-auto",
+      "provider": "gateway",
+      "transportOutcome": "success",
+      "validatedOutcome": "completed",
+      "errorType": null,
+      "usage": {
+        "prompt_tokens": 100,
+        "completion_tokens": 5,
+        "total_tokens": 105,
+        "raw": {
+          "completion_tokens": 5,
+          "prompt_tokens": 100,
+          "total_tokens": 105
+        }
+      }
+    },
+    {
+      "requestId": "sr_1785710170890_1eefa5",
+      "attemptNumber": 1,
+      "model": "deepseek-ai/DeepSeek-V4-Flash",
+      "provider": "modelscope",
+      "transportOutcome": "success",
+      "validatedOutcome": "completed",
+      "errorType": null,
+      "usage": {
+        "prompt_tokens": 293,
+        "completion_tokens": 79,
+        "total_tokens": 372,
+        "raw": {
+          "prompt_tokens": 293,
+          "completion_tokens": 79,
+          "total_tokens": 372
+        }
+      }
+    },
+    {
+      "requestId": "sr_1785710172442_3c96a9",
+      "attemptNumber": 1,
+      "model": "deepseek-ai/DeepSeek-V4-Flash",
+      "provider": "modelscope",
+      "transportOutcome": "success",
+      "validatedOutcome": "completed",
+      "errorType": null,
+      "usage": {
+        "prompt_tokens": 88,
+        "completion_tokens": 23,
+        "total_tokens": 111,
+        "raw": {
+          "prompt_tokens": 88,
+          "completion_tokens": 23,
+          "total_tokens": 111
+        }
+      }
+    },
+    {
+      "requestId": "sr_1785710173282_cab692",
+      "attemptNumber": 1,
+      "model": "deepseek-ai/DeepSeek-V4-Flash",
+      "provider": "modelscope",
+      "transportOutcome": "aborted",
+      "validatedOutcome": "incomplete",
+      "errorType": null,
+      "usage": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    },
+    {
+      "requestId": "sr_1785710174489_a917fb",
+      "attemptNumber": 1,
+      "model": "ms-bad-key-model",
+      "provider": "modelscope-badkey",
+      "transportOutcome": "error",
+      "validatedOutcome": "error",
+      "errorType": "auth_invalid",
+      "usage": null
+    },
+    {
+      "requestId": "sr_1785710174489_a917fb",
+      "attemptNumber": 2,
+      "model": "ms-bad-key-model",
+      "provider": "modelscope-badkey",
+      "transportOutcome": null,
+      "validatedOutcome": null,
+      "errorType": null,
+      "usage": null
+    },
+    {
+      "requestId": "sr_1785710174489_a917fb",
+      "attemptNumber": 3,
+      "model": "gateway-auto",
+      "provider": "gateway",
+      "transportOutcome": "success",
+      "validatedOutcome": "completed",
+      "errorType": null,
+      "usage": {
+        "prompt_tokens": 148,
+        "completion_tokens": 26,
+        "total_tokens": 174,
+        "raw": {
+          "prompt_tokens": 148,
+          "completion_tokens": 26,
+          "total_tokens": 174,
+          "prompt_tokens_details": {
+            "audio_tokens": 0,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0
+          },
+          "completion_tokens_details": {
+            "audio_tokens": 0,
+            "reasoning_tokens": 21
+          }
+        }
+      }
+    },
+    {
+      "requestId": "sr_1785710178031_7f475c",
+      "attemptNumber": 1,
+      "model": "paid-model",
+      "provider": "internlm",
+      "transportOutcome": null,
+      "validatedOutcome": null,
+      "errorType": "budget_blocked",
+      "usage": null
+    }
+  ],
+  "requests": [
+    {
+      "request_id": "sr_1785710165940_e40522",
+      "protocol": "chat",
+      "model": "deepseek-ai/DeepSeek-V4-Flash",
+      "provider": null,
+      "status": "completed",
+      "external_request_id": null
+    },
+    {
+      "request_id": "sr_1785710166931_479238",
+      "protocol": "anthropic",
+      "model": "gateway-auto",
+      "provider": null,
+      "status": "completed",
+      "external_request_id": null
+    },
+    {
+      "request_id": "sr_1785710169583_7891b1",
+      "protocol": "responses",
+      "model": "gateway-auto",
+      "provider": null,
+      "status": "completed",
+      "external_request_id": null
+    },
+    {
+      "request_id": "sr_1785710170890_1eefa5",
+      "protocol": "chat",
+      "model": "deepseek-ai/DeepSeek-V4-Flash",
+      "provider": null,
+      "status": "completed",
+      "external_request_id": null
+    },
+    {
+      "request_id": "sr_1785710172442_3c96a9",
+      "protocol": "chat",
+      "model": "deepseek-ai/DeepSeek-V4-Flash",
+      "provider": null,
+      "status": "completed",
+      "external_request_id": null
+    },
+    {
+      "request_id": "sr_1785710173282_cab692",
+      "protocol": "chat",
+      "model": "deepseek-ai/DeepSeek-V4-Flash",
+      "provider": null,
+      "status": "client_aborted",
+      "external_request_id": null
+    },
+    {
+      "request_id": "sr_1785710174489_a917fb",
+      "protocol": "chat",
+      "model": "auto",
+      "provider": null,
+      "status": "completed",
+      "external_request_id": null
+    },
+    {
+      "request_id": "sr_1785710178031_7f475c",
+      "protocol": "chat",
+      "model": "paid-model",
+      "provider": null,
+      "status": "budget_exceeded",
+      "external_request_id": null
+    }
+  ],
+  "checks": [
+    {
+      "check": "completed audits",
+      "actual": 6,
+      "expect": ">= 5",
+      "pass": true
+    },
+    {
+      "check": "cost_records count",
+      "actual": 6,
+      "expect": ">= 5",
+      "pass": true
+    },
+    {
+      "check": "attempts count",
+      "actual": 10,
+      "expect": ">= 8 (fallback=2+ 等)",
+      "pass": true
+    },
+    {
+      "check": "budget_exceeded audit exists",
+      "actual": true,
+      "expect": true,
+      "pass": true
+    },
+    {
+      "check": "budget_exceeded no cost",
+      "actual": false,
+      "expect": false,
+      "pass": true
+    },
+    {
+      "check": "real usage tokens recorded",
+      "actual": 6,
+      "expect": ">= 5",
+      "pass": true
+    },
+    {
+      "check": "fallback request with 2 attempts",
+      "actual": "sr_1785710174489_a917fb",
+      "expect": "exists",
+      "pass": true
+    },
+    {
+      "check": "attempt providers",
+      "actual": [
+        "modelscope",
+        "gateway",
+        "modelscope-badkey",
+        "internlm"
+      ],
+      "expect": "含 modelscope-badkey(401) 与 gateway(成功)",
+      "pass": true
+    }
+  ],
+  "allPass": true
+}

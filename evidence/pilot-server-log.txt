@@ -1,0 +1,87 @@
+[config-loader][2026-08-02T22:35:56.431Z] loading config from /Users/lijie/.trae-cn/work/6a6d729d8a72319e5b2aaf1f/pilot-config.json
+[config-loader][2026-08-02T22:35:56.434Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T22:35:56.434Z] server: config loaded
+[config-loader][2026-08-02T22:35:56.435Z] server: config warning: agent_bindings["claude-code"].budget.allowPaid=false but allowedModels is non-empty; verify intent
+[config-loader][2026-08-02T22:35:56.435Z] server: config validated
+[config-loader][2026-08-02T22:35:56.438Z] server: storage initialized
+[config-loader][2026-08-02T22:35:56.439Z] server: all components initialized
+[health][2026-08-02T22:35:56.439Z] starting periodic health check every 300000ms
+[health][2026-08-02T22:35:56.439Z] probing modelscope: GET https://api-inference.modelscope.cn/v1/models
+[health][2026-08-02T22:35:56.470Z] probing modelscope-badkey: GET https://api-inference.modelscope.cn/v1/models
+[health][2026-08-02T22:35:56.471Z] probing gateway: GET http://127.0.0.1:7878/v1/models
+[health][2026-08-02T22:35:56.472Z] probing internlm: GET https://chat.intern-ai.org.cn/api/v1/models
+[config-loader][2026-08-02T22:35:56.473Z] server: health check started (interval=300s)
+[config-loader][2026-08-02T22:35:56.473Z] server: created (timeout=90000ms, keepAlive=5000ms)
+[config-loader][2026-08-02T22:35:56.478Z] server: Smart Router Mainline 已启动: http://127.0.0.1:28788
+[config-loader][2026-08-02T22:35:56.478Z] server: 配置文件: /Users/lijie/.trae-cn/work/6a6d729d8a72319e5b2aaf1f/pilot-config.json
+[config-loader][2026-08-02T22:35:56.478Z] server: 智能模式: off
+[config-loader][2026-08-02T22:35:56.478Z] server: 模型数量: 4
+[config-loader][2026-08-02T22:35:56.478Z] server: Provider 数量: 4
+[health][2026-08-02T22:35:56.488Z] provider "gateway" status: unknown → active
+[health][2026-08-02T22:35:56.488Z] probe gateway: OK (17ms)
+[health][2026-08-02T22:35:56.651Z] provider "internlm" status: unknown → active
+[health][2026-08-02T22:35:56.651Z] probe internlm: OK (179ms)
+[health][2026-08-02T22:35:56.691Z] provider "modelscope-badkey" status: unknown → active
+[health][2026-08-02T22:35:56.692Z] probe modelscope-badkey: OK (221ms)
+[health][2026-08-02T22:35:56.696Z] provider "modelscope" status: unknown → active
+[health][2026-08-02T22:35:56.696Z] probe modelscope: OK (256ms)
+[chat-protocol][2026-08-02T22:36:05.940Z] [sr_1785710165940_e40522] agent=generic model=deepseek-ai/DeepSeek-V4-Flash claudeCode=false patches=[]
+[fallback][2026-08-02T22:36:06.920Z] first byte received, model switching disabled
+[execution][2026-08-02T22:36:06.921Z] cost recorded: modelscope/deepseek-ai/DeepSeek-V4-Flash 0 USD
+[execution][2026-08-02T22:36:06.921Z] request completed: modelscope/deepseek-ai/DeepSeek-V4-Flash (973ms, 1 upstream calls)
+[config-loader][2026-08-02T22:36:06.924Z] [finalizer] quality feedback: modelscope:deepseek-ai/DeepSeek-V4-Flash success=1 failure=0 (completed)
+[config-loader][2026-08-02T22:36:06.924Z] [finalizer] transaction: finalized sr_1785710165940_e40522 outcome=completed attempts=1 (atomic)
+[anthropic-protocol][2026-08-02T22:36:06.932Z] [sr_1785710166931_479238] agent=claude-code model=gateway-auto claudeCode=true patches=[]
+[fallback][2026-08-02T22:36:09.578Z] first byte received, model switching disabled
+[execution][2026-08-02T22:36:09.578Z] cost recorded: gateway/gateway-auto 0 USD
+[execution][2026-08-02T22:36:09.578Z] request completed: gateway/gateway-auto (2644ms, 1 upstream calls)
+[config-loader][2026-08-02T22:36:09.580Z] [finalizer] quality feedback: gateway:gateway-auto success=1 failure=0 (completed)
+[config-loader][2026-08-02T22:36:09.580Z] [finalizer] transaction: finalized sr_1785710166931_479238 outcome=completed attempts=1 (atomic)
+[responses-protocol][2026-08-02T22:36:09.583Z] [sr_1785710169583_7891b1] responses non-stream model=gateway-auto
+[chat-protocol][2026-08-02T22:36:09.584Z] [sr_1785710169583_7891b1] agent=codex model=gateway-auto claudeCode=false patches=[]
+[fallback][2026-08-02T22:36:10.884Z] first byte received, model switching disabled
+[execution][2026-08-02T22:36:10.885Z] cost recorded: gateway/gateway-auto 0 USD
+[execution][2026-08-02T22:36:10.885Z] request completed: gateway/gateway-auto (1299ms, 1 upstream calls)
+[config-loader][2026-08-02T22:36:10.886Z] [finalizer] quality feedback: gateway:gateway-auto success=2 failure=0 (completed)
+[config-loader][2026-08-02T22:36:10.886Z] [finalizer] transaction: finalized sr_1785710169583_7891b1 outcome=completed attempts=1 (atomic)
+[responses-protocol][2026-08-02T22:36:10.887Z] [sr_1785710169583_7891b1] responses completed: output_items=1 status=completed
+[chat-protocol][2026-08-02T22:36:10.890Z] [sr_1785710170890_1eefa5] agent=generic model=deepseek-ai/DeepSeek-V4-Flash claudeCode=false patches=[]
+[fallback][2026-08-02T22:36:12.436Z] first byte received, model switching disabled
+[execution][2026-08-02T22:36:12.438Z] cost recorded: modelscope/deepseek-ai/DeepSeek-V4-Flash 0 USD
+[execution][2026-08-02T22:36:12.438Z] request completed: modelscope/deepseek-ai/DeepSeek-V4-Flash (1544ms, 1 upstream calls)
+[config-loader][2026-08-02T22:36:12.439Z] [finalizer] quality feedback: modelscope:deepseek-ai/DeepSeek-V4-Flash success=2 failure=0 (completed)
+[config-loader][2026-08-02T22:36:12.439Z] [finalizer] transaction: finalized sr_1785710170890_1eefa5 outcome=completed attempts=1 (atomic)
+[chat-protocol][2026-08-02T22:36:12.442Z] [sr_1785710172442_3c96a9] agent=generic model=deepseek-ai/DeepSeek-V4-Flash claudeCode=false patches=[]
+[fallback][2026-08-02T22:36:13.278Z] first byte received, model switching disabled
+[execution][2026-08-02T22:36:13.279Z] cost recorded: modelscope/deepseek-ai/DeepSeek-V4-Flash 0 USD
+[execution][2026-08-02T22:36:13.279Z] request completed: modelscope/deepseek-ai/DeepSeek-V4-Flash (834ms, 1 upstream calls)
+[config-loader][2026-08-02T22:36:13.279Z] [finalizer] quality feedback: modelscope:deepseek-ai/DeepSeek-V4-Flash success=3 failure=0 (completed)
+[config-loader][2026-08-02T22:36:13.279Z] [finalizer] transaction: finalized sr_1785710172442_3c96a9 outcome=completed attempts=1 (atomic)
+[chat-stream-protocol][2026-08-02T22:36:13.283Z] [sr_1785710173282_cab692] stream agent=generic model=deepseek-ai/DeepSeek-V4-Flash claudeCode=false
+[execution][2026-08-02T22:36:14.102Z] stream pre-read valid, 1 chunks buffered
+[execution][2026-08-02T22:36:14.103Z] request completed: modelscope/deepseek-ai/DeepSeek-V4-Flash (815ms, 1 upstream calls)
+[chat-stream-protocol][2026-08-02T22:36:14.105Z] [sr_1785710173282_cab692] first byte received, model switching disabled
+[chat-protocol][2026-08-02T22:36:14.489Z] [sr_1785710174489_a917fb] agent=generic model=auto claudeCode=false patches=[]
+[chat-stream-protocol][2026-08-02T22:36:14.526Z] client aborted during SSE piping, stopping
+[chat-stream-protocol][2026-08-02T22:36:14.527Z] [sr_1785710173282_cab692] stream client aborted, bytes=5601
+[chat-stream-protocol][2026-08-02T22:36:14.527Z] [sr_1785710173282_cab692] usage extracted from stream: prompt=0 completion=0
+[config-loader][2026-08-02T22:36:14.528Z] [finalizer] transaction: finalized sr_1785710173282_cab692 outcome=client_aborted attempts=1 (atomic)
+[key-pool][2026-08-02T22:36:14.707Z] key "modelscope-badkey-0" permanently disabled (AUTH_INVALID / 401)
+[health][2026-08-02T22:36:14.708Z] provider "modelscope-badkey" status: active → degraded
+[provider-client][2026-08-02T22:36:14.709Z] upstream error from modelscope-badkey/ms-bad-key-model: HTTP 401 (auth_invalid): {"error":{"message":"Authentication failed, please make sure that a valid ModelScope token is supplied.","request_id":"2b6f7860-4200-4e9c-9ff5-7ee1f1c5adb7"}}
+[execution][2026-08-02T22:36:14.709Z] key-level error (auth_invalid) for modelscope-badkey; will retry with different key
+[fallback][2026-08-02T22:36:14.709Z] free candidate failed (retriable=false); paid fallback blocked
+[execution][2026-08-02T22:36:14.709Z] no available keys for provider "modelscope-badkey"
+[fallback][2026-08-02T22:36:14.710Z] free candidate failed (retriable=false); paid fallback blocked
+[fallback][2026-08-02T22:36:18.027Z] first byte received, model switching disabled
+[execution][2026-08-02T22:36:18.027Z] cost recorded: gateway/gateway-auto 0 USD
+[execution][2026-08-02T22:36:18.027Z] request completed: gateway/gateway-auto (3316ms, 2 upstream calls)
+[config-loader][2026-08-02T22:36:18.029Z] [finalizer] quality feedback: gateway:gateway-auto success=3 failure=0 (completed)
+[config-loader][2026-08-02T22:36:18.029Z] [finalizer] transaction: finalized sr_1785710174489_a917fb outcome=completed attempts=3 (atomic)
+[chat-protocol][2026-08-02T22:36:18.031Z] [sr_1785710178031_7f475c] agent=generic model=paid-model claudeCode=false patches=[]
+[execution][2026-08-02T22:36:18.032Z] all candidates budget-blocked (allowPaid=false, paid models only)
+[config-loader][2026-08-02T22:36:18.033Z] [finalizer] transaction: finalized sr_1785710178031_7f475c outcome=budget_exceeded attempts=1 (atomic)
+[config-loader][2026-08-02T22:36:36.211Z] server: 收到 SIGTERM，正在关闭...
+[health][2026-08-02T22:36:36.211Z] health check stopped
+[config-loader][2026-08-02T22:36:36.212Z] server: 健康检查已停止
+[config-loader][2026-08-02T22:36:36.212Z] server: 服务器已关闭

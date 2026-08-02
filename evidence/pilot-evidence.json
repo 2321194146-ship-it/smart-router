@@ -1,0 +1,125 @@
+{
+  "startTime": "2026-08-02T22:36:05.930Z",
+  "endTime": "2026-08-02T22:36:18.035Z",
+  "router": "http://127.0.0.1:28788",
+  "summary": {
+    "total": 7,
+    "passed": 7,
+    "failed": 0,
+    "passRate": "100.0%"
+  },
+  "note": "脱敏证据：content 已截断，不含任何 API Key / Authorization 头。全部请求经 28788 Smart Router 发往真实端点：modelscope 直连 / gateway(7878) 转发。",
+  "tests": [
+    {
+      "name": "1-openai-chat",
+      "timestamp": "2026-08-02T22:36:06.929Z",
+      "status": 200,
+      "success": true,
+      "details": {
+        "model": "deepseek-ai/DeepSeek-V4-Flash",
+        "finish_reason": "stop",
+        "content_preview": "PILOT_OK",
+        "usage": {
+          "prompt_tokens": 11,
+          "completion_tokens": 27,
+          "total_tokens": 38
+        }
+      }
+    },
+    {
+      "name": "2-anthropic-messages",
+      "timestamp": "2026-08-02T22:36:09.582Z",
+      "status": 200,
+      "success": true,
+      "details": {
+        "type": "message",
+        "stop_reason": "end_turn",
+        "model": "gateway-auto",
+        "content_preview": "",
+        "usage": {
+          "input_tokens": 147,
+          "output_tokens": 26
+        }
+      }
+    },
+    {
+      "name": "3-responses",
+      "timestamp": "2026-08-02T22:36:10.889Z",
+      "status": 200,
+      "success": true,
+      "details": {
+        "id": "202608030636100b609b91ee...",
+        "model": "glm-4-flash",
+        "status": "completed",
+        "output_text": "PILOT_OK",
+        "usage": {
+          "input_tokens": 100,
+          "output_tokens": 5,
+          "total_tokens": 105
+        }
+      }
+    },
+    {
+      "name": "4-tool-use-tool-result",
+      "timestamp": "2026-08-02T22:36:13.281Z",
+      "status": 200,
+      "success": true,
+      "details": {
+        "round1_tool_calls": 1,
+        "round1_finish_reason": "tool_calls",
+        "round1_args": "{\"a\": 2, \"b\": 3}",
+        "round2_finish_reason": "stop",
+        "round2_content_preview": "2 + 3 = **5**",
+        "round2_usage": {
+          "prompt_tokens": 88,
+          "completion_tokens": 23,
+          "total_tokens": 111
+        }
+      }
+    },
+    {
+      "name": "5-stream-client-abort",
+      "timestamp": "2026-08-02T22:36:14.487Z",
+      "success": true,
+      "details": {
+        "aborted": true,
+        "bytes": 5601,
+        "doneCount": 0
+      }
+    },
+    {
+      "name": "6-real-fail-fallback",
+      "timestamp": "2026-08-02T22:36:18.030Z",
+      "status": 200,
+      "success": true,
+      "details": {
+        "final_model": "nemotron-3-ultra-free",
+        "final_content": "FALLBACK_OK",
+        "usage": {
+          "prompt_tokens": 148,
+          "completion_tokens": 26,
+          "total_tokens": 174,
+          "prompt_tokens_details": {
+            "audio_tokens": 0,
+            "cached_tokens": 0,
+            "cache_write_tokens": 0
+          },
+          "completion_tokens_details": {
+            "audio_tokens": 0,
+            "reasoning_tokens": 21
+          }
+        }
+      }
+    },
+    {
+      "name": "7-paid-blocked",
+      "timestamp": "2026-08-02T22:36:18.035Z",
+      "status": 402,
+      "success": true,
+      "details": {
+        "error_type": "budget_exceeded",
+        "error_message": "Request failed: budget_exceeded"
+      }
+    }
+  ]
+}

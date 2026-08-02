@@ -104,8 +104,11 @@ function extractPrice(model) {
  */
 function pickTokens(usage, keys) {
   if (!usage || typeof usage !== 'object') return 0;
+  // 兼容下划线（prompt_tokens）与驼峰（promptTokens）两种命名：
+  // 为每个候选键额外生成驼峰变体
   for (const k of keys) {
-    const v = usage[k];
+    const camel = k.replace(/_([a-z])/g, (_, ch) => ch.toUpperCase());
+    const v = usage[k] ?? usage[camel];
     if (typeof v === 'number' && Number.isFinite(v) && v >= 0) return v;
   }
   return 0;

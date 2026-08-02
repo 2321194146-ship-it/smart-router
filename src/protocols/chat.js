@@ -203,6 +203,8 @@ function errorToOpenAIType(errorType) {
       return 'server_error';
     case 'client_aborted':
       return 'client_closed';
+    case 'budget_exceeded':
+      return 'budget_exceeded';
     case 'service_unavailable':
       return 'service_unavailable';
     case 'invalid_request_error':
@@ -606,9 +608,28 @@ async function handleFailure(
   const status = outcomeToHttpStatus(executionResult.outcome);
   const error = executionResult.error || {
     message: `Request failed: ${executionResult.outcome}`,
-    type: 'internal_error',
+    type: outcomeToOpenAIType(executionResult.outcome),
   };
   sendJsonResponse(res, status, buildErrorResponse(error, requestId));
+}
+
+/**
+ * 将 execution outcome 映射为 OpenAI 兼容的 error.type（无上游 error 时的兜底归因）。
+ */
+function outcomeToOpenAIType(outcome) {
+  switch (outcome) {
+    case 'budget_exceeded':
+      return 'budget_exceeded';
+    case 'no_candidate':
+      return 'service_unavailable';
+    case 'provider_error':
+    case 'incomplete':
+      return 'server_error';
+    case 'client_aborted':
+      return 'client_closed';
+    default:
+      return 'internal_error';
+  }
 }
 
 // ----------------------------------------------------------------------------

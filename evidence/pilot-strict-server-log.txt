@@ -1,0 +1,32 @@
+[config-loader][2026-08-02T22:36:40.121Z] loading config from /Users/lijie/.trae-cn/work/6a6d729d8a72319e5b2aaf1f/pilot-config-strict.json
+[config-loader][2026-08-02T22:36:40.123Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T22:36:40.123Z] server: config loaded
+[config-loader][2026-08-02T22:36:40.124Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T22:36:40.124Z] server: config warning: budget.allowPaid=false but allowedModels is non-empty; verify intent
+[config-loader][2026-08-02T22:36:40.124Z] server: config validated
+[config-loader][2026-08-02T22:36:40.128Z] server: storage initialized
+[config-loader][2026-08-02T22:36:40.129Z] server: all components initialized
+[health][2026-08-02T22:36:40.129Z] starting periodic health check every 300000ms
+[health][2026-08-02T22:36:40.129Z] probing modelscope: GET https://api-inference.modelscope.cn/v1/models
+[health][2026-08-02T22:36:40.159Z] probing gateway: GET http://127.0.0.1:7878/v1/models
+[config-loader][2026-08-02T22:36:40.159Z] server: health check started (interval=300s)
+[config-loader][2026-08-02T22:36:40.160Z] server: created (timeout=90000ms, keepAlive=5000ms)
+[config-loader][2026-08-02T22:36:40.164Z] server: Smart Router Mainline 已启动: http://127.0.0.1:28788
+[config-loader][2026-08-02T22:36:40.164Z] server: 配置文件: /Users/lijie/.trae-cn/work/6a6d729d8a72319e5b2aaf1f/pilot-config-strict.json
+[config-loader][2026-08-02T22:36:40.164Z] server: 智能模式: off
+[config-loader][2026-08-02T22:36:40.164Z] server: 模型数量: 2
+[config-loader][2026-08-02T22:36:40.164Z] server: Provider 数量: 2
+[health][2026-08-02T22:36:40.175Z] provider "gateway" status: unknown → active
+[health][2026-08-02T22:36:40.175Z] probe gateway: OK (16ms)
+[health][2026-08-02T22:36:40.357Z] provider "modelscope" status: unknown → active
+[health][2026-08-02T22:36:40.357Z] probe modelscope: OK (228ms)
+[chat-protocol][2026-08-02T22:36:57.710Z] [sr_1785710217709_eb37a7] agent=generic model=deepseek-ai/DeepSeek-V4-Flash claudeCode=false patches=[]
+[fallback][2026-08-02T22:36:58.937Z] first byte received, model switching disabled
+[execution][2026-08-02T22:36:58.938Z] cost recorded: modelscope/deepseek-ai/DeepSeek-V4-Flash 0 USD
+[execution][2026-08-02T22:36:58.939Z] request completed: modelscope/deepseek-ai/DeepSeek-V4-Flash (1219ms, 1 upstream calls)
+[config-loader][2026-08-02T22:36:58.942Z] [finalizer] quality feedback: modelscope:deepseek-ai/DeepSeek-V4-Flash success=1 failure=0 (completed)
+[config-loader][2026-08-02T22:36:58.942Z] [finalizer] transaction: finalized sr_1785710217709_eb37a7 outcome=completed attempts=1 (atomic)
+[chat-protocol][2026-08-02T22:36:58.950Z] [sr_1785710218950_901ef7] agent=generic model=nonexistent-strict-model claudeCode=false patches=[]
+[candidates][2026-08-02T22:36:58.950Z] strictModel=true and model "nonexistent-strict-model" not found; returning empty candidates
+[chat-protocol][2026-08-02T22:36:58.950Z] [sr_1785710218950_901ef7] no candidates available
+[config-loader][2026-08-02T22:36:58.951Z] [finalizer] transaction: finalized sr_1785710218950_901ef7 outcome=no_candidate attempts=0 (atomic)

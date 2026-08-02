@@ -523,6 +523,9 @@ export function buildResponsesError(error, requestId) {
     case 'client_aborted':
       responseType = 'client_closed';
       break;
+    case 'budget_exceeded':
+      responseType = 'insufficient_quota';
+      break;
     case 'service_unavailable':
       responseType = 'service_unavailable';
       break;

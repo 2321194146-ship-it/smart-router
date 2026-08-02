@@ -670,6 +670,10 @@ export function buildAnthropicError(error, requestId) {
     case 'invalid_request_error':
       anthropicType = 'invalid_request_error';
       break;
+    // 预算超限
+    case 'budget_exceeded':
+      anthropicType = 'invalid_request_error';
+      break;
     // 默认
     default:
       anthropicType = 'api_error';
