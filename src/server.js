@@ -110,8 +110,8 @@ export async function createServer(configPath) {
 
   // 4. 初始化所有组件（注入 store）
   const keyPool = new KeyPool(config, store);
-  const health = new ProviderHealth(config);
-  const circuitBreaker = new CircuitBreaker(config.circuit_breaker || {});
+  const health = new ProviderHealth(config, store);
+  const circuitBreaker = new CircuitBreaker(config.circuit_breaker || {}, store);
   const providerClient = new ProviderClient(config, keyPool, health);
   const costTracker = new CostTracker(config, store);
   const finalizer = new Finalizer(costTracker, store);
@@ -122,6 +122,7 @@ export async function createServer(configPath) {
     health,
     costTracker,
     circuitBreaker,
+    store,
   );
 
   log('server: all components initialized');
@@ -251,21 +252,30 @@ async function handleRequest(req, res, components) {
       // 解析 Agent 身份（从请求头和请求体）
       const agentInfo = resolveAgent(req.headers, body, { path: pathname });
 
-      // 构建上下文（传递给协议处理器）
-      const context = {
-        ...components,
-        cancelToken,
-        agentInfo,
-        requestId: generateRequestId(req),
-      };
-
-      // 判断协议类型
+      // 判断协议类型（在构建上下文之前确定，以便透传 protocol）
       const isAnthropic =
         pathname === '/v1/messages' || pathname === '/messages';
       const isResponses =
         pathname === '/v1/responses' || pathname === '/responses';
       const isChat =
         pathname === '/v1/chat/completions' || pathname === '/chat/completions';
+
+      // 确定协议类型（用于审计记录中的 protocol 字段）
+      const protocol = isAnthropic ? 'anthropic'
+        : isResponses ? 'responses'
+        : 'chat';
+
+      // 构建上下文（传递给协议处理器）
+      // requestId 由 Server 生成一次，所有 adapter 透传同一个
+      // 客户端提供的 x-request-id / x-correlation-id 仅作为 externalRequestId 保存
+      const context = {
+        ...components,
+        cancelToken,
+        agentInfo,
+        requestId: generateRequestId(req),
+        externalRequestId: extractExternalRequestId(req),
+        protocol,
+      };
 
       if (isChat) {
         // Chat Completions 协议
@@ -484,14 +494,18 @@ function handleListModels(req, res, config) {
  * @returns {string} 请求唯一标识
  */
 function generateRequestId(req) {
-  const headers = req?.headers || {};
-  const explicitId = headers['x-request-id'] || headers['x-correlation-id'];
-  if (explicitId) return String(explicitId);
-
-  // 自动生成：sr_<timestamp>_<random6>
+  // 始终生成内部唯一 ID，不使用外部 header 作为主键
   const timestamp = Date.now();
   const random = randomBytes(3).toString('hex');
   return `sr_${timestamp}_${random}`;
+}
+
+/**
+ * 提取外部请求 ID（仅用于审计追踪，不作为数据库主键）。
+ */
+function extractExternalRequestId(req) {
+  const headers = req?.headers || {};
+  return headers['x-request-id'] || headers['x-correlation-id'] || null;
 }
 
 // ----------------------------------------------------------------------------
@@ -503,4 +517,5 @@ export default {
   parseBody,
   handleListModels,
   generateRequestId,
+  extractExternalRequestId,
 };

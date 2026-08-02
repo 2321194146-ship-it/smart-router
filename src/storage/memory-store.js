@@ -44,7 +44,7 @@ export class MemoryStore extends StorageInterface {
 
   // --- attempts ---
 
-  async saveAttempt(attempt) {
+  async saveAttempt(attempt, transaction) {
     if (!attempt?.requestId || !attempt.attemptNumber) return false;
     const key = `${attempt.requestId}:${attempt.attemptNumber}`;
     if (this._attempts.has(key)) return false;
@@ -64,7 +64,7 @@ export class MemoryStore extends StorageInterface {
 
   // --- cost_records ---
 
-  async saveCost(costRecord) {
+  async saveCost(costRecord, transaction) {
     if (!costRecord?.requestId) {
       throw new Error('saveCost: requestId required');
     }
@@ -126,7 +126,7 @@ export class MemoryStore extends StorageInterface {
 
   // --- finalized_requests ---
 
-  async saveFinalized(finalized) {
+  async saveFinalized(finalized, transaction) {
     if (!finalized?.requestId) {
       return { finalized: false, reason: 'missing_requestId' };
     }
@@ -141,9 +141,45 @@ export class MemoryStore extends StorageInterface {
     return this._finalized.has(requestId);
   }
 
+  async updateRequestStatus(requestId, status, transaction) {
+    const r = this._requests.get(requestId);
+    if (r) {
+      r.status = status;
+      r.updatedAt = new Date().toISOString();
+    }
+  }
+
+  async beginTransaction() {
+    // Memory store: snapshot state for potential rollback
+    return {
+      snapshot: {
+        requests: new Map(this._requests),
+        attempts: new Map(this._attempts),
+        costs: new Map(this._costs),
+        finalized: new Map(this._finalized),
+        auditRecords: [...this._auditRecords],
+      },
+    };
+  }
+
+  async commitTransaction(transaction) {
+    // Memory store: no-op, changes already applied
+  }
+
+  async rollbackTransaction(transaction) {
+    // Memory store: restore snapshot
+    if (transaction?.snapshot) {
+      this._requests = transaction.snapshot.requests;
+      this._attempts = transaction.snapshot.attempts;
+      this._costs = transaction.snapshot.costs;
+      this._finalized = transaction.snapshot.finalized;
+      this._auditRecords = transaction.snapshot.auditRecords;
+    }
+  }
+
   // --- audit ---
 
-  async saveAuditRecord(auditRecord) {
+  async saveAuditRecord(auditRecord, transaction) {
     if (!auditRecord?.requestId) return;
     this._auditRecords.push({ ...auditRecord });
   }

@@ -179,6 +179,167 @@ export class Finalizer {
   }
 
   // --------------------------------------------------------------------------
+  // 事务收尾：finalizeRequestTransaction
+  // --------------------------------------------------------------------------
+
+  /**
+   * 使用单一数据库事务收尾请求。
+   *
+   * 在同一事务中原子完成：
+   *   1. finalized_requests 幂等占位
+   *   2. requests 最终状态更新
+   *   3. attempts 全部写入
+   *   4. cost_records 成本记录
+   *   5. audit_records 审计记录
+   *
+   * 任何一步失败 → 整个事务回滚，不留下半状态。
+   * 允许安全重试（幂等）。
+   *
+   * @param {string} requestId 请求唯一标识
+   * @param {object} attemptLog AttemptLog 实例
+   * @param {string} finalOutcome 最终 Outcome
+   * @param {object} [options] 附加选项
+   * @returns {Promise<{finalized: boolean, reason?: string, auditRecord?: object}>}
+   */
+  async finalizeRequestTransaction(requestId, attemptLog, finalOutcome, options = {}) {
+    // 如果 store 不支持事务，回退到普通 finalize
+    if (!this.store || typeof this.store.beginTransaction !== 'function') {
+      return this.finalize(requestId, attemptLog, finalOutcome, options);
+    }
+
+    // 幂等检查
+    try {
+      const alreadyFinalized = await this.store.isFinalized(requestId);
+      if (alreadyFinalized) {
+        log(`[finalizer] transaction: already finalized, skipping: ${requestId}`);
+        return { finalized: false, reason: 'already_finalized' };
+      }
+    } catch (err) {
+      log(`[finalizer] isFinalized check error: ${err.message}`);
+    }
+
+    const successfulAttempt = attemptLog ? attemptLog.getSuccessful() : null;
+    const allAttempts = attemptLog ? attemptLog.toJSON() : [];
+
+    // 预构建审计记录
+    const auditRecord = this._buildAuditRecord(requestId, attemptLog, finalOutcome, options);
+
+    // 预记录成本（内存去重 + store 持久化在事务中完成）
+    let costRecord = null;
+    if (successfulAttempt && successfulAttempt.usage && this.costTracker) {
+      try {
+        const costResult = this.costTracker.recordCost(
+          requestId,
+          successfulAttempt.model,
+          successfulAttempt.provider,
+          successfulAttempt.usage,
+          successfulAttempt.cost
+        );
+        if (costResult.recorded) {
+          costRecord = costResult.record;
+          log(`[finalizer] transaction: cost recorded: ${successfulAttempt.provider}/${successfulAttempt.model}`);
+        } else {
+          costRecord = costResult.record;
+        }
+      } catch (err) {
+        log(`[finalizer] transaction: cost recording failed: ${err.message}`);
+      }
+    }
+
+    let transaction = null;
+    try {
+      transaction = await this.store.beginTransaction();
+
+      // 1. finalized_requests 幂等占位
+      const finResult = await this.store.saveFinalized({
+        requestId,
+        outcome: finalOutcome,
+        agentId: options.agentId || null,
+        protocol: options.protocol || null,
+        timestamp: new Date().toISOString(),
+      }, transaction);
+
+      if (!finResult.finalized) {
+        await this.store.rollbackTransaction(transaction);
+        transaction = null;
+        log(`[finalizer] transaction: already finalized (in txn), skipping: ${requestId}`);
+        return { finalized: false, reason: 'already_finalized' };
+      }
+
+      // 2. 更新 requests 最终状态
+      if (typeof this.store.updateRequestStatus === 'function') {
+        await this.store.updateRequestStatus(requestId, finalOutcome, transaction);
+      }
+
+      // 3. 保存所有 attempts
+      for (const attempt of allAttempts) {
+        await this.store.saveAttempt({
+          requestId,
+          attemptNumber: attempt.attemptNumber,
+          model: attempt.model,
+          provider: attempt.provider,
+          keyId: attempt.keyId,
+          transportOutcome: attempt.transportOutcome,
+          validatedOutcome: attempt.validatedOutcome,
+          errorType: attempt.error?.type || null,
+          errorMessage: attempt.error?.message || null,
+          latencyMs: attempt.latencyMs,
+          firstByteMs: attempt.firstContentByteMs,
+          headersReceived: attempt.headersReceived,
+          firstByteSentToClient: attempt.firstByteSentToClient,
+          usage: attempt.usage,
+          cost: attempt.cost,
+          timestamp: attempt.timestamp || new Date().toISOString(),
+        }, transaction);
+      }
+
+      // 4. 保存 cost_records（如果有）
+      if (costRecord) {
+        try {
+          await this.store.saveCost(costRecord, transaction);
+        } catch (err) {
+          log(`[finalizer] transaction: saveCost (may be dup): ${err.message}`);
+        }
+      }
+
+      // 5. 保存 audit_records
+      await this.store.saveAuditRecord(auditRecord, transaction);
+
+      // 提交事务
+      await this.store.commitTransaction(transaction);
+      transaction = null;
+
+      // 更新内存状态
+      this._finalizedIds.add(requestId);
+      this._auditRecords.push(auditRecord);
+
+      // 回写模型质量反馈
+      if (shouldRecordQualityFeedback(finalOutcome) && successfulAttempt) {
+        this._recordQualityFeedback(successfulAttempt, finalOutcome, options);
+      }
+
+      log(
+        `[finalizer] transaction: finalized ${requestId} outcome=${finalOutcome} ` +
+        `attempts=${allAttempts.length}`
+      );
+
+      return { finalized: true, auditRecord };
+
+    } catch (err) {
+      if (transaction) {
+        try {
+          await this.store.rollbackTransaction(transaction);
+          log(`[finalizer] transaction: rolled back for ${requestId}: ${err.message}`);
+        } catch (rollbackErr) {
+          log(`[finalizer] transaction: rollback failed: ${rollbackErr.message}`);
+        }
+      }
+      log(`[finalizer] transaction: failed for ${requestId}: ${err.message}`);
+      throw err;
+    }
+  }
+
+  // --------------------------------------------------------------------------
   // 无候选收尾：finalizeNoCandidate
   // --------------------------------------------------------------------------
 

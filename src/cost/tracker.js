@@ -632,6 +632,13 @@ export class CostTracker {
     this.records.set(requestId, record);
     this._addToDaily(dateKey, modelId, provider, finalCost);
 
+    // 持久化到 store（异步，不阻塞主路径；DB UNIQUE 约束保证幂等）
+    if (this.store && typeof this.store.saveCost === 'function') {
+      this.store.saveCost(record).catch((err) => {
+        // store 写入失败不影响内存记录
+      });
+    }
+
     return { recorded: true, record };
   }
 

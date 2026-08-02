@@ -41,17 +41,6 @@ function protocolLog(msg) {
 // ----------------------------------------------------------------------------
 
 /**
- * 生成或提取请求唯一标识。
- * 优先从 x-request-id / x-correlation-id 头读取，否则自动生成。
- */
-function generateRequestId(req) {
-  const headers = req?.headers || {};
-  const id = headers['x-request-id'] || headers['x-correlation-id'];
-  if (id) return String(id);
-  return `req-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-/**
  * 从请求体中检测所需能力（如 vision）。
  * 遍历 messages，若任一 content block 为 image 类型则返回 'vision'。
  */
@@ -341,7 +330,8 @@ export async function handleChatCompletion(req, res, body, context) {
     agentInfo,
   } = context;
 
-  const requestId = generateRequestId(req);
+  const requestId = context.requestId;
+  const externalRequestId = req?.headers?.['x-request-id'] || req?.headers?.['x-correlation-id'] || null;
   const agentId = agentInfo?.agentId || 'generic';
 
   // 解析请求体（兼容字符串传入）
@@ -394,7 +384,7 @@ export async function handleChatCompletion(req, res, body, context) {
       protocolLog(`[${requestId}] no candidates available`);
       await finalizer.finalizeNoCandidate(requestId, requestedModel, {
         agentId,
-        protocol: 'chat',
+        protocol: context.protocol || 'chat',
       });
 
       if (!cancelToken?.isAborted() && isResWritable(res)) {
@@ -414,7 +404,7 @@ export async function handleChatCompletion(req, res, body, context) {
       agentId,
       abortSignal: cancelToken?.signal || undefined,
       budget,
-      protocol: 'chat',
+      protocol: context.protocol || 'chat',
       requestId,
       timeoutMs: config?.server?.request_timeout_ms,
     });
@@ -431,7 +421,7 @@ export async function handleChatCompletion(req, res, body, context) {
     } else {
       await handleFailure(
         res, executionResult, attemptLog, finalizer, requestId, agentId,
-        cancelToken,
+        cancelToken, context,
       );
     }
   } catch (err) {
@@ -441,7 +431,7 @@ export async function handleChatCompletion(req, res, body, context) {
     try {
       await finalizer.finalizeNoCandidate(requestId, parsedBody?.model, {
         agentId,
-        protocol: 'chat',
+        protocol: context.protocol || 'chat',
       });
     } catch {
       // 收尾失败不影响错误响应
@@ -527,12 +517,15 @@ async function handleSuccess(
     }
   }
 
-  // 收尾（幂等：以 requestId 去重）
-  await finalizer.finalize(requestId, attemptLog, outcome, {
+  // 收尾（使用事务：finalizeRequestTransaction 或回退到 finalize）
+  const finalizeMethod = (typeof finalizer.finalizeRequestTransaction === 'function')
+    ? finalizer.finalizeRequestTransaction.bind(finalizer)
+    : finalizer.finalize.bind(finalizer);
+  await finalizeMethod(requestId, attemptLog, outcome, {
     model: executionResult.finalCandidate?.modelId,
     provider: executionResult.finalCandidate?.provider,
     agentId,
-    protocol: 'chat',
+    protocol: context.protocol || 'chat',
     responseSize,
   });
 
@@ -564,16 +557,19 @@ async function handleSuccess(
  */
 async function handleFailure(
   res, executionResult, attemptLog, finalizer, requestId, agentId,
-  cancelToken,
+  cancelToken, context,
 ) {
   const outcome = mapExecutionOutcome(executionResult.outcome);
 
-  // 收尾
-  await finalizer.finalize(requestId, attemptLog, outcome, {
+  // 收尾（使用事务）
+  const finalizeMethod = (typeof finalizer.finalizeRequestTransaction === 'function')
+    ? finalizer.finalizeRequestTransaction.bind(finalizer)
+    : finalizer.finalize.bind(finalizer);
+  await finalizeMethod(requestId, attemptLog, outcome, {
     model: executionResult.finalCandidate?.modelId,
     provider: executionResult.finalCandidate?.provider,
     agentId,
-    protocol: 'chat',
+    protocol: context?.protocol || 'chat',
   });
 
   // 客户端已断开：不发送响应

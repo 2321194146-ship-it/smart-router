@@ -28,6 +28,7 @@ export const ErrorType = {
   RATE_LIMIT_TRANSIENT: 'rate_limit_transient', // 429 瞬时
   RATE_LIMIT_QUOTA: 'rate_limit_quota', // 429 配额耗尽
   SERVER_ERROR: 'server_error', // 500/502/503
+  CONTENT_INVALID: 'content_invalid', // 200 但内容无效（空 body / 无效 JSON / 空 SSE 等）
   NETWORK_ERROR: 'network_error', // fetch 失败
   CLIENT_ABORTED: 'client_aborted', // 客户端取消
   UNKNOWN: 'unknown',
@@ -343,6 +344,7 @@ export function isRetriable(errorType) {
     case ErrorType.FORBIDDEN_TEMP:
     case ErrorType.SERVER_ERROR:
     case ErrorType.NETWORK_ERROR:
+    case ErrorType.CONTENT_INVALID:
       return true;
     case ErrorType.AUTH_INVALID:
     case ErrorType.FORBIDDEN_KEY:
@@ -387,6 +389,8 @@ export function getCooldownDuration(errorType) {
       return 60; // 1min
     case ErrorType.NETWORK_ERROR:
       return 15; // 15s
+    case ErrorType.CONTENT_INVALID:
+      return 0; // 内容无效不冷却（立即尝试下一候选）
     case ErrorType.CLIENT_ABORTED:
       return 0; // 不冷却（客户端行为，非 provider 故障）
     case ErrorType.UNKNOWN:
@@ -431,6 +435,8 @@ export function getCooldownScope(errorType) {
     case ErrorType.NETWORK_ERROR:
       return 'model';
     case ErrorType.FORBIDDEN_TEMP:
+      return 'model';
+    case ErrorType.CONTENT_INVALID:
       return 'model';
     case ErrorType.CLIENT_ABORTED:
     case ErrorType.UNKNOWN:

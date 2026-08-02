@@ -72,6 +72,10 @@ export class AttemptRecord {
     // 预算屏蔽标记
     this.budgetBlocked = false;
 
+    // 首字节语义
+    this.headersReceived = false;
+    this.firstByteSentToClient = false;
+
     // 时间戳
     this.timestamp = Date.now();
   }
@@ -175,6 +179,8 @@ export class AttemptRecord {
       usage: this.usage,
       cost: this.cost,
       budgetBlocked: this.budgetBlocked,
+      headersReceived: this.headersReceived,
+      firstByteSentToClient: this.firstByteSentToClient,
       timestamp: new Date(this.timestamp).toISOString(),
     };
   }
@@ -225,6 +231,52 @@ export class AttemptLog {
       keyId
     );
     this.records.push(record);
+    return record;
+  }
+
+  /**
+   * 便捷方法：从纯对象添加一条尝试记录。
+   * 用于测试和审计回放场景。
+   *
+   * @param {object} data 尝试记录数据
+   * @returns {AttemptRecord} 新创建的记录
+   */
+  add(data = {}) {
+    const record = this.addAttempt(
+      data.model || null,
+      data.provider || null,
+      data.keyId || null,
+    );
+    if (data.transportOutcome) {
+      record.setTransportResult(
+        data.transportOutcome,
+        data.httpStatus || null,
+        data.latencyMs || 0,
+        data.firstByteMs || data.firstContentByteMs || null,
+      );
+    }
+    if (data.validatedOutcome) {
+      record.setValidatedResult(data.validatedOutcome);
+    }
+    if (data.errorType || data.errorMessage) {
+      record.setError(data.errorType || null, data.errorMessage || null);
+    }
+    if (data.usage || data.cost) {
+      record.setUsage(data.usage || null, data.cost || null);
+    }
+    if (data.budgetBlocked) {
+      record.markBudgetBlocked();
+    }
+    // 首字节语义字段
+    if (data.headersReceived !== undefined) {
+      record.headersReceived = data.headersReceived;
+    }
+    if (data.firstContentByteMs !== undefined) {
+      record.firstByteMs = data.firstContentByteMs;
+    }
+    if (data.firstByteSentToClient !== undefined) {
+      record.firstByteSentToClient = data.firstByteSentToClient;
+    }
     return record;
   }
 

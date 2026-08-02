@@ -67,7 +67,7 @@ export class StorageInterface {
    * @param {object} attempt { requestId, attemptNumber, model, provider, keyId, ... }
    * @returns {Promise<boolean>} 是否成功插入（同 requestId+attemptNumber 已存在返回 false）
    */
-  async saveAttempt(attempt) {
+  async saveAttempt(attempt, transaction) {
     throw new Error('StorageInterface.saveAttempt() not implemented');
   }
 
@@ -87,7 +87,7 @@ export class StorageInterface {
    * @param {object} costRecord { requestId, modelId, provider, usage, cost, dateKey, timestamp }
    * @returns {Promise<{ recorded: boolean, record: object }>}
    */
-  async saveCost(costRecord) {
+  async saveCost(costRecord, transaction) {
     throw new Error('StorageInterface.saveCost() not implemented');
   }
 
@@ -174,7 +174,7 @@ export class StorageInterface {
    * @param {object} finalized { requestId, outcome, agentId, protocol, timestamp }
    * @returns {Promise<{ finalized: boolean, reason?: string }>}
    */
-  async saveFinalized(finalized) {
+  async saveFinalized(finalized, transaction) {
     throw new Error('StorageInterface.saveFinalized() not implemented');
   }
 
@@ -187,6 +187,47 @@ export class StorageInterface {
     throw new Error('StorageInterface.isFinalized() not implemented');
   }
 
+  // --- request status update ---
+
+  /**
+   * 更新请求最终状态。
+   * @param {string} requestId
+   * @param {string} status 最终状态
+   * @param {*} [transaction] 事务对象（可选）
+   * @returns {Promise<void>}
+   */
+  async updateRequestStatus(requestId, status, transaction) {
+    throw new Error('StorageInterface.updateRequestStatus() not implemented');
+  }
+
+  // --- transactions ---
+
+  /**
+   * 开始事务。
+   * @returns {Promise<object>} 事务句柄
+   */
+  async beginTransaction() {
+    throw new Error('StorageInterface.beginTransaction() not implemented');
+  }
+
+  /**
+   * 提交事务。
+   * @param {object} transaction 事务句柄
+   * @returns {Promise<void>}
+   */
+  async commitTransaction(transaction) {
+    throw new Error('StorageInterface.commitTransaction() not implemented');
+  }
+
+  /**
+   * 回滚事务。
+   * @param {object} transaction 事务句柄
+   * @returns {Promise<void>}
+   */
+  async rollbackTransaction(transaction) {
+    throw new Error('StorageInterface.rollbackTransaction() not implemented');
+  }
+
   // --- audit ---
 
   /**
@@ -194,7 +235,7 @@ export class StorageInterface {
    * @param {object} auditRecord
    * @returns {Promise<void>}
    */
-  async saveAuditRecord(auditRecord) {
+  async saveAuditRecord(auditRecord, transaction) {
     throw new Error('StorageInterface.saveAuditRecord() not implemented');
   }
 

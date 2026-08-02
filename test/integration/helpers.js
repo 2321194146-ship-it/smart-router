@@ -114,8 +114,15 @@ export function createMockProvider(options = {}) {
       });
     },
     close() {
+      if (typeof server.closeAllConnections === 'function') {
+        server.closeAllConnections();
+      }
       return new Promise((resolve) => {
-        server.close(() => resolve());
+        const timeout = setTimeout(() => resolve(), 3000);
+        server.close(() => {
+          clearTimeout(timeout);
+          resolve();
+        });
       });
     },
     get port() {
@@ -138,7 +145,9 @@ export function createTestConfig(mockPort, options = {}) {
       request_timeout_ms: 30000,
       keep_alive_timeout_ms: 5000,
       max_request_body_bytes: 10485760,
+      ...(options.dataDir ? { data_dir: options.dataDir } : {}),
     },
+    ...(options.dataDir ? { data_dir: options.dataDir } : {}),
     intelligence: {
       mode: 'off',
       fallback_to_routing: true,
@@ -227,6 +236,37 @@ export async function startSmartRouter(configPath) {
       resolve({ server, port: addr.port });
     });
   });
+}
+
+/**
+ * Stop Smart Router and clean up all resources (store, health check, server).
+ */
+export async function stopSmartRouter(routerInfo) {
+  if (!routerInfo?.server) return;
+  const components = routerInfo.server._components;
+  // Stop health check first to prevent new probes
+  if (components?.health?.stopHealthCheck) {
+    components.health.stopHealthCheck();
+  }
+  // Force-close all inbound connections
+  if (typeof routerInfo.server.closeAllConnections === 'function') {
+    routerInfo.server.closeAllConnections();
+  }
+  // Close server with timeout fallback
+  await new Promise((resolve) => {
+    const timeout = setTimeout(() => resolve(), 3000);
+    routerInfo.server.close(() => {
+      clearTimeout(timeout);
+      resolve();
+    });
+  });
+  // Close store with timeout
+  if (components?.store?.close) {
+    await Promise.race([
+      components.store.close().catch(() => {}),
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+    ]);
+  }
 }
 
 export function httpRequest(port, path, options = {}) {

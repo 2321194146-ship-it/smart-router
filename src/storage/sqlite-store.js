@@ -40,6 +40,7 @@ export class SQLiteStore extends StorageInterface {
         protocol TEXT,
         model TEXT,
         provider TEXT,
+        status TEXT,
         timestamp TEXT NOT NULL
       );
 
@@ -125,10 +126,11 @@ export class SQLiteStore extends StorageInterface {
 
   // --- requests ---
 
-  async saveRequest(request) {
+  async saveRequest(request, transaction) {
     if (!request?.requestId) return false;
+    const db = (transaction?.db) || this._db;
     try {
-      this._db.prepare(
+      db.prepare(
         'INSERT OR IGNORE INTO requests (request_id, agent_id, protocol, model, provider, timestamp) VALUES (?, ?, ?, ?, ?, ?)'
       ).run(
         request.requestId,
@@ -161,11 +163,12 @@ export class SQLiteStore extends StorageInterface {
 
   // --- attempts ---
 
-  async saveAttempt(attempt) {
+  async saveAttempt(attempt, transaction) {
     if (!attempt?.requestId || !attempt.attemptNumber) return false;
+    const db = (transaction?.db) || this._db;
     try {
-      this._db.prepare(
-        `INSERT OR IGNORE INTO attempts
+      db.prepare(
+        `INSERT OR REPLACE INTO attempts
         (request_id, attempt_number, model, provider, key_id,
          transport_outcome, validated_outcome, error_type, error_message,
          http_status, latency_ms, first_byte_ms, headers_received,
@@ -225,12 +228,13 @@ export class SQLiteStore extends StorageInterface {
 
   // --- cost_records ---
 
-  async saveCost(costRecord) {
+  async saveCost(costRecord, transaction) {
     if (!costRecord?.requestId) {
       throw new Error('saveCost: requestId required');
     }
+    const db = (transaction?.db) || this._db;
     try {
-      const existing = this._db.prepare(
+      const existing = db.prepare(
         'SELECT * FROM cost_records WHERE request_id = ?'
       ).get(costRecord.requestId);
       if (existing) {
@@ -247,7 +251,7 @@ export class SQLiteStore extends StorageInterface {
           },
         };
       }
-      this._db.prepare(
+      db.prepare(
         'INSERT INTO cost_records (request_id, model_id, provider, usage, cost, date_key, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)'
       ).run(
         costRecord.requestId,
@@ -371,12 +375,13 @@ export class SQLiteStore extends StorageInterface {
 
   // --- finalized_requests ---
 
-  async saveFinalized(finalized) {
+  async saveFinalized(finalized, transaction) {
     if (!finalized?.requestId) {
       return { finalized: false, reason: 'missing_requestId' };
     }
+    const db = (transaction?.db) || this._db;
     try {
-      this._db.prepare(
+      const insResult = db.prepare(
         'INSERT OR IGNORE INTO finalized_requests (request_id, outcome, agent_id, protocol, timestamp) VALUES (?, ?, ?, ?, ?)'
       ).run(
         finalized.requestId,
@@ -385,8 +390,7 @@ export class SQLiteStore extends StorageInterface {
         finalized.protocol || null,
         finalized.timestamp || new Date().toISOString()
       );
-      const changes = this._db.prepare('SELECT changes() as c').get();
-      if (changes.c === 0) {
+      if (insResult.changes === 0) {
         return { finalized: false, reason: 'already_finalized' };
       }
       return { finalized: true };
@@ -402,11 +406,30 @@ export class SQLiteStore extends StorageInterface {
     return !!row;
   }
 
+  async updateRequestStatus(requestId, status, transaction) {
+    const db = (transaction?.db) || this._db;
+    db.prepare('UPDATE requests SET status = ? WHERE request_id = ?').run(status, requestId);
+  }
+
+  async beginTransaction() {
+    this._db.exec('BEGIN TRANSACTION');
+    return { active: true, db: this._db };
+  }
+
+  async commitTransaction(transaction) {
+    this._db.exec('COMMIT');
+  }
+
+  async rollbackTransaction(transaction) {
+    try { this._db.exec('ROLLBACK'); } catch (e) { /* may already be rolled back */ }
+  }
+
   // --- audit ---
 
-  async saveAuditRecord(auditRecord) {
+  async saveAuditRecord(auditRecord, transaction) {
     if (!auditRecord?.requestId) return;
-    this._db.prepare(
+    const db = (transaction?.db) || this._db;
+    db.prepare(
       `INSERT INTO audit_records
       (request_id, outcome, final_model, final_provider, attempt_count,
        agent_id, protocol, response_size, attempts, timestamp)

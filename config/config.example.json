@@ -2,6 +2,7 @@
   "server": {
     "host": "127.0.0.1",
     "port": 28788,
+    "data_dir": "./data",
     "request_timeout_ms": 300000,
     "shutdown_grace_ms": 5000,
     "max_request_body_bytes": 10485760

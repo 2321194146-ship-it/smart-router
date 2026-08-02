@@ -124,13 +124,14 @@ export class ExecutionEngine {
    * @param {object} costTracker CostTracker 实例
    * @param {object} circuitBreaker CircuitBreaker 实例
    */
-  constructor(config, providerClient, keyPool, health, costTracker, circuitBreaker) {
+  constructor(config, providerClient, keyPool, health, costTracker, circuitBreaker, store = null) {
     this.config = config;
     this.providerClient = providerClient;
     this.keyPool = keyPool;
     this.health = health;
     this.costTracker = costTracker;
     this.circuitBreaker = circuitBreaker;
+    this.store = store || null;
 
     // 解析四重上限
     const routing = config?.routing || {};
@@ -185,6 +186,21 @@ export class ExecutionEngine {
 
     const abortSignal = options.abortSignal || null;
     const protocol = options.protocol || 'chat';
+    const requestId = options.requestId || null;
+
+    // 持久化请求元数据到 store
+    if (this.store && requestId) {
+      this.store.saveRequest({
+        requestId,
+        agentId: options.agentId || 'unknown',
+        protocol,
+        model: body?.model || null,
+        provider: null,
+        timestamp: new Date().toISOString(),
+      }).catch((err) => {
+        log('saveRequest error: ' + err.message);
+      });
+    }
 
     while (totalUpstreamCalls < this.limits.maxTotalUpstreamCalls) {
       // 检查客户端是否已断开
@@ -261,11 +277,7 @@ export class ExecutionEngine {
           attempts.push(attemptLog);
           chain.markAttempted(candidate);
           chain.excludeProvider(candidate.provider);
-          lastError = new ProviderError(
-            ErrorType.UNKNOWN,
-            'max providers per request reached',
-            { provider: candidate.provider }
-          );
+          // lastError 保留原值：排除 provider 后继续尝试下一候选
           continue;
         }
         providersTried.add(candidate.provider);
@@ -329,11 +341,7 @@ export class ExecutionEngine {
         attempts.push(attemptLog);
         chain.markAttempted(candidate);
         chain.excludeProvider(candidate.provider);
-        lastError = new ProviderError(
-          ErrorType.UNKNOWN,
-          `no available keys for provider "${candidate.provider}"`,
-          { provider: candidate.provider }
-        );
+        // lastError 保留原值（如 auth_invalid）：排除 provider 后继续尝试下一候选
         continue;
       }
 
@@ -348,11 +356,7 @@ export class ExecutionEngine {
         attempts.push(attemptLog);
         chain.markAttempted(candidate);
         chain.excludeProvider(candidate.provider);
-        lastError = new ProviderError(
-          ErrorType.UNKNOWN,
-          `max keys per provider reached for "${candidate.provider}"`,
-          { provider: candidate.provider }
-        );
+        // lastError 保留原值：排除 provider 后继续尝试下一候选
         continue;
       }
 
@@ -366,6 +370,30 @@ export class ExecutionEngine {
 
       attempts.push(tryResult.attemptLog);
       chain.markAttempted(candidate);
+
+      // 持久化 Attempt 记录到 store
+      if (this.store && requestId) {
+        this.store.saveAttempt({
+          requestId,
+          attemptNumber: tryResult.attemptLog.attemptNumber,
+          model: tryResult.attemptLog.model,
+          provider: tryResult.attemptLog.provider,
+          keyId: tryResult.attemptLog.keyId,
+          transportOutcome: tryResult.attemptLog.transportOutcome,
+          validatedOutcome: tryResult.attemptLog.validatedOutcome,
+          errorType: tryResult.attemptLog.error?.type || null,
+          errorMessage: tryResult.attemptLog.error?.message || null,
+          latencyMs: tryResult.attemptLog.latencyMs,
+          firstByteMs: tryResult.attemptLog.firstContentByteMs,
+          headersReceived: tryResult.attemptLog.headersReceived,
+          firstByteSentToClient: tryResult.attemptLog.firstByteSentToClient,
+          usage: tryResult.attemptLog.usage,
+          cost: tryResult.attemptLog.cost,
+          timestamp: tryResult.attemptLog.timestamp || new Date().toISOString(),
+        }).catch((err) => {
+          log('saveAttempt error: ' + err.message);
+        });
+      }
 
       // 首字节标记
       if (tryResult.firstByteReceived) {
@@ -542,33 +570,102 @@ export class ExecutionEngine {
         this.circuitBreaker.record(cbKey, true, latency);
       }
 
-      // 解析 usage（仅非流式响应）
+      // 解析 usage（仅非流式响应）+ 内容有效性验证
       let usage = null;
       let cost = null;
       const isStreaming = body?.stream === true;
       let firstByteSentToClient = false;
       let firstContentByteMs = null;
       let bodyValid = false;
+      let contentInvalid = false; // 200 但内容无效（空 body、无效 JSON 等）
 
       if (!isStreaming) {
         try {
           const cloned = result.response.clone();
           const bodyText = await cloned.text();
-          if (bodyText) {
-            bodyValid = true;
-            usage = this.providerClient.parseUsage(bodyText, provider);
-            if (usage && this.costTracker) {
-              cost = this.costTracker.calculateCost(modelConfig, usage);
+          if (bodyText && bodyText.trim()) {
+            // 尝试解析 JSON 验证内容有效性
+            try {
+              const parsed = JSON.parse(bodyText);
+              if (parsed && typeof parsed === 'object') {
+                bodyValid = true;
+                usage = this.providerClient.parseUsage(bodyText, provider);
+                if (usage && this.costTracker) {
+                  cost = this.costTracker.calculateCost(modelConfig, usage);
+                }
+              } else {
+                contentInvalid = true;
+                log('upstream returned 200 but body is not valid JSON object');
+              }
+            } catch (jsonErr) {
+              contentInvalid = true;
+              log('upstream returned 200 but body is not valid JSON: ' + jsonErr.message);
             }
+          } else {
+            contentInvalid = true;
+            log('upstream returned 200 with empty body');
           }
         } catch {
-          // 流式响应或解析失败：usage 未知
+          // 读取 body 失败：可能是流式响应
+          contentInvalid = true;
+          log('upstream returned 200 but body read failed');
         }
-        // 非流式：body 有效则视为首字节已发送（内容已就绪）
+        // 非流式：body 有效才视为首字节已发送
         firstByteSentToClient = bodyValid;
         firstContentByteMs = bodyValid ? latency : null;
       }
       // 流式：firstByteSentToClient 保持 false，由协议处理器通过 onFirstByte 回调设置
+
+      // 如果内容无效且尚未向客户端发送任何内容，允许 Fallback
+      if (contentInvalid && !firstByteSentToClient) {
+        log('upstream 200 but content invalid; allowing fallback to next candidate');
+        // 记录 key 成功（HTTP 层面确实成功了）
+        if (this.keyPool && result.keyId) {
+          await this.keyPool.markKeySucceeded(provider, result.keyId);
+        }
+        const attemptLog = this._buildAttemptLog(
+          candidate, result.keyId, attemptNumber, 'error',
+          { type: 'invalid_content', message: 'upstream returned 200 but body was empty or invalid', httpStatus: 200 },
+          null, null, latency
+        );
+        attemptLog.headersReceived = true;
+        attemptLog.firstContentByteMs = null;
+        attemptLog.firstByteSentToClient = false;
+        // 持久化 Attempt 到 store
+        if (this.store && options.requestId) {
+          this.store.saveAttempt({
+            requestId: options.requestId,
+            attemptNumber: attemptNumber,
+            model: candidate.modelId,
+            provider: candidate.provider,
+            keyId: result.keyId,
+            transportOutcome: 'success',
+            validatedOutcome: 'error',
+            errorType: 'invalid_content',
+            errorMessage: 'upstream 200 but body empty or invalid',
+            latencyMs: latency,
+            firstByteMs: null,
+            headersReceived: true,
+            firstByteSentToClient: false,
+            timestamp: new Date().toISOString(),
+          }).catch(() => {});
+        }
+        return {
+          success: false,
+          response: null,
+          error: new ProviderError(
+            ErrorType.CONTENT_INVALID,
+            'upstream returned 200 but body was empty or invalid',
+            { provider, model: modelId }
+          ),
+          headersReceived: true,
+          firstByteReceived: false,
+          attemptLog,
+          keyId: result.keyId,
+          usage: null,
+          cost: null,
+        };
+      }
 
       const attemptLog = this._buildAttemptLog(
         candidate, result.keyId, attemptNumber, 'success',

@@ -41,16 +41,6 @@ function protocolLog(msg) {
 // ----------------------------------------------------------------------------
 
 /**
- * 生成或提取请求唯一标识。
- */
-function generateRequestId(req) {
-  const headers = req?.headers || {};
-  const id = headers['x-request-id'] || headers['x-correlation-id'];
-  if (id) return String(id);
-  return `req-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-/**
  * 从请求体中检测所需能力（如 vision）。
  */
 function detectCapability(body) {
@@ -1082,7 +1072,8 @@ export async function handleResponseStream(req, res, body, context) {
     agentInfo,
   } = context;
 
-  const requestId = generateRequestId(req);
+  const requestId = context.requestId;
+  const externalRequestId = req?.headers?.['x-request-id'] || req?.headers?.['x-correlation-id'] || null;
   const agentId = agentInfo?.agentId || 'generic';
 
   // 解析请求体（兼容字符串传入）
@@ -1158,7 +1149,7 @@ export async function handleResponseStream(req, res, body, context) {
       agentId,
       abortSignal: cancelToken?.signal || undefined,
       budget,
-      protocol: 'chat',
+      protocol: context.protocol || 'responses',
       requestId,
       timeoutMs: config?.server?.request_timeout_ms,
     });

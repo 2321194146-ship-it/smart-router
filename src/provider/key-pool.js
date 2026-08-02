@@ -68,6 +68,10 @@ export class KeyPool {
     /** @type {Map<string, string[]>} providerName → keyId 数组（保持插入顺序） */
     this._providerKeyIds = new Map();
     this._initKeys(config);
+    // 从 store 恢复 Key 状态（异步执行，不阻塞构造）
+    if (this.store) {
+      this._restorePromise = this._restoreKeyStatus();
+    }
   }
 
   // --------------------------------------------------------------------------
@@ -260,6 +264,7 @@ export class KeyPool {
       rec.status = KeyStatus.ACTIVE;
       rec.cooldownUntil = null;
     }
+    this._persistKeyStatus(providerName, keyId);
   }
 
   /**
@@ -299,6 +304,7 @@ export class KeyPool {
       rec.status = KeyStatus.INVALID;
       rec.cooldownUntil = null;
       log(`key "${keyId}" permanently disabled (AUTH_INVALID / 401)`);
+      this._persistKeyStatus(providerName, keyId);
       return;
     }
 
@@ -319,6 +325,7 @@ export class KeyPool {
         `key "${keyId}" cooling for ${cooldownSec}s ` +
           `(errorType=${errorType}, failureCount=${rec.failureCount})`
       );
+      this._persistKeyStatus(providerName, keyId);
     }
   }
 
@@ -333,6 +340,7 @@ export class KeyPool {
     rec.status = KeyStatus.DISABLED;
     rec.cooldownUntil = null;
     log(`key "${keyId}" manually disabled`);
+    this._persistKeyStatus(providerName, keyId);
   }
 
   /**
@@ -349,6 +357,7 @@ export class KeyPool {
       rec.cooldownUntil = null;
       rec.failureCount = 0;
       log(`key "${keyId}" manually enabled`);
+      this._persistKeyStatus(providerName, keyId);
     }
   }
 
@@ -531,6 +540,62 @@ export class KeyPool {
         // 客户端取消或未知错误 → 不冷却
         return 0;
     }
+  }
+  // --------------------------------------------------------------------------
+  // Store 持久化集成
+  // --------------------------------------------------------------------------
+
+  /**
+   * 等待 Key 状态恢复完成（从 store 异步加载）。
+   * 调用方可在使用 KeyPool 前 await 此 Promise，确保恢复完成。
+   * @returns {Promise<void>|undefined}
+   */
+  getRestoredPromise() {
+    return this._restorePromise;
+  }
+
+  /**
+   * 从 store 恢复 Key 状态（冷却、失效等）。
+   * 异步执行，不阻塞构造函数。
+   */
+  async _restoreKeyStatus() {
+    if (!this.store || typeof this.store.getKeyStatuses !== 'function') return;
+    try {
+      for (const [providerName, keyIds] of this._providerKeyIds) {
+        const statuses = await this.store.getKeyStatuses(providerName);
+        for (const s of statuses) {
+          const rec = this._keys.get(s.keyId);
+          if (!rec) continue;
+          if (s.status && s.status !== KeyStatus.ACTIVE) {
+            rec.status = s.status;
+            log('restored key "' + s.keyId + '" as ' + s.status + ' from store');
+          }
+        }
+      }
+    } catch (err) {
+      log('restoreKeyStatus error: ' + err.message);
+    }
+  }
+
+  /**
+   * 持久化 Key 状态到 store。
+   * 异步执行，使用 .catch() 不阻塞主流程。
+   * @param {string} providerName
+   * @param {string} keyId
+   */
+  _persistKeyStatus(providerName, keyId) {
+    if (!this.store || typeof this.store.saveKeyStatus !== 'function') return;
+    const rec = this._keys.get(keyId);
+    if (!rec) return;
+    this.store.saveKeyStatus({
+      provider: providerName,
+      keyId,
+      status: rec.status,
+      reason: rec.lastErrorType,
+      updatedAt: new Date().toISOString(),
+    }).catch((err) => {
+      log('persistKeyStatus error for ' + keyId + ': ' + err.message);
+    });
   }
 }
 

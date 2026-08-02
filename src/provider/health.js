@@ -73,7 +73,7 @@ export class CircuitBreaker {
   /**
    * @param {object} [config] circuit_breaker 配置段
    */
-  constructor(config = {}) {
+  constructor(config = {}, store = null) {
     this.enabled = config.enabled !== false;
     this.failureThreshold = config.failure_threshold ?? 5;
     this.failureWindowMs = (config.failure_window_sec ?? 60) * 1000;
@@ -83,9 +83,13 @@ export class CircuitBreaker {
     this.slowCallRatioThreshold = config.slow_call_ratio ?? 0.5;
     this.slowCallWindowMs = (config.slow_call_window_sec ?? config.slow_call_window ?? 60) * 1000;
     this.cooldownBaseMs = config.cooldown_base_ms ?? 1000;
+    this.store = store || null;
 
     /** @type {Map<string, object>} key → 熔断记录 */
     this._records = new Map();
+    if (this.store) {
+      this._restorePromise = this._restoreCircuitState();
+    }
   }
 
   /**
@@ -171,6 +175,7 @@ export class CircuitBreaker {
         rec.callSamples = [];
         rec.openUntil = null;
         log(`circuit "${key}" HALF_OPEN → CLOSED (probe succeeded)`);
+        this._persistCircuitState(key);
       } else {
         rec.halfOpenFailures++;
         // 探测失败 → 重新打开
@@ -178,6 +183,7 @@ export class CircuitBreaker {
         rec.openUntil = now + this.openStateMs;
         rec.consecutiveFailures++;
         log(`circuit "${key}" HALF_OPEN → OPEN (probe failed)`);
+        this._persistCircuitState(key);
       }
       return;
     }
@@ -216,6 +222,7 @@ export class CircuitBreaker {
             ? `slow call ratio exceeded`
             : `window failures=${windowFailures}`;
         log(`circuit "${key}" CLOSED → OPEN (${reason})`);
+        this._persistCircuitState(key);
       }
     }
   }
@@ -315,6 +322,55 @@ export class CircuitBreaker {
     rec.failures = rec.failures.filter((f) => f.time > failureCutoff);
     rec.callSamples = rec.callSamples.filter((s) => s.time > slowCutoff);
   }
+  // ------------------------------------------------------------------------
+  // Store 持久化集成
+  // ------------------------------------------------------------------------
+
+  /**
+   * 从 store 恢复熔断器状态。
+   * 异步执行，不阻塞构造函数。
+   */
+  async _restoreCircuitState() {
+    if (!this.store || typeof this.store.getAllProviderHealth !== 'function') return;
+    try {
+      const records = await this.store.getAllProviderHealth();
+      for (const r of records) {
+        if (!r.provider) continue;
+        const rec = this._createRecord();
+        if (r.state === 'OPEN') {
+          rec.state = CircuitState.OPEN;
+          rec.openUntil = Date.now() + this.openStateMs;
+        } else if (r.state === 'HALF_OPEN') {
+          rec.state = CircuitState.HALF_OPEN;
+        }
+        rec.consecutiveFailures = r.failureCount || 0;
+        this._records.set(r.provider, rec);
+        log('restored circuit "' + r.provider + '" state: ' + r.state);
+      }
+    } catch (err) {
+      log('restoreCircuitState error: ' + err.message);
+    }
+  }
+
+  /**
+   * 持久化熔断器状态到 store。
+   * 异步执行，使用 .catch() 不阻塞主流程。
+   * @param {string} key
+   */
+  _persistCircuitState(key) {
+    if (!this.store || typeof this.store.saveProviderHealth !== 'function') return;
+    const rec = this._records.get(key);
+    if (!rec) return;
+    this.store.saveProviderHealth({
+      provider: key,
+      state: rec.state,
+      failureCount: rec.consecutiveFailures,
+      lastFailureAt: rec.failures.length > 0 ? new Date(rec.failures[rec.failures.length - 1].time).toISOString() : null,
+      updatedAt: new Date().toISOString(),
+    }).catch((err) => {
+      log('persistCircuitState error: ' + err.message);
+    });
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -351,12 +407,16 @@ export class ProviderHealth {
   /**
    * @param {object} config 已加载的配置对象
    */
-  constructor(config) {
+  constructor(config, store = null) {
     this.config = config;
+    this.store = store || null;
     /** @type {Map<string, object>} providerName → 健康记录 */
     this._records = new Map();
     this._timer = null;
     this._init(config);
+    if (this.store) {
+      this._restorePromise = this._restoreHealthState();
+    }
   }
 
   // --------------------------------------------------------------------------
@@ -493,6 +553,7 @@ export class ProviderHealth {
 
     // 重算状态
     this._recomputeStatus(rec);
+    this._persistHealthState(providerName);
   }
 
   // --------------------------------------------------------------------------
@@ -765,6 +826,55 @@ export class ProviderHealth {
     }
 
     return headers;
+  }
+  // --------------------------------------------------------------------------
+  // Store 持久化集成
+  // --------------------------------------------------------------------------
+
+  /**
+   * 从 store 恢复 Provider 健康状态。
+   * 异步执行，不阻塞构造函数。
+   */
+  async _restoreHealthState() {
+    if (!this.store || typeof this.store.getAllProviderHealth !== 'function') return;
+    try {
+      const records = await this.store.getAllProviderHealth();
+      for (const r of records) {
+        const rec = this._records.get(r.provider);
+        if (!rec) continue;
+        if (r.state === 'active') {
+          rec.status = ProviderStatus.ACTIVE;
+        } else if (r.state === 'degraded') {
+          rec.status = ProviderStatus.DEGRADED;
+        } else if (r.state === 'down') {
+          rec.status = ProviderStatus.DOWN;
+        }
+        rec.consecutiveFailures = r.failureCount || 0;
+        log('restored provider "' + r.provider + '" status: ' + (r.state || 'unknown'));
+      }
+    } catch (err) {
+      log('restoreHealthState error: ' + err.message);
+    }
+  }
+
+  /**
+   * 持久化 Provider 健康状态到 store。
+   * 异步执行，使用 .catch() 不阻塞主流程。
+   * @param {string} providerName
+   */
+  _persistHealthState(providerName) {
+    if (!this.store || typeof this.store.saveProviderHealth !== 'function') return;
+    const rec = this._records.get(providerName);
+    if (!rec) return;
+    this.store.saveProviderHealth({
+      provider: providerName,
+      state: rec.status,
+      failureCount: rec.consecutiveFailures,
+      lastFailureAt: rec.lastCheck ? new Date(rec.lastCheck).toISOString() : null,
+      updatedAt: new Date().toISOString(),
+    }).catch((err) => {
+      log('persistHealthState error: ' + err.message);
+    });
   }
 }
 

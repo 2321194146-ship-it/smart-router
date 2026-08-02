@@ -31,17 +31,6 @@ function protocolLog(msg) {
 // ----------------------------------------------------------------------------
 
 /**
- * 生成或提取请求唯一标识。
- * 优先从 x-request-id / x-correlation-id 头读取，否则自动生成。
- */
-function generateRequestId(req) {
-  const headers = req?.headers || {};
-  const id = headers['x-request-id'] || headers['x-correlation-id'];
-  if (id) return String(id);
-  return `req-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-/**
  * 检查 res 是否可写（未结束且未销毁）。
  */
 function isResWritable(res) {
@@ -646,7 +635,8 @@ function createResponseInterceptor() {
  * @param {object} context 上下文（含 config, executionEngine, finalizer, costTracker, cancelToken, agentInfo）
  */
 export async function handleResponse(req, res, body, context) {
-  const requestId = generateRequestId(req);
+  const requestId = context.requestId;
+  const externalRequestId = req?.headers?.['x-request-id'] || req?.headers?.['x-correlation-id'] || null;
 
   // 解析请求体（兼容字符串传入）
   let parsedBody = body;

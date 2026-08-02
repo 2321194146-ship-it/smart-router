@@ -42,16 +42,6 @@ function protocolLog(msg) {
 // ----------------------------------------------------------------------------
 
 /**
- * 生成或提取请求唯一标识。
- */
-function generateRequestId(req) {
-  const headers = req?.headers || {};
-  const id = headers['x-request-id'] || headers['x-correlation-id'];
-  if (id) return String(id);
-  return `req-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-/**
  * 从请求体中检测所需能力（如 vision）。
  * 兼容 Anthropic 和 OpenAI 两种 content block 格式。
  */
@@ -723,7 +713,8 @@ export async function handleAnthropicMessage(req, res, body, context) {
     agentInfo,
   } = context;
 
-  const requestId = generateRequestId(req);
+  const requestId = context.requestId;
+  const externalRequestId = req?.headers?.['x-request-id'] || req?.headers?.['x-correlation-id'] || null;
   const agentId = agentInfo?.agentId || 'claude-code';
 
   // 解析请求体（兼容字符串传入）
@@ -802,7 +793,7 @@ export async function handleAnthropicMessage(req, res, body, context) {
       agentId,
       abortSignal: cancelToken?.signal || undefined,
       budget,
-      protocol: 'chat',
+      protocol: context.protocol || 'anthropic',
       requestId,
       timeoutMs: config?.server?.request_timeout_ms,
     });
@@ -819,7 +810,7 @@ export async function handleAnthropicMessage(req, res, body, context) {
     } else {
       await handleFailure(
         res, executionResult, attemptLog, finalizer, requestId, agentId,
-        cancelToken,
+        cancelToken, context,
       );
     }
   } catch (err) {
@@ -937,13 +928,16 @@ async function handleSuccess(
     }
   }
 
-  // 收尾（幂等：以 requestId 去重）
+  // 收尾（使用事务：finalizeRequestTransaction 或回退到 finalize）
   const anthropicResponseStr = JSON.stringify(anthropicResponse);
-  await finalizer.finalize(requestId, attemptLog, outcome, {
+  const finalizeMethod = (typeof finalizer.finalizeRequestTransaction === 'function')
+    ? finalizer.finalizeRequestTransaction.bind(finalizer)
+    : finalizer.finalize.bind(finalizer);
+  await finalizeMethod(requestId, attemptLog, outcome, {
     model: executionResult.finalCandidate?.modelId,
     provider: executionResult.finalCandidate?.provider,
     agentId,
-    protocol: 'anthropic',
+    protocol: context.protocol || 'anthropic',
     responseSize: Buffer.byteLength(anthropicResponseStr),
   });
 
@@ -971,16 +965,19 @@ async function handleSuccess(
  */
 async function handleFailure(
   res, executionResult, attemptLog, finalizer, requestId, agentId,
-  cancelToken,
+  cancelToken, context,
 ) {
   const outcome = mapExecutionOutcome(executionResult.outcome);
 
-  // 收尾
-  await finalizer.finalize(requestId, attemptLog, outcome, {
+  // 收尾（使用事务）
+  const finalizeMethod = (typeof finalizer.finalizeRequestTransaction === 'function')
+    ? finalizer.finalizeRequestTransaction.bind(finalizer)
+    : finalizer.finalize.bind(finalizer);
+  await finalizeMethod(requestId, attemptLog, outcome, {
     model: executionResult.finalCandidate?.modelId,
     provider: executionResult.finalCandidate?.provider,
     agentId,
-    protocol: 'anthropic',
+    protocol: (context?.protocol) || 'anthropic',
   });
 
   // 客户端已断开：不发送响应

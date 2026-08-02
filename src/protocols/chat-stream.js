@@ -37,16 +37,6 @@ function protocolLog(msg) {
 // ----------------------------------------------------------------------------
 
 /**
- * 生成或提取请求唯一标识。
- */
-function generateRequestId(req) {
-  const headers = req?.headers || {};
-  const id = headers['x-request-id'] || headers['x-correlation-id'];
-  if (id) return String(id);
-  return `req-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-/**
  * 从请求体中检测所需能力（如 vision）。
  */
 function detectCapability(body) {
@@ -569,7 +559,8 @@ export async function handleChatCompletionStream(req, res, body, context) {
     agentInfo,
   } = context;
 
-  const requestId = generateRequestId(req);
+  const requestId = context.requestId;
+  const externalRequestId = req?.headers?.['x-request-id'] || req?.headers?.['x-correlation-id'] || null;
   const agentId = agentInfo?.agentId || 'generic';
 
   // 解析请求体（兼容字符串传入）
@@ -621,7 +612,7 @@ export async function handleChatCompletionStream(req, res, body, context) {
       protocolLog(`[${requestId}] no candidates available`);
       await finalizer.finalizeNoCandidate(requestId, requestedModel, {
         agentId,
-        protocol: 'chat',
+        protocol: context.protocol || 'chat',
       });
 
       if (!cancelToken?.isAborted() && isResWritable(res)) {
@@ -641,7 +632,7 @@ export async function handleChatCompletionStream(req, res, body, context) {
       agentId,
       abortSignal: cancelToken?.signal || undefined,
       budget,
-      protocol: 'chat',
+      protocol: context.protocol || 'chat',
       requestId,
       timeoutMs: config?.server?.request_timeout_ms,
     });
@@ -668,7 +659,7 @@ export async function handleChatCompletionStream(req, res, body, context) {
     try {
       await finalizer.finalizeNoCandidate(requestId, parsedBody?.model, {
         agentId,
-        protocol: 'chat',
+        protocol: context.protocol || 'chat',
       });
     } catch {
       // 收尾失败不影响错误响应
@@ -779,7 +770,7 @@ async function handleStreamSuccess(
     model: executionResult.finalCandidate?.modelId,
     provider: executionResult.finalCandidate?.provider,
     agentId,
-    protocol: 'chat',
+    protocol: context.protocol || 'chat',
     responseSize: pipeResult.bytesTransferred,
   });
 }
@@ -804,7 +795,7 @@ async function handleStreamFailure(
     model: executionResult.finalCandidate?.modelId,
     provider: executionResult.finalCandidate?.provider,
     agentId,
-    protocol: 'chat',
+    protocol: context.protocol || 'chat',
   });
 
   // 客户端已断开：不发送响应
