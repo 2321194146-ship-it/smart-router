@@ -35,7 +35,7 @@ cp config/config.example.json config/local.json
 
 ```bash
 npm start
-# 或：node src/index.js --config config/local.json
+# 或：node src/index.js config/local.json
 ```
 
 5. 验证探活
