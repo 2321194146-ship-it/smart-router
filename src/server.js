@@ -34,6 +34,7 @@ import { KeyPool } from './provider/key-pool.js';
 import { ProviderHealth, CircuitBreaker } from './provider/health.js';
 import { ProviderClient } from './provider/client.js';
 import { ExecutionEngine } from './router/execution.js';
+import { IntelligenceLayer } from './intelligence/index.js';
 import { CostTracker } from './cost/tracker.js';
 import { CancelToken } from './runtime/cancellation.js';
 import { Finalizer } from './runtime/finalization.js';
@@ -125,6 +126,10 @@ export async function createServer(configPath) {
     store,
   );
 
+  // 4b. 初始化智能层（Phase2-A Shadow；off 模式零开销）
+  const intelligence = new IntelligenceLayer(config);
+  log(`server: intelligence layer initialized (mode=${intelligence.mode})`);
+
   log('server: all components initialized');
 
   // 5. 启动健康检查
@@ -147,6 +152,7 @@ export async function createServer(configPath) {
     costTracker,
     finalizer,
     executionEngine,
+    intelligence,
   };
 
   // 6. 创建 HTTP 服务器

@@ -117,7 +117,8 @@ function validateIntelligence(intel, errors, warnings) {
     errors.push('intelligence must be an object');
     return;
   }
-  const allowedModes = new Set(['off', 'assist', 'auto']);
+  // Phase 1 主干仅支持 off；Phase2-A Shadow 新增 shadow 模式（不改变执行路径）
+  const allowedModes = new Set(['off', 'assist', 'auto', 'shadow']);
   if (!('mode' in intel)) {
     errors.push('intelligence.mode is required');
   } else if (!allowedModes.has(intel.mode)) {
@@ -125,9 +126,9 @@ function validateIntelligence(intel, errors, warnings) {
       `intelligence.mode must be one of ${[...allowedModes].join(', ')} (got "${intel.mode}")`
     );
   }
-  if (intel.mode !== undefined && intel.mode !== 'off') {
+  if (intel.mode !== undefined && intel.mode !== 'off' && intel.mode !== 'shadow') {
     warnings.push(
-      `intelligence.mode="${intel.mode}" is set, but Phase 1 mainline expects "off"`
+      `intelligence.mode="${intel.mode}" is set, but Phase 1/2-A expects "off" or "shadow"`
     );
   }
 }

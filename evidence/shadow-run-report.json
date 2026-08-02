@@ -1,0 +1,410 @@
+{
+  "mode": "shadow",
+  "requests": [
+    {
+      "name": "chat",
+      "status": 200,
+      "model": "deepseek-ai/DeepSeek-V4-Flash"
+    },
+    {
+      "name": "anthropic",
+      "status": 200,
+      "model": "gateway-auto"
+    },
+    {
+      "name": "responses",
+      "status": 200,
+      "model": "nemotron-3-ultra-free"
+    },
+    {
+      "name": "tool_use_round1",
+      "status": 200,
+      "model": "deepseek-ai/DeepSeek-V4-Flash"
+    },
+    {
+      "name": "fallback",
+      "status": 200,
+      "model": "glm-4-flash"
+    },
+    {
+      "name": "paid_blocked",
+      "status": 402,
+      "model": null
+    }
+  ],
+  "summary": {
+    "requests": 6,
+    "shadowRecords": 6,
+    "agree": 4,
+    "differ": 2,
+    "suggestionAcceptedRate": "66.7%"
+  },
+  "comparison": [
+    {
+      "requestId": "sr_1785710750690_7f2982",
+      "protocol": "chat",
+      "agentId": "generic",
+      "suggested": "deepseek-ai/DeepSeek-V4-Flash",
+      "suggestedScore": 0.7,
+      "real": "modelscope/deepseek-ai/DeepSeek-V4-Flash",
+      "realOutcome": "completed",
+      "agree": true,
+      "realLatencyMs": 1949,
+      "predictedLatencyMs": 1522,
+      "predictedCost": null,
+      "realCost": {
+        "inputCost": 0,
+        "outputCost": 0,
+        "totalCost": 0,
+        "currency": "USD"
+      },
+      "explanationSummary": "推荐 modelscope/deepseek-ai/DeepSeek-V4-Flash（score=0.7）；预估质量 1；预估延迟 1522ms"
+    },
+    {
+      "requestId": "sr_1785710752657_ac8237",
+      "protocol": "anthropic",
+      "agentId": "claude-code",
+      "suggested": "gateway-auto",
+      "suggestedScore": 0.7,
+      "real": "gateway/gateway-auto",
+      "realOutcome": "completed",
+      "agree": true,
+      "realLatencyMs": 3148,
+      "predictedLatencyMs": 1219,
+      "predictedCost": null,
+      "realCost": {
+        "inputCost": 0,
+        "outputCost": 0,
+        "totalCost": 0,
+        "currency": "USD"
+      },
+      "explanationSummary": "推荐 gateway/gateway-auto（score=0.7）；预估质量 0.95；预估延迟 1219ms"
+    },
+    {
+      "requestId": "sr_1785710755818_0f8716",
+      "protocol": "responses",
+      "agentId": "codex",
+      "suggested": "gateway-auto",
+      "suggestedScore": 0.7,
+      "real": "gateway/gateway-auto",
+      "realOutcome": "completed",
+      "agree": true,
+      "realLatencyMs": 1885,
+      "predictedLatencyMs": 1277,
+      "predictedCost": null,
+      "realCost": {
+        "inputCost": 0,
+        "outputCost": 0,
+        "totalCost": 0,
+        "currency": "USD"
+      },
+      "explanationSummary": "推荐 gateway/gateway-auto（score=0.7）；预估质量 0.95；预估延迟 1277ms"
+    },
+    {
+      "requestId": "sr_1785710757712_6780f5",
+      "protocol": "chat",
+      "agentId": "generic",
+      "suggested": "deepseek-ai/DeepSeek-V4-Flash",
+      "suggestedScore": 0.875,
+      "real": "modelscope/deepseek-ai/DeepSeek-V4-Flash",
+      "realOutcome": "completed",
+      "agree": true,
+      "realLatencyMs": 1541,
+      "predictedLatencyMs": 1453,
+      "predictedCost": null,
+      "realCost": {
+        "inputCost": 0,
+        "outputCost": 0,
+        "totalCost": 0,
+        "currency": "USD"
+      },
+      "explanationSummary": "推荐 modelscope/deepseek-ai/DeepSeek-V4-Flash（score=0.875）；预估质量 1；预估延迟 1453ms"
+    },
+    {
+      "requestId": "sr_1785710759260_3b00e0",
+      "protocol": "chat",
+      "agentId": "generic",
+      "suggested": "ms-bad-key-model",
+      "suggestedScore": 0.7,
+      "real": "gateway/gateway-auto",
+      "realOutcome": "completed",
+      "agree": false,
+      "realLatencyMs": 408,
+      "predictedLatencyMs": 1455,
+      "predictedCost": null,
+      "realCost": {
+        "inputCost": 0,
+        "outputCost": 0,
+        "totalCost": 0,
+        "currency": "USD"
+      },
+      "explanationSummary": "推荐 modelscope-badkey/ms-bad-key-model（score=0.7）；预估质量 0.95；预估延迟 1455ms；淘汰 3 个候选"
+    },
+    {
+      "requestId": "sr_1785710759733_b40bee",
+      "protocol": "chat",
+      "agentId": "generic",
+      "suggested": null,
+      "suggestedScore": null,
+      "real": null,
+      "realOutcome": "budget_exceeded",
+      "agree": false,
+      "realLatencyMs": 0,
+      "predictedLatencyMs": null,
+      "predictedCost": null,
+      "realCost": null,
+      "explanationSummary": "无推荐（所有候选被预算/策略淘汰）；预估质量 null；预估延迟 nullms；淘汰 1 个候选"
+    }
+  ],
+  "records": [
+    {
+      "requestId": "sr_1785710750690_7f2982",
+      "protocol": "chat",
+      "agentId": "generic",
+      "task": {
+        "taskType": "coding",
+        "complexity": 0.42,
+        "needsToolUse": false,
+        "codeRelated": true
+      },
+      "suggestion": {
+        "model": "deepseek-ai/DeepSeek-V4-Flash",
+        "score": 0.7
+      },
+      "predictions": {
+        "cost": null,
+        "quality": 1,
+        "latency": 1522
+      },
+      "explanation": "推荐 modelscope/deepseek-ai/DeepSeek-V4-Flash（score=0.7）；预估质量 1；预估延迟 1522ms",
+      "traditional": {
+        "finalModel": "deepseek-ai/DeepSeek-V4-Flash",
+        "finalProvider": "modelscope",
+        "outcome": "completed",
+        "latencyMs": 1949,
+        "usage": {
+          "promptTokens": 12,
+          "completionTokens": 101,
+          "totalTokens": 113,
+          "raw": {
+            "prompt_tokens": 12,
+            "completion_tokens": 101,
+            "total_tokens": 113
+          }
+        },
+        "cost": {
+          "inputCost": 0,
+          "outputCost": 0,
+          "totalCost": 0,
+          "currency": "USD"
+        }
+      }
+    },
+    {
+      "requestId": "sr_1785710752657_ac8237",
+      "protocol": "anthropic",
+      "agentId": "claude-code",
+      "task": {
+        "taskType": "chat",
+        "complexity": 0.18,
+        "needsToolUse": false,
+        "codeRelated": false
+      },
+      "suggestion": {
+        "model": "gateway-auto",
+        "score": 0.7
+      },
+      "predictions": {
+        "cost": null,
+        "quality": 0.95,
+        "latency": 1219
+      },
+      "explanation": "推荐 gateway/gateway-auto（score=0.7）；预估质量 0.95；预估延迟 1219ms",
+      "traditional": {
+        "finalModel": "gateway-auto",
+        "finalProvider": "gateway",
+        "outcome": "completed",
+        "latencyMs": 3148,
+        "usage": {
+          "promptTokens": 109,
+          "completionTokens": 60,
+          "totalTokens": 169,
+          "raw": {
+            "input_tokens": 109,
+            "output_tokens": 60
+          }
+        },
+        "cost": {
+          "inputCost": 0,
+          "outputCost": 0,
+          "totalCost": 0,
+          "currency": "USD"
+        }
+      }
+    },
+    {
+      "requestId": "sr_1785710755818_0f8716",
+      "protocol": "responses",
+      "agentId": "codex",
+      "task": {
+        "taskType": "extraction",
+        "complexity": 0.24,
+        "needsToolUse": false,
+        "codeRelated": false
+      },
+      "suggestion": {
+        "model": "gateway-auto",
+        "score": 0.7
+      },
+      "predictions": {
+        "cost": null,
+        "quality": 0.95,
+        "latency": 1277
+      },
+      "explanation": "推荐 gateway/gateway-auto（score=0.7）；预估质量 0.95；预估延迟 1277ms",
+      "traditional": {
+        "finalModel": "gateway-auto",
+        "finalProvider": "gateway",
+        "outcome": "completed",
+        "latencyMs": 1885,
+        "usage": {
+          "promptTokens": 150,
+          "completionTokens": 40,
+          "totalTokens": 190,
+          "raw": {
+            "prompt_tokens": 150,
+            "completion_tokens": 40,
+            "total_tokens": 190,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens": 0
+            },
+            "completion_tokens_details": {
+              "audio_tokens": 0,
+              "reasoning_tokens": 15
+            }
+          }
+        },
+        "cost": {
+          "inputCost": 0,
+          "outputCost": 0,
+          "totalCost": 0,
+          "currency": "USD"
+        }
+      }
+    },
+    {
+      "requestId": "sr_1785710757712_6780f5",
+      "protocol": "chat",
+      "agentId": "generic",
+      "task": {
+        "taskType": "tool_orchestration",
+        "complexity": 0.48,
+        "needsToolUse": true,
+        "codeRelated": false
+      },
+      "suggestion": {
+        "model": "deepseek-ai/DeepSeek-V4-Flash",
+        "score": 0.875
+      },
+      "predictions": {
+        "cost": null,
+        "quality": 1,
+        "latency": 1453
+      },
+      "explanation": "推荐 modelscope/deepseek-ai/DeepSeek-V4-Flash（score=0.875）；预估质量 1；预估延迟 1453ms",
+      "traditional": {
+        "finalModel": "deepseek-ai/DeepSeek-V4-Flash",
+        "finalProvider": "modelscope",
+        "outcome": "completed",
+        "latencyMs": 1541,
+        "usage": {
+          "promptTokens": 294,
+          "completionTokens": 78,
+          "totalTokens": 372,
+          "raw": {
+            "prompt_tokens": 294,
+            "completion_tokens": 78,
+            "total_tokens": 372
+          }
+        },
+        "cost": {
+          "inputCost": 0,
+          "outputCost": 0,
+          "totalCost": 0,
+          "currency": "USD"
+        }
+      }
+    },
+    {
+      "requestId": "sr_1785710759260_3b00e0",
+      "protocol": "chat",
+      "agentId": "generic",
+      "task": {
+        "taskType": "chat",
+        "complexity": 0.18,
+        "needsToolUse": false,
+        "codeRelated": false
+      },
+      "suggestion": {
+        "model": "ms-bad-key-model",
+        "score": 0.7
+      },
+      "predictions": {
+        "cost": null,
+        "quality": 0.95,
+        "latency": 1455
+      },
+      "explanation": "推荐 modelscope-badkey/ms-bad-key-model（score=0.7）；预估质量 0.95；预估延迟 1455ms；淘汰 3 个候选",
+      "traditional": {
+        "finalModel": "gateway-auto",
+        "finalProvider": "gateway",
+        "outcome": "completed",
+        "latencyMs": 408,
+        "usage": {
+          "promptTokens": 98,
+          "completionTokens": 6,
+          "totalTokens": 104,
+          "raw": {
+            "completion_tokens": 6,
+            "prompt_tokens": 98,
+            "total_tokens": 104
+          }
+        },
+        "cost": {
+          "inputCost": 0,
+          "outputCost": 0,
+          "totalCost": 0,
+          "currency": "USD"
+        }
+      }
+    },
+    {
+      "requestId": "sr_1785710759733_b40bee",
+      "protocol": "chat",
+      "agentId": "generic",
+      "task": {
+        "taskType": "chat",
+        "complexity": 0.18,
+        "needsToolUse": false,
+        "codeRelated": false
+      },
+      "suggestion": null,
+      "predictions": {
+        "cost": null,
+        "quality": null,
+        "latency": null
+      },
+      "explanation": "无推荐（所有候选被预算/策略淘汰）；预估质量 null；预估延迟 nullms；淘汰 1 个候选",
+      "traditional": {
+        "finalModel": null,
+        "finalProvider": null,
+        "outcome": "budget_exceeded",
+        "latencyMs": 0,
+        "usage": null,
+        "cost": null
+      }
+    }
+  ]
+}

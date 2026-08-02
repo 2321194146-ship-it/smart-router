@@ -1,16 +1,50 @@
 {
   "package": "smart-router-mainline",
-  "version": "1.0.0-phase1-sealed-final",
-  "date": "2026-08-02T22:09:10.432Z",
-  "description": "Smart Router Mainline Phase 1 Sealed Final - concurrent transaction fix (finalizeRequestAtomic, BEGIN IMMEDIATE) and unified atomic no_candidate/internal_error finalize",
+  "version": "1.0.0-phase2-shadow",
+  "branch": "phase2-shadow",
+  "base_commit": "feb735d",
+  "pilot_fix_commit": "247495b",
+  "date": "2026-08-02T22:48:30.151Z",
+  "description": "Smart Router Mainline Phase 2-A Shadow - intelligent decision layer in shadow mode (Task Analyzer / Capability Registry / Policy / Budget / Decision Engine / Explainability / Shadow Recorder)",
+  "pilot_summary": {
+    "status": "passed",
+    "total": 9,
+    "passed": 9,
+    "note": "真实外部 Provider Pilot 9/9 通过：modelscope 直连 chat / 7878 网关 Anthropic+Responses / 真实 401 fallback / tool_use / 流式取消 / 禁付费 / strict / 真实 usage 成本 Attempt 记录。",
+    "reports": [
+      "PILOT_REPORT.md"
+    ]
+  },
+  "phase2_summary": {
+    "mode": "off|shadow",
+    "modules": [
+      "task-analyzer",
+      "capability-registry",
+      "policy",
+      "budget",
+      "decision-engine",
+      "explainability",
+      "shadow-recorder",
+      "intelligence-index"
+    ],
+    "constraints": [
+      "不增加上游调用（纯本地计算）",
+      "不修改 Phase1 候选顺序（只读）",
+      "不影响用户响应（try/catch + off no-op）",
+      "三协议同一内部 sr_ requestId",
+      "可立即切回 off",
+      "智能输出为机器可执行元数据，不附加 System Prompt",
+      "未实现：Active / Dashboard / 网站 / 用户系统 / 商业化 / Prompt 注入 / 消息改写 / Tool 自动控制 / 多模型并行拼接 / 自动学习改权重"
+    ]
+  },
   "test_summary": {
     "unit": {
-      "tests": 345,
-      "suites": 75,
+      "tests": 370,
+      "suites": 84,
       "failures": 0
     },
     "integration": {
-      "tests": 65,
+      "tests": 69,
       "suites": 18,
       "failures": 0
     },
@@ -20,44 +54,51 @@
       "failures": 0
     },
     "total": {
-      "tests": 443,
-      "suites": 108,
+      "tests": 472,
+      "suites": 117,
       "failures": 0
     }
   },
-  "pilot_summary": {
-    "status": "pending_external_pilot",
-    "note": "本地 Mock Provider 测试只称为 HTTP Provider Failure/Fallback Integration；未实际运行真实外部 Provider Pilot，无 pilot-evidence.json，不填写 5/5 通过结论。复跑脚本 scripts/pilot-sanitized.mjs 不含任何 Key，可复跑。",
-    "scripts": [
-      "scripts/pilot-sanitized.mjs"
-    ]
+  "shadow_run": {
+    "requests": 6,
+    "records": 6,
+    "agree": 4,
+    "differ": 2,
+    "suggestionAcceptedRate": "66.7%"
   },
-  "this_round_fixes": [
-    "方案A：SQLiteStore.finalizeRequestAtomic（BEGIN IMMEDIATE + 连续同步写入 + ROLLBACK，无 await），修复并发事务 \"cannot start a transaction within a transaction\"；业务层纯计算后调用，成功后更新内存",
-    "所有终态统一原子收尾：5 个协议 10 处 finalizeNoCandidate 调用改为 finalizeRequestTransaction；候选真实为空 → NO_CANDIDATE；catch 内部异常 → INTERNAL_ERROR（新增 Outcome），不冒充 no_candidate",
-    "no_candidate 事务内兜底创建 requests 行并持久化 external_request_id（覆盖 execute() 前收尾场景）",
-    "MemoryStore 同步实现 finalizeRequestAtomic，语义一致"
-  ],
   "source_files": {
     ".gitignore": "8df601f2fa14b88b6d3ade8fd92d239cc7699546619d7c40c505da6999302479",
-    "README.md": "e1646b253773a5c6c7e10b91b78f37c3e2b35968fd2ac63eb1ec415f602b834e",
-    "RELEASE_MANIFEST.json": "1fa022b66d0d6b16edb0ab72443ef960b63effefb97586869ed869e7e9376066",
+    "README.md": "8a604c577a20c8f5e851c1c38f20af5185c3217fdfb9ea2cf40b9d1fb65dcbac",
+    "RELEASE_MANIFEST.json": "d022b2e4afe7594526eef3b2585d6083887ec62add223f146ab61a82dad9419a",
     "config/config.example.json": "d2fb50a52711b5045ad65c1081c1be5ccff873d3d88d0920855b25c552c21be8",
+    "evidence/pilot-db-evidence.json": "8de97825fe0c4b2ede60f9d914c95d9ec2f9c131bc914b713afb3ee99e8d57ff",
+    "evidence/pilot-evidence.json": "4fdd0f250938ad806d4076702bbdc2b18c90df899472d161791f60bb5de35a28",
+    "evidence/pilot-server-log.txt": "279307686a15f1361871953c0419222851f09bff26b2cccfc1455033cec4310c",
+    "evidence/pilot-strict-evidence.json": "bce24a301623fa4af71b98822de6f33c8ca37141ad45d788146e1b96e559104a",
+    "evidence/pilot-strict-server-log.txt": "3d8766883dbd59fe9fa9fc349e16eed2110961367e98e3bced5bdd2eee8c37ae",
     "package-lock.json": "6977397067365dd3ee214d1f4b5c6db3a53265be8bc317097348fb01783b5ecd",
     "package.json": "99adca94583aca800739c857be37876d80c1781719280d7407b3bd005879d994",
     "scripts/pilot-sanitized.mjs": "1699a261e416d885abe60e26f65039745d527397eeb6cecbae997dcf12380042",
     "src/agent/compatibility.js": "9ae2bf023796af50cb6eb234310fd5ce3c5d8287731ff41f6783a450a76ce91a",
     "src/agent/identity.js": "cdf17de3dfefddb52b09b03f8d1043782bfd15062568552ae2674d3f0792dc99",
     "src/config/loader.js": "e6e0551c78ef3898e10d6a2ce478b844a679c8d30bec7c2b9918a1bca95ae2e5",
-    "src/config/validator.js": "8966de4a28a21352eb1db8acfb78f739e043cf2eb24e5214565ab7090b25b0c3",
-    "src/cost/tracker.js": "63761e72bbb2fe7589e513fff0f0b7151d0b79e6e76a79e0a154a2500c6d46dd",
+    "src/config/validator.js": "d2c0b139bd5735889e89ddae7185d4716f80b10aaec7547531fa9038719c7657",
+    "src/cost/tracker.js": "d123673201b9244c38a517eaf1ba39771fb7eab93ed977f7823aaf05bdec99d6",
     "src/index.js": "9e58f767ca1719379879dd82411c3aaf8be60da9530b9d80945922cc0aaf904f",
-    "src/protocols/anthropic-stream.js": "32fb4310b7b12a4b9cce325d8509c30e01ff9c97a6c5b9a66c900fd3d7395391",
-    "src/protocols/anthropic.js": "f439de9d256a649505cddb2281aca2257ae21204b6154440a3f491cc0bb8e91d",
-    "src/protocols/chat-stream.js": "50108c660f5d8f9950abd55025210024d690f0fd2072a11887a1a05006ea35b6",
-    "src/protocols/chat.js": "28d030c4322c43dc1579206c59e18f80d6627ebcadd685586213a2737caa4069",
-    "src/protocols/responses-stream.js": "2993c2a9e87aa5d77763b7716f8dfb92ecd758664b2730e221e58b0878546b21",
-    "src/protocols/responses.js": "0925011257d36f476a9b732f11782d135edfad317497532639fbbb28c9c39736",
+    "src/intelligence/budget.js": "ca20b71d0829c50753035c49d10f3ed4eb7c7e37498b074b534d21922004fb89",
+    "src/intelligence/capability-registry.js": "2061f2d6affaa1deebbb6063d015d02c9b5a3f87edf3a51da484c1cef5bbb0ba",
+    "src/intelligence/decision-engine.js": "de5d3ce45b985518cbefa1ba1427031ce27a7e38ae76d1a85e27c8c005adea2e",
+    "src/intelligence/explainability.js": "f09aab56bd64b64345a94d57bd82e0d922f18221f4012cf0cb9aeca5e80c7408",
+    "src/intelligence/index.js": "66d31074305cd84853b9b5df56afc5646bb7bab3357c137226d1c5bc29ec81e3",
+    "src/intelligence/policy.js": "adc96387600f0d8aad47020a68ff170e6110651497975eb6ebc954c0dfa43970",
+    "src/intelligence/shadow-recorder.js": "1df4acf6d9a40cce6e7f10f568d8e5a5784b5a74faca17bbe2141d29b5e86f2c",
+    "src/intelligence/task-analyzer.js": "34f92a34d1b10b18349970578b6bfc5d948c63cbf78eaf44aebf8b1e4e1d0623",
+    "src/protocols/anthropic-stream.js": "d4fedb437cccfc6564910f55fdbbaf88fb93912a1c0a9d36148dbec83278c641",
+    "src/protocols/anthropic.js": "d5f40cd0656a710488cf53e965eed6074f07dbeb59d249957ef576aaf575a792",
+    "src/protocols/chat-stream.js": "05d81c3cffc90812215939ce5d176d0930e2007b6f950a743009848ad2115e24",
+    "src/protocols/chat.js": "3cf6304f9e62fa21418468832184a1a7af1955162313e63a2af22635ab509ffc",
+    "src/protocols/responses-stream.js": "0c9d3bcc3f5673c1906958892ab7ae142c097260ccbc6d7cd519210410772c8f",
+    "src/protocols/responses.js": "99855c555612f1297e4eaaaab1866063d510bdb3b6a5f0809a88a926479acba5",
     "src/provider/client.js": "2aead24d6aabd4d866a2465f892b3a5ddd4cd5e384adcda11546f4ab1e2f6a86",
     "src/provider/errors.js": "01495b49e22b7089ce21600259dabe9e169215537a6b7c42c1eaa8c5a44a19f5",
     "src/provider/health.js": "54d0187339cfe980ea7befe3b71666e97359dc009e54e27e50f98269e33a4016",
@@ -69,7 +110,7 @@
     "src/runtime/cancellation.js": "d54004020e9fe61a5e7cfdb58dfbd1354f3126b4377ef34064ca340ac8af60de",
     "src/runtime/finalization.js": "822ea2fd26d9b34dbb1bd6e5027261d41912e2ffef18992d1af6afdf7a8d93a4",
     "src/runtime/outcomes.js": "bdbe1f097db49dca1a0118f4d178903188831d66b9131b3fef372165830a1ce7",
-    "src/server.js": "81fa96676272204ff1128747d6ef533dc9b869b189b110f1d8eb3359a98a4aeb",
+    "src/server.js": "b2dbdd970f235c51576bbac8d167fad3e88819f05f0dd90a4ab4df7a4892b078",
     "src/storage/index.js": "146b1e4e61a880d65b08e33e24af109ac656d979c1f9452fdf1d4778b91af7d2",
     "src/storage/interface.js": "91978bc4fec4b6188464cf8b8482ce70323433613bfc3f29f85927e4aa922396",
     "src/storage/memory-store.js": "50af795b6a42bf26fe745d6a3d1f4b372ad66886221ec49f31e851be9f1707aa",
@@ -84,12 +125,14 @@
     "test/integration/persistence.test.js": "3aafb2c8c3474206b369dfea06e6ce070c286e5ce278a4abf237f95c174f02c2",
     "test/integration/provider-fallback-integration.test.js": "1dd84d7931d73ec3e4736c029f8033e8865690ca35a8559633cd8e9d8430f51d",
     "test/integration/responses-integration.test.js": "2b3553bd27ccfcac9278db982d2b90b6100bef16fd33e0364b18a1cc099be6b3",
+    "test/integration/shadow-mode.test.js": "3ed7c356de48724bd58862eda1001cbe8739065f9f24ffdbcbb6867f749fbc97",
     "test/integration/stream-empty-fallback.test.js": "4092167a728bd5c649aa5b9aef768afac5415b60aadd4de4d3bacb82f0d26baa",
     "test/integration/transaction-rollback.test.js": "c4000bd04eae76fb8518e4b9da148f51746be67d86d12385e9dbeaca7000ca8c",
     "test/integration/verified-closure.test.js": "b195170bec93e2eb5eb433c011248d450e9eb9f5d1662e38b60596d55c1da3f0",
     "test/unit/audit.test.js": "a9f1af07ad0675eb1c0c4f89288450a6943bde1f105c3d7230cb3551e17d6189",
     "test/unit/cancellation.test.js": "957fe1e75c0602c1b322c86f25611e4dc9a135d7cdd30dfcba6cc7f2417191e4",
     "test/unit/claude-code-compat.test.js": "54798d7aa7d5108bd506735f91f4d6d90fd34e16a196aaa93f61ad84b220d689",
+    "test/unit/intelligence.test.js": "f01b56d931f893121d5c1574505e917ffcf9418738d1cbdf0657fc0f2f2ccd48",
     "test/unit/protocol-anthropic.test.js": "5e5a5a5ba96422b2430dfe6fb828e4a734cbce9305a095bc82fe390b9cc715aa",
     "test/unit/protocol-chat.test.js": "e25445d6530c6de5455429e085d912a59f50eda91b3464bc8eb4db5ddf5c6346",
     "test/unit/protocol-responses.test.js": "9243287c1c14d7dc6ce0fa6a2f6f21cda5a7879f680c8f36b9d13574a89b02c7",
@@ -97,15 +140,22 @@
     "test/unit/provider-health.test.js": "6e892776f8edf681627789b154b502691b0686b5f684a11b64823319ff08afce",
     "test/unit/provider-key-pool.test.js": "3711744740cc77840cd5663aa61dc49f6083f237bc681561bc480e9a62742fa2"
   },
+  "reports": [
+    "PHASE2_ARCHITECTURE.md",
+    "PILOT_REPORT.md",
+    "SHADOW_RUN_REPORT.md",
+    "TASK_ANALYZER_EVAL.md",
+    "CAPABILITY_REGISTRY.md",
+    "DECISION_ENGINE_SCORING.md",
+    "POLICY_BUDGET_TEST_REPORT.md",
+    "EXPLAINABILITY_SAMPLES.md",
+    "OFF_SHADOW_COMPARISON.md",
+    "KNOWN_ISSUES.md"
+  ],
   "release_consistency": {
     "package_lock_version": "1.0.0-phase1",
     "config_example_data_dir": "./data",
-    "readme_sqlite_path": "README.md 包含 SQLite 路径说明",
-    "manifest_coverage": "覆盖全部 src、test、config、package.json、package-lock.json、README.md、scripts/",
     "pilot_status_honest": true,
-    "reports": [
-      "CONCURRENT_TRANSACTION_TEST_REPORT.md",
-      "NO_CANDIDATE_ATOMICITY_REPORT.md"
-    ]
+    "shadow_no_execution_change": true
   }
 }

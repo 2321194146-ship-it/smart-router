@@ -419,6 +419,33 @@ export async function handleChatCompletion(req, res, body, context) {
       timeoutMs: config?.server?.request_timeout_ms,
     });
 
+    // 4b. Shadow 观测：智能建议 + 传统路由真实结果（不改变任何行为；off 模式 no-op）
+    if (context.intelligence && typeof context.intelligence.suggest === 'function') {
+      try {
+        context.intelligence.suggest({
+          requestId,
+          body: patchedBody,
+          agentId,
+          budget,
+          candidates,
+          protocol: context.protocol || 'chat',
+        });
+        const _lastAtt = Array.isArray(executionResult?.attempts) && executionResult.attempts.length > 0
+          ? executionResult.attempts[executionResult.attempts.length - 1]
+          : null;
+        context.intelligence.recordTraditional(requestId, {
+          finalModel: executionResult?.finalCandidate?.modelId ?? null,
+          finalProvider: executionResult?.finalCandidate?.provider ?? null,
+          outcome: executionResult?.outcome ?? null,
+          latencyMs: _lastAtt?.latencyMs ?? null,
+          usage: _lastAtt?.usage ?? null,
+          cost: _lastAtt?.cost ?? null,
+        });
+      } catch (_e) {
+        // Shadow 层失败不影响主流程
+      }
+    }
+
     // 5. 构建 AttemptLog（从执行引擎的纯对象数组转换为 AttemptLog 实例）
     const attemptLog = buildAttemptLogFromResult(executionResult, requestId);
 

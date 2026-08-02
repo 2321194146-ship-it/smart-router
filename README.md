@@ -82,6 +82,25 @@ node scripts/pilot-sanitized.mjs --config "$SMARTROUTER_CONFIG" --out pilot-evid
 
 脚本只通过环境变量 / 外部配置文件读取 Key，自身不含任何密钥，输出 pilot-evidence.json（脱敏：content 截断、Key 字段不出现）。
 
+## Phase 2-A（Shadow 版，分支 phase2-shadow）
+
+智能决策层 Shadow 版：只观察、只建议、只记录，不参与执行。
+
+- 模块：src/intelligence/（Agent Identity 复用 Phase1）
+  - Task Analyzer / Capability Registry / Policy / Budget / Decision Engine / Explainability / Shadow Recorder
+- 模式：intelligence.mode = "off" | "shadow"
+  - off：Phase1 行为完全一致（零开销）
+  - shadow：记录智能建议 + 传统路由真实选择（不增加上游调用、不修改候选顺序、不影响用户响应）
+- 三协议（chat/responses/anthropic）同一内部 sr_ requestId
+- 智能输出为机器可执行元数据，不附加任何 System Prompt
+
+```json
+{ "intelligence": { "mode": "shadow", "shadow": { "policy": { "tierPreference": true, "preferFree": true } } } }
+```
+
+本阶段未实现：Active 全流量、Dashboard、网站、用户系统、商业化、Prompt 注入、
+用户消息改写、Tool 自动控制、多模型并行/拼接、自动学习修改生产权重。
+
 ## 关于交付包（ZIP）内容说明
 
 - 交付包根目录含全部报告（*_REPORT.md、READ_ME_FIRST.md、RELEASE_MANIFEST.json）
