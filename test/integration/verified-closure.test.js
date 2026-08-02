@@ -289,7 +289,11 @@ describe('2. Finalize Transaction', () => {
     const failingStore = new SQLiteStore(join(tmpDir, 'fail.db'));
     await failingStore.init();
 
-    failingStore.saveAuditRecord = async () => { throw new Error('Simulated failure'); };
+    // 方案A：finalizeRequestAtomic 直接走同步 SQL，失败注入使用
+    // audit_records 上的 BEFORE INSERT 触发器（RAISE(ABORT)）。
+    failingStore._db.exec(
+      "CREATE TRIGGER trg_fail_audit BEFORE INSERT ON audit_records BEGIN SELECT RAISE(ABORT, 'Simulated failure'); END;"
+    );
 
     const ft = new CostTracker({
       models: [{ id: 'test-model', provider: 'mock-a', price: { input_cost_per_1k: 0.01, output_cost_per_1k: 0.02, currency: 'USD' } }],
@@ -311,12 +315,7 @@ describe('2. Finalize Transaction', () => {
     assert.ok(!audit, 'Audit record should not exist after rollback');
 
     // Allow safe retry
-    failingStore.saveAuditRecord = async (rec, tx) => {
-      const db = tx?.db || failingStore._db;
-      db.prepare(
-        'INSERT INTO audit_records (request_id, outcome, final_model, final_provider, attempt_count, agent_id, protocol, response_size, attempts, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-      ).run(rec.requestId, rec.outcome, rec.finalModel, rec.finalProvider, rec.attemptCount, rec.agentId, rec.protocol, rec.responseSize, JSON.stringify(rec.attempts), rec.timestamp);
-    };
+    failingStore._db.exec('DROP TRIGGER IF EXISTS trg_fail_audit');
     const retry = await ff.finalizeRequestTransaction(requestId, al, Outcome.COMPLETED, { protocol: 'chat' });
     assert.ok(retry.finalized, 'Retry after rollback should succeed');
 

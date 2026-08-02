@@ -47,11 +47,12 @@ curl -s http://127.0.0.1:28788/v1 | head -c 200
 ## 测试门禁（全部必须退出 0）
 
 ```bash
-npm test                 # unit + integration + audit 全量（当前 437 项）
+npm test                 # unit + integration + audit 全量（当前 443 项）
 npm run test:unit        # 345 项
-npm run test:integration # 59 项（含 SQLite 重启恢复、Finalize 事务原子性回滚、requestId 全链唯一、
+npm run test:integration # 65 项（含 SQLite 重启恢复、Finalize 事务原子性回滚与 100 并发事务、
                          #      三协议流式首内容前空 SSE Fallback、真实失败 Fallback、Cancel 证据对齐、
-                         #      429 Key 冷却持久化与重启恢复、externalRequestId 持久化）
+                         #      429 Key 冷却持久化与重启恢复、externalRequestId 持久化、
+                         #      三协议 HTTP 无候选原子性）
 npm run test:audit       # 33 项
 npm run syntax:check     # src/index.js + src/server.js 语法
 ```
@@ -60,7 +61,8 @@ npm run syntax:check     # src/index.js + src/server.js 语法
 
 - KeyPool / CircuitBreaker / ProviderHealth 启动时从 SQLite 恢复状态，运行时写入 saveKeyStatus / saveProviderHealth
 - 每个请求写 saveRequest，每个真实 Attempt 写 saveAttempt，每次成本写 saveCost
-- Finalize 使用单数据库事务（finalizeRequestTransaction）：finalized 幂等占位 + requests 最终状态 + attempts + cost + audit 原子提交，失败整体回滚，可安全重试
+- Finalize 使用单次同步原子事务（finalizeRequestAtomic，BEGIN IMMEDIATE + 连续同步写入，无 await）：finalized 幂等占位 + requests 最终状态 + attempts + cost + audit 原子提交，失败整体回滚，可安全重试；100 个并发 Finalize 无 "cannot start a transaction within a transaction"
+- 所有终态（含 no_candidate）统一走原子收尾入口；候选真实为空才记 no_candidate，协议内部未预期异常记 internal_error，不冒充 no_candidate
 - 内部 requestId 全链唯一（sr_ 前缀），Chat / Responses / Anthropic 与所有 adapter 透传 context.requestId；客户端 x-request-id / x-correlation-id 仅作为 externalRequestId 保存，不作为数据库唯一主键
 - 首内容前（未向客户端发送有效内容）允许尝试下一合法候选；首内容后禁止换模型 / 拼接 / 重复 Tool 调用，标记 incomplete
 - HTTP Provider Failure/Fallback Integration：本地 Mock Provider 测试覆盖 Provider A 401/429/5xx 失败 → Provider B 成功 → Attempt 2 成功，同一 requestId 下完整记录 finalModel / finalProvider / Token / 成本 / 是否付费（本地 Mock 测试不称为真实外部 Provider Pilot）

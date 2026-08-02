@@ -40,6 +40,7 @@ export const Outcome = Object.freeze({
   PROVIDER_ERROR: 'provider_error', // Provider 故障（5xx、网络错误等）
   CLIENT_ERROR: 'client_error', // 客户端 4xx 错误（非取消）
   VALIDATION_FAILED: 'validation_failed', // 验证失败（响应格式不合法）
+  INTERNAL_ERROR: 'internal_error', // 协议处理器内部未预期异常（catch 路径，不得冒充 no_candidate）
 });
 
 // ----------------------------------------------------------------------------

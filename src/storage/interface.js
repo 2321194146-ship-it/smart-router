@@ -204,6 +204,17 @@ export class StorageInterface {
     throw new Error('StorageInterface.updateRequestStatus() not implemented');
   }
 
+  /**
+   * 单次同步原子收尾事务（方案A）。
+   * 内部必须使用 BEGIN IMMEDIATE + 连续同步写入（无 await / 网络操作）。
+   * 业务层在调用前完成全部纯计算，成功后更新内存聚合。
+   * @param {object} payload { requestId, outcome, attempts, costRecord, auditRecord, agentId, protocol, timestamp }
+   * @returns {{finalized: boolean, reason?: string}}
+   */
+  finalizeRequestAtomic(payload) {
+    throw new Error('StorageInterface.finalizeRequestAtomic() not implemented');
+  }
+
   // --- transactions ---
 
   /**

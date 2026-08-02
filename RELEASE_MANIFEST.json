@@ -1,8 +1,8 @@
 {
   "package": "smart-router-mainline",
-  "version": "1.0.0-phase1-sealed",
-  "date": "2026-08-02T21:48:32.760Z",
-  "description": "Smart Router Mainline Phase 1 Sealed - true transaction atomicity, streaming pre-first-content fallback, key cooldown persistence, streaming audit consistency, externalRequestId persistence, corrected evidence naming",
+  "version": "1.0.0-phase1-sealed-final",
+  "date": "2026-08-02T22:09:10.432Z",
+  "description": "Smart Router Mainline Phase 1 Sealed Final - concurrent transaction fix (finalizeRequestAtomic, BEGIN IMMEDIATE) and unified atomic no_candidate/internal_error finalize",
   "test_summary": {
     "unit": {
       "tests": 345,
@@ -10,8 +10,8 @@
       "failures": 0
     },
     "integration": {
-      "tests": 59,
-      "suites": 15,
+      "tests": 65,
+      "suites": 18,
       "failures": 0
     },
     "audit": {
@@ -20,29 +20,28 @@
       "failures": 0
     },
     "total": {
-      "tests": 437,
-      "suites": 105,
+      "tests": 443,
+      "suites": 108,
       "failures": 0
     }
   },
   "pilot_summary": {
     "status": "pending_external_pilot",
-    "note": "本地 Mock Provider 测试只称为 HTTP Provider Failure/Fallback Integration；未实际运行真实外部 Provider Pilot，无 pilot-evidence.json，因此不填写 5/5 通过结论。复跑脚本 scripts/pilot-sanitized.mjs 不含任何 Key，可复跑。",
+    "note": "本地 Mock Provider 测试只称为 HTTP Provider Failure/Fallback Integration；未实际运行真实外部 Provider Pilot，无 pilot-evidence.json，不填写 5/5 通过结论。复跑脚本 scripts/pilot-sanitized.mjs 不含任何 Key，可复跑。",
     "scripts": [
       "scripts/pilot-sanitized.mjs"
     ]
   },
-  "regression_fixes": [
-    "事务原子性：finalizeRequestTransaction 内依次写 finalized_requests/requests/attempts/cost_records/audit_records，任一步失败整体回滚；CostTracker 纯计算 + 事务成功后更新内存",
-    "流式协议统一事务收尾：chat-stream/responses-stream/anthropic-stream 全部走 finalizeRequestTransaction",
-    "流式首内容前 Fallback：空 SSE/无效首事件/首合法事件前异常 EOF → 关闭上游继续下一候选（三协议集成测试）",
-    "Key 冷却状态持久化：key_status 增加 cooldown_until/failure_count/last_error_type/last_failure_at/last_success_at，重启完整恢复，冷却到期自动恢复 active，COOLING+cooldownUntil=null 不永久卡死",
-    "流式审计一致性：completed/incomplete/client_aborted 与最终成功 Attempt 的 validatedOutcome 对齐",
-    "externalRequestId 持久化：requests 表新增 external_request_id，按外部 ID 可关联内部 requestId"
+  "this_round_fixes": [
+    "方案A：SQLiteStore.finalizeRequestAtomic（BEGIN IMMEDIATE + 连续同步写入 + ROLLBACK，无 await），修复并发事务 \"cannot start a transaction within a transaction\"；业务层纯计算后调用，成功后更新内存",
+    "所有终态统一原子收尾：5 个协议 10 处 finalizeNoCandidate 调用改为 finalizeRequestTransaction；候选真实为空 → NO_CANDIDATE；catch 内部异常 → INTERNAL_ERROR（新增 Outcome），不冒充 no_candidate",
+    "no_candidate 事务内兜底创建 requests 行并持久化 external_request_id（覆盖 execute() 前收尾场景）",
+    "MemoryStore 同步实现 finalizeRequestAtomic，语义一致"
   ],
   "source_files": {
     ".gitignore": "8df601f2fa14b88b6d3ade8fd92d239cc7699546619d7c40c505da6999302479",
-    "README.md": "94384564ada29be6c422aeef9042233e77f2b212bf9181cf109a6520c18877ef",
+    "README.md": "e1646b253773a5c6c7e10b91b78f37c3e2b35968fd2ac63eb1ec415f602b834e",
+    "RELEASE_MANIFEST.json": "1fa022b66d0d6b16edb0ab72443ef960b63effefb97586869ed869e7e9376066",
     "config/config.example.json": "d2fb50a52711b5045ad65c1081c1be5ccff873d3d88d0920855b25c552c21be8",
     "package-lock.json": "6977397067365dd3ee214d1f4b5c6db3a53265be8bc317097348fb01783b5ecd",
     "package.json": "99adca94583aca800739c857be37876d80c1781719280d7407b3bd005879d994",
@@ -53,11 +52,11 @@
     "src/config/validator.js": "8966de4a28a21352eb1db8acfb78f739e043cf2eb24e5214565ab7090b25b0c3",
     "src/cost/tracker.js": "63761e72bbb2fe7589e513fff0f0b7151d0b79e6e76a79e0a154a2500c6d46dd",
     "src/index.js": "9e58f767ca1719379879dd82411c3aaf8be60da9530b9d80945922cc0aaf904f",
-    "src/protocols/anthropic-stream.js": "a4a9aad8a63cf5cc0eb4db33bf205b603273e7ef4fd7a148d661b6bd05b0d725",
-    "src/protocols/anthropic.js": "1f68ad3c1269b6c8503020d6586ebde72b7d7f489a3156385f04bd65842864dc",
-    "src/protocols/chat-stream.js": "3bc92f33a037a88f62de724a59e84fab7e492153153c8ed7780ca3423255fe02",
-    "src/protocols/chat.js": "a4f0487bd5f812d92998aaea76408840f68d79ce9791641ce328fabd3f54de1a",
-    "src/protocols/responses-stream.js": "fb8495c0e9ff31faf599d2b1abdb7ac4a6d4653cabc5af18f0af307ac737e78e",
+    "src/protocols/anthropic-stream.js": "32fb4310b7b12a4b9cce325d8509c30e01ff9c97a6c5b9a66c900fd3d7395391",
+    "src/protocols/anthropic.js": "f439de9d256a649505cddb2281aca2257ae21204b6154440a3f491cc0bb8e91d",
+    "src/protocols/chat-stream.js": "50108c660f5d8f9950abd55025210024d690f0fd2072a11887a1a05006ea35b6",
+    "src/protocols/chat.js": "28d030c4322c43dc1579206c59e18f80d6627ebcadd685586213a2737caa4069",
+    "src/protocols/responses-stream.js": "2993c2a9e87aa5d77763b7716f8dfb92ecd758664b2730e221e58b0878546b21",
     "src/protocols/responses.js": "0925011257d36f476a9b732f11782d135edfad317497532639fbbb28c9c39736",
     "src/provider/client.js": "2aead24d6aabd4d866a2465f892b3a5ddd4cd5e384adcda11546f4ab1e2f6a86",
     "src/provider/errors.js": "01495b49e22b7089ce21600259dabe9e169215537a6b7c42c1eaa8c5a44a19f5",
@@ -68,24 +67,26 @@
     "src/router/fallback.js": "cb2de21ef13430036242d19e88e0863824a8f0eb62caca956c49c742805651e9",
     "src/runtime/attempts.js": "d8b67fc97bcbf4d4a5a9f0de0a07ea0771a2b679009536be4a47a52802d1420d",
     "src/runtime/cancellation.js": "d54004020e9fe61a5e7cfdb58dfbd1354f3126b4377ef34064ca340ac8af60de",
-    "src/runtime/finalization.js": "9ca382a2df3d82704b054aa9fcf87adfd7e5dd09f8f94f5f87c804f365215c88",
-    "src/runtime/outcomes.js": "32748d878462b1741723c9c8ff9a949076ddc5870e40531c1fbb64a7980829ff",
+    "src/runtime/finalization.js": "822ea2fd26d9b34dbb1bd6e5027261d41912e2ffef18992d1af6afdf7a8d93a4",
+    "src/runtime/outcomes.js": "bdbe1f097db49dca1a0118f4d178903188831d66b9131b3fef372165830a1ce7",
     "src/server.js": "81fa96676272204ff1128747d6ef533dc9b869b189b110f1d8eb3359a98a4aeb",
     "src/storage/index.js": "146b1e4e61a880d65b08e33e24af109ac656d979c1f9452fdf1d4778b91af7d2",
-    "src/storage/interface.js": "fa453d301ba6a60dbfd79edaca30f93a8180d8f42a09643c7078f5aa16b98dce",
-    "src/storage/memory-store.js": "72f6ce3a01804b7eac700258462a8ffc6739b44e9f8e71bfd162bb38343334ca",
-    "src/storage/sqlite-store.js": "2aa3ab7472837f77dede45368df6ba83a46efff6631a5bb986af12af2daf43dd",
+    "src/storage/interface.js": "91978bc4fec4b6188464cf8b8482ce70323433613bfc3f29f85927e4aa922396",
+    "src/storage/memory-store.js": "50af795b6a42bf26fe745d6a3d1f4b372ad66886221ec49f31e851be9f1707aa",
+    "src/storage/sqlite-store.js": "f51755a619cd0dc3f0abea449c92e79a7a236613596c00364428f62028d890e4",
     "test/audit/release-gate.test.js": "3e2bd8285284748773bb0b1f9aeefe27070f530247e9cf16c6300ad68fd886d7",
     "test/integration/anthropic-integration.test.js": "3bc27cf622f6a822beed7e02ba0b0eb3a38541bee0b34ac881d0859876006a10",
     "test/integration/chat-integration.test.js": "45cb205e9ece24ce984bb50f06c6151d410c4c3a0500ef2c5d1a1381b6eadd54",
+    "test/integration/concurrent-transaction.test.js": "70736e755009c272acb97eef0529f7eed28f2b401efca7a8a9323d4080bd4c9a",
     "test/integration/helpers.js": "525c4d39c28314a6ad99337a966532b6e2658a4e5947987bf2308e588d27c57e",
     "test/integration/key-cooldown-recovery.test.js": "b52ac19930710dc08a357608db3b62e9c9d5e5619c55884ab99095f3a5c67c0e",
+    "test/integration/no-candidate-atomicity.test.js": "a1cd596880e43adaafdb7ca4fdf74aafd8d64afb6e80004ee7c5fbee8a8b3039",
     "test/integration/persistence.test.js": "3aafb2c8c3474206b369dfea06e6ce070c286e5ce278a4abf237f95c174f02c2",
     "test/integration/provider-fallback-integration.test.js": "1dd84d7931d73ec3e4736c029f8033e8865690ca35a8559633cd8e9d8430f51d",
     "test/integration/responses-integration.test.js": "2b3553bd27ccfcac9278db982d2b90b6100bef16fd33e0364b18a1cc099be6b3",
     "test/integration/stream-empty-fallback.test.js": "4092167a728bd5c649aa5b9aef768afac5415b60aadd4de4d3bacb82f0d26baa",
-    "test/integration/transaction-rollback.test.js": "8d792798a36dff42b599313033f4a88328533ed5db8ca2919538a4dab916908a",
-    "test/integration/verified-closure.test.js": "6f455e94dff9aa596a5d91a7cec0cf53e75b1837694cbf764fb592b0ec6040e6",
+    "test/integration/transaction-rollback.test.js": "c4000bd04eae76fb8518e4b9da148f51746be67d86d12385e9dbeaca7000ca8c",
+    "test/integration/verified-closure.test.js": "b195170bec93e2eb5eb433c011248d450e9eb9f5d1662e38b60596d55c1da3f0",
     "test/unit/audit.test.js": "a9f1af07ad0675eb1c0c4f89288450a6943bde1f105c3d7230cb3551e17d6189",
     "test/unit/cancellation.test.js": "957fe1e75c0602c1b322c86f25611e4dc9a135d7cdd30dfcba6cc7f2417191e4",
     "test/unit/claude-code-compat.test.js": "54798d7aa7d5108bd506735f91f4d6d90fd34e16a196aaa93f61ad84b220d689",
@@ -101,6 +102,10 @@
     "config_example_data_dir": "./data",
     "readme_sqlite_path": "README.md 包含 SQLite 路径说明",
     "manifest_coverage": "覆盖全部 src、test、config、package.json、package-lock.json、README.md、scripts/",
-    "pilot_status_honest": true
+    "pilot_status_honest": true,
+    "reports": [
+      "CONCURRENT_TRANSACTION_TEST_REPORT.md",
+      "NO_CANDIDATE_ATOMICITY_REPORT.md"
+    ]
   }
 }

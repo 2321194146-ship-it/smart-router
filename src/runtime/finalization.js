@@ -21,6 +21,7 @@ import {
   QUALITY_OUTCOMES,
   shouldRecordQualityFeedback,
 } from './outcomes.js';
+import { AttemptLog } from './attempts.js';
 
 // ----------------------------------------------------------------------------
 // Finalizer：运行时收尾
@@ -202,12 +203,11 @@ export class Finalizer {
    * @returns {Promise<{finalized: boolean, reason?: string, auditRecord?: object}>}
    */
   async finalizeRequestTransaction(requestId, attemptLog, finalOutcome, options = {}) {
-    // 如果 store 不支持事务，回退到普通 finalize
-    if (!this.store || typeof this.store.beginTransaction !== 'function') {
+    if (!this.store) {
       return this.finalize(requestId, attemptLog, finalOutcome, options);
     }
 
-    // 幂等检查
+    // 幂等检查（事务外）
     try {
       const alreadyFinalized = await this.store.isFinalized(requestId);
       if (alreadyFinalized) {
@@ -240,6 +240,50 @@ export class Finalizer {
       }
     }
 
+    // 方案A：Store 内部单次同步原子事务（BEGIN IMMEDIATE + 连续同步写入）
+    if (typeof this.store.finalizeRequestAtomic === 'function') {
+      const payload = {
+        requestId,
+        outcome: finalOutcome,
+        attempts: allAttempts,
+        costRecord,
+        auditRecord,
+        agentId: options.agentId || null,
+        protocol: options.protocol || null,
+        externalRequestId: options.externalRequestId || null,
+        timestamp: new Date().toISOString(),
+      };
+      let result;
+      try {
+        result = this.store.finalizeRequestAtomic(payload);
+      } catch (err) {
+        // 事务失败：内存 Cost、日度统计和质量反馈均不改变
+        log(`[finalizer] transaction: failed for ${requestId}: ${err.message}`);
+        throw err;
+      }
+      if (!result.finalized) {
+        log(`[finalizer] transaction: already finalized (atomic), skipping: ${requestId}`);
+        return { finalized: false, reason: result.reason || 'already_finalized' };
+      }
+      // 事务成功后：更新内存状态
+      this._finalizedIds.add(requestId);
+      this._auditRecords.push(auditRecord);
+      // 事务成功后：更新 CostTracker 内存聚合
+      if (costRecord && this.costTracker) {
+        this.costTracker.updateMemoryAggregation(costRecord);
+      }
+      // 事务成功后：回写模型质量反馈
+      if (shouldRecordQualityFeedback(finalOutcome) && successfulAttempt) {
+        this._recordQualityFeedback(successfulAttempt, finalOutcome, options);
+      }
+      log(
+        `[finalizer] transaction: finalized ${requestId} outcome=${finalOutcome} ` +
+        `attempts=${allAttempts.length} (atomic)`
+      );
+      return { finalized: true, auditRecord };
+    }
+
+    // 回退：store 不支持 finalizeRequestAtomic 时，使用旧的多步事务逻辑
     let transaction = null;
     try {
       transaction = await this.store.beginTransaction();
@@ -355,62 +399,16 @@ export class Finalizer {
    * @returns {Promise<{finalized: boolean, reason?: string, auditRecord?: object}>}
    */
   async finalizeNoCandidate(requestId, requestedModel, options = {}) {
-    // 幂等检查：优先使用 store
-    if (this.store) {
-      try {
-        const result = await this.store.saveFinalized({
-          requestId,
-          outcome: Outcome.NO_CANDIDATE,
-          agentId: options.agentId || null,
-          protocol: options.protocol || null,
-          timestamp: new Date().toISOString(),
-        });
-        if (!result.finalized) {
-          log(`[finalizer] finalize already executed (store), skipping: ${requestId}`);
-          return { finalized: false, reason: 'already_finalized' };
-        }
-      } catch (err) {
-        log(`[finalizer] store saveFinalized error, falling back to memory: ${err.message}`);
-        if (this._finalizedIds.has(requestId)) {
-          return { finalized: false, reason: 'already_finalized' };
-        }
-      }
-    } else {
-      if (this._finalizedIds.has(requestId)) {
-        log(`[finalizer] finalize already executed, skipping: ${requestId}`);
-        return { finalized: false, reason: 'already_finalized' };
-      }
-    }
-    this._finalizedIds.add(requestId);
-
-    const auditRecord = {
-      requestId,
-      outcome: Outcome.NO_CANDIDATE,
-      requestedModel: requestedModel || null,
-      finalModel: null,
-      finalProvider: null,
-      attempts: [],
-      attemptCount: 0,
-      agentId: options.agentId || null,
-      protocol: options.protocol || null,
-      responseSize: options.responseSize ?? null,
-      timestamp: new Date().toISOString(),
-    };
-
-    this._auditRecords.push(auditRecord);
-
-    // 持久化到 store
-    if (this.store) {
-      try {
-        await this.store.saveAuditRecord(auditRecord);
-      } catch (err) {
-        log(`[finalizer] store saveAuditRecord error: ${err.message}`);
-      }
-    }
-
-    log(`[finalizer] no_candidate audit record: ${requestId}`);
-
-    return { finalized: true, auditRecord };
+    // 统一原子收尾入口的兼容包装器：
+    // 构建空 AttemptLog，委托 finalizeRequestTransaction 以
+    // Outcome.NO_CANDIDATE 收尾，事务内完成 finalized_requests /
+    // requests.status=no_candidate / audit_records；不写 Cost、不写质量反馈。
+    // SQLite 生产路径实际执行的是 finalizeRequestAtomic（同步原子事务）。
+    const attemptLog = new AttemptLog(requestId);
+    return this.finalizeRequestTransaction(requestId, attemptLog, Outcome.NO_CANDIDATE, {
+      ...options,
+      requestedModel: options.requestedModel ?? requestedModel,
+    });
   }
 
   // --------------------------------------------------------------------------
@@ -446,6 +444,8 @@ export class Finalizer {
       // 最终成功模型/provider（如有）
       finalModel: successfulAttempt ? successfulAttempt.model : (options.model || null),
       finalProvider: successfulAttempt ? successfulAttempt.provider : (options.provider || null),
+      // 客户端请求的模型（no_candidate 等场景使用）
+      requestedModel: options.requestedModel || null,
       // 完整审计链（每个 attempt 含 transport_outcome 和 validated_outcome）
       attempts,
       attemptCount: attempts.length,

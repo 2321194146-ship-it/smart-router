@@ -1,14 +1,14 @@
 // test/integration/transaction-rollback.test.js
-// Smart Router Mainline - Phase 1
-// True transaction atomicity regression tests:
-//   - saveCost failure  -> full rollback, no half-state
-//   - saveAuditRecord failure -> full rollback, no half-state
+// Smart Router Mainline - Phase 1 Sealed Final
+// True transaction atomicity regression tests (方案A: finalizeRequestAtomic):
+//   - cost_records write failure  -> full rollback, no half-state
+//   - audit_records write failure -> full rollback, no half-state
 //   - in-memory CostTracker NOT updated on failure
 //   - safe to retry after rollback
 //
-// Requirement (#1): any step failure inside finalizeRequestTransaction must
-// roll back ALL writes (finalized_requests, requests status, attempts,
-// cost_records, audit_records) and must NOT touch in-memory cost state.
+// Injection strategy: since finalizeRequestAtomic writes via synchronous SQL
+// inside BEGIN IMMEDIATE, failures are injected with SQLite BEFORE INSERT
+// triggers (RAISE(ABORT)) on cost_records / audit_records.
 
 import { test, describe } from 'node:test';
 import assert from 'node:assert';
@@ -51,42 +51,38 @@ function buildAttemptLog(requestId) {
 }
 
 async function assertNoHalfState(store, costTracker, requestId) {
-  // finalized_requests must NOT exist
   const finalized = await store.isFinalized(requestId);
   assert.strictEqual(finalized, false, 'finalized_requests should not exist after rollback');
 
-  // cost_records must NOT exist
   const cost = await store.getCost(requestId);
   assert.ok(!cost, 'cost_records should not exist after rollback');
 
-  // audit_records must NOT exist
   const audit = await store.getAuditRecord(requestId);
   assert.ok(!audit, 'audit_records should not exist after rollback');
 
-  // attempts must NOT exist (rolled back with the transaction)
   const attempts = await store.getAttempts(requestId);
   assert.strictEqual(attempts.length, 0, 'attempts should not exist after rollback');
 
-  // requests status must NOT be completed
   const req = await store.getRequest(requestId);
   assert.ok(req, 'request row should exist (saved before finalize)');
   assert.notStrictEqual(req.status, 'completed', 'requests.status must not be completed after rollback');
 
-  // in-memory cost must NOT exist
   assert.ok(
     !costTracker.records.has(requestId),
     'in-memory cost must not exist after rollback',
   );
 }
 
-describe('Transaction Atomicity (finalizeRequestTransaction)', () => {
-  test('saveCost failure -> full rollback + safe retry', async () => {
+describe('Transaction Atomicity (finalizeRequestAtomic)', () => {
+  test('cost_records write failure -> full rollback + safe retry', async () => {
     const requestId = 'txn-cost-fail';
     const store = new SQLiteStore(':memory:');
     await store.init();
 
-    // Inject saveCost failure
-    store.saveCost = async () => { throw new Error('injected saveCost failure'); };
+    // Inject: any INSERT into cost_records aborts the transaction
+    store._db.exec(
+      "CREATE TRIGGER trg_fail_cost BEFORE INSERT ON cost_records BEGIN SELECT RAISE(ABORT, 'injected saveCost failure'); END;"
+    );
 
     const costTracker = new CostTracker(MODEL_CONFIG, store);
     const finalizer = new Finalizer(costTracker, store);
@@ -106,8 +102,8 @@ describe('Transaction Atomicity (finalizeRequestTransaction)', () => {
 
     await assertNoHalfState(store, costTracker, requestId);
 
-    // Safe retry: restore saveCost, retry must succeed
-    delete store.saveCost;
+    // Safe retry: drop the trigger, retry must succeed
+    store._db.exec('DROP TRIGGER IF EXISTS trg_fail_cost');
     const retry = await finalizer.finalizeRequestTransaction(requestId, al, Outcome.COMPLETED, { protocol: 'chat' });
     assert.ok(retry.finalized, 'retry after rollback should succeed');
     assert.ok(costTracker.records.has(requestId), 'in-memory cost written after successful retry');
@@ -116,13 +112,14 @@ describe('Transaction Atomicity (finalizeRequestTransaction)', () => {
     store.close();
   });
 
-  test('saveAuditRecord failure -> full rollback + safe retry', async () => {
+  test('audit_records write failure -> full rollback + safe retry', async () => {
     const requestId = 'txn-audit-fail';
     const store = new SQLiteStore(':memory:');
     await store.init();
 
-    // Inject saveAuditRecord failure
-    store.saveAuditRecord = async () => { throw new Error('injected saveAuditRecord failure'); };
+    store._db.exec(
+      "CREATE TRIGGER trg_fail_audit BEFORE INSERT ON audit_records BEGIN SELECT RAISE(ABORT, 'injected saveAuditRecord failure'); END;"
+    );
 
     const costTracker = new CostTracker(MODEL_CONFIG, store);
     const finalizer = new Finalizer(costTracker, store);
@@ -142,7 +139,7 @@ describe('Transaction Atomicity (finalizeRequestTransaction)', () => {
     await assertNoHalfState(store, costTracker, requestId);
 
     // Safe retry
-    delete store.saveAuditRecord;
+    store._db.exec('DROP TRIGGER IF EXISTS trg_fail_audit');
     const retry = await finalizer.finalizeRequestTransaction(requestId, al, Outcome.COMPLETED, { protocol: 'chat' });
     assert.ok(retry.finalized, 'retry after rollback should succeed');
     assert.ok(costTracker.records.has(requestId), 'in-memory cost written after successful retry');
@@ -168,22 +165,15 @@ describe('Transaction Atomicity (finalizeRequestTransaction)', () => {
     const result = await finalizer.finalizeRequestTransaction(requestId, al, Outcome.COMPLETED, { protocol: 'chat' });
     assert.ok(result.finalized);
 
-    // finalized_requests
     assert.strictEqual(await store.isFinalized(requestId), true);
-    // attempts
     assert.strictEqual((await store.getAttempts(requestId)).length, 1);
-    // cost_records
     assert.ok(await store.getCost(requestId));
-    // audit_records
     assert.ok(await store.getAuditRecord(requestId));
-    // requests status updated to completed
     const req = await store.getRequest(requestId);
     assert.strictEqual(req.status, 'completed');
-    // in-memory cost
     assert.ok(costTracker.records.has(requestId));
     assert.strictEqual(costTracker.records.size, 1);
 
-    // Idempotent: second call does not duplicate
     const again = await finalizer.finalizeRequestTransaction(requestId, al, Outcome.COMPLETED, { protocol: 'chat' });
     assert.strictEqual(again.finalized, false);
     assert.strictEqual(again.reason, 'already_finalized');

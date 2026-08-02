@@ -461,6 +461,144 @@ export class SQLiteStore extends StorageInterface {
     return !!row;
   }
 
+  /**
+   * 单次同步原子收尾事务（方案A）。
+   *
+   * 使用 BEGIN IMMEDIATE 获取写锁，在同一连接上连续同步执行全部写入。
+   * 方法内部不包含任何 await / 网络操作，Node.js 单线程下其他请求
+   * 无法在事务中途插入，从根本上避免 "cannot start a transaction within a transaction"。
+   *
+   * 写入顺序：
+   *   1. finalized_requests（幂等占位）
+   *   2. requests 最终状态
+   *   3. attempts
+   *   4. cost_records（如提供，已存在则跳过保证成本仅扣一次）
+   *   5. audit_records
+   *
+   * 任何一步失败 → ROLLBACK + 抛出错误；调用方不得 catch 后继续 commit。
+   *
+   * @param {object} payload
+   *   - requestId {string}
+   *   - outcome {string}
+   *   - attempts {object[]} 已纯计算的 attempt 数组
+   *   - costRecord {object|null} 已纯计算的成本记录（可选）
+   *   - auditRecord {object} 已构建的审计记录
+   *   - agentId {string|null}
+   *   - protocol {string|null}
+   *   - timestamp {string}
+   * @returns {{finalized: boolean, reason?: string}}
+   */
+  finalizeRequestAtomic(payload) {
+    const db = this._db;
+    const {
+      requestId, outcome, attempts = [], costRecord = null, auditRecord,
+      agentId = null, protocol = null, externalRequestId = null, timestamp,
+    } = payload || {};
+    if (!requestId) {
+      throw new Error('finalizeRequestAtomic: requestId required');
+    }
+    if (!auditRecord) {
+      throw new Error('finalizeRequestAtomic: auditRecord required');
+    }
+
+    const ts = timestamp || new Date().toISOString();
+    db.exec('BEGIN IMMEDIATE');
+    try {
+      // 1. finalized_requests 幂等占位
+      const ins = db.prepare(
+        'INSERT OR IGNORE INTO finalized_requests (request_id, outcome, agent_id, protocol, timestamp) VALUES (?, ?, ?, ?, ?)'
+      ).run(requestId, outcome || null, agentId, protocol, ts);
+      if (ins.changes === 0) {
+        db.exec('ROLLBACK');
+        return { finalized: false, reason: 'already_finalized' };
+      }
+
+      // 2. requests 最终状态（行缺失时兜底创建，覆盖 no_candidate 等
+      //    execute() 之前收尾、尚未 saveRequest 的场景）
+      const upd = db.prepare('UPDATE requests SET status = ? WHERE request_id = ?').run(outcome || null, requestId);
+      if (upd.changes === 0) {
+        db.prepare(
+          'INSERT OR IGNORE INTO requests (request_id, agent_id, protocol, status, external_request_id, timestamp) VALUES (?, ?, ?, ?, ?, ?)'
+        ).run(requestId, agentId, protocol, outcome || null, externalRequestId, ts);
+      }
+
+      // 3. attempts
+      const attemptStmt = db.prepare(
+        `INSERT OR REPLACE INTO attempts
+        (request_id, attempt_number, model, provider, key_id,
+         transport_outcome, validated_outcome, error_type, error_message,
+         http_status, latency_ms, first_byte_ms, headers_received,
+         first_byte_sent_to_client, budget_blocked, usage, cost, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      );
+      for (const a of attempts) {
+        attemptStmt.run(
+          requestId,
+          a.attemptNumber,
+          a.model || null,
+          a.provider || null,
+          a.keyId || null,
+          a.transportOutcome || null,
+          a.validatedOutcome || null,
+          a.errorType || null,
+          a.errorMessage || null,
+          a.httpStatus || null,
+          a.latencyMs || 0,
+          a.firstByteMs || null,
+          a.headersReceived ? 1 : 0,
+          a.firstByteSentToClient ? 1 : 0,
+          a.budgetBlocked ? 1 : 0,
+          a.usage ? JSON.stringify(a.usage) : null,
+          a.cost ? JSON.stringify(a.cost) : null,
+          a.timestamp || ts
+        );
+      }
+
+      // 4. cost_records（如提供；已存在则跳过）
+      if (costRecord) {
+        const existing = db.prepare('SELECT 1 FROM cost_records WHERE request_id = ?').get(requestId);
+        if (!existing) {
+          db.prepare(
+            'INSERT INTO cost_records (request_id, model_id, provider, usage, cost, date_key, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)'
+          ).run(
+            costRecord.requestId,
+            costRecord.modelId || null,
+            costRecord.provider || null,
+            JSON.stringify(costRecord.usage || {}),
+            JSON.stringify(costRecord.cost || {}),
+            costRecord.dateKey || ts.slice(0, 10),
+            costRecord.timestamp || ts
+          );
+        }
+      }
+
+      // 5. audit_records
+      db.prepare(
+        `INSERT INTO audit_records
+        (request_id, outcome, final_model, final_provider, attempt_count,
+         agent_id, protocol, response_size, attempts, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).run(
+        auditRecord.requestId,
+        auditRecord.outcome || outcome || null,
+        auditRecord.finalModel || null,
+        auditRecord.finalProvider || null,
+        auditRecord.attemptCount || 0,
+        auditRecord.agentId || null,
+        auditRecord.protocol || null,
+        auditRecord.responseSize || null,
+        JSON.stringify(auditRecord.attempts || []),
+        auditRecord.timestamp || ts
+      );
+
+      db.exec('COMMIT');
+      return { finalized: true };
+    } catch (err) {
+      try { db.exec('ROLLBACK'); } catch (e) { /* may already be rolled back */ }
+      throw err;
+    }
+  }
+
   async updateRequestStatus(requestId, status, transaction) {
     const db = (transaction?.db) || this._db;
     db.prepare('UPDATE requests SET status = ? WHERE request_id = ?').run(status, requestId);

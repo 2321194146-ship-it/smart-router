@@ -1127,10 +1127,17 @@ export async function handleResponseStream(req, res, body, context) {
     // 4. 无候选可用
     if (candidates.length === 0) {
       protocolLog(`[${requestId}] no candidates available`);
-      await finalizer.finalizeNoCandidate(requestId, requestedModel, {
-        agentId,
-        protocol: 'responses',
-      });
+      await finalizer.finalizeRequestTransaction(
+        requestId,
+        new AttemptLog(requestId),
+        Outcome.NO_CANDIDATE,
+        {
+          agentId,
+          protocol: 'responses',
+          requestedModel,
+          externalRequestId: context.externalRequestId || null,
+        }
+      );
 
       if (!cancelToken?.isAborted() && isResWritable(res)) {
         sendJsonResponse(res, 503, buildResponsesError(
@@ -1175,10 +1182,17 @@ export async function handleResponseStream(req, res, body, context) {
 
     // 尝试收尾
     try {
-      await finalizer.finalizeNoCandidate(requestId, parsedBody?.model, {
-        agentId,
-        protocol: 'responses',
-      });
+      await finalizer.finalizeRequestTransaction(
+        requestId,
+        new AttemptLog(requestId),
+        Outcome.INTERNAL_ERROR,
+        {
+          agentId,
+          protocol: 'responses',
+          requestedModel: parsedBody?.model,
+          externalRequestId: context.externalRequestId || null,
+        }
+      );
     } catch {
       // 收尾失败不影响错误响应
     }

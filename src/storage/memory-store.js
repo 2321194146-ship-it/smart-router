@@ -159,6 +159,56 @@ export class MemoryStore extends StorageInterface {
     }
   }
 
+  /**
+   * 单次同步原子收尾（内存版）。
+   * 内存操作本身同步，无并发冲突；语义与 SQLiteStore.finalizeRequestAtomic 一致：
+   * finalized 幂等占位 → requests 状态 → attempts → cost → audit；
+   * 已收尾返回 already_finalized 且不修改任何数据。
+   */
+  finalizeRequestAtomic(payload) {
+    const {
+      requestId, outcome, attempts = [], costRecord = null, auditRecord,
+      agentId = null, protocol = null, externalRequestId = null, timestamp,
+    } = payload || {};
+    if (!requestId) {
+      throw new Error('finalizeRequestAtomic: requestId required');
+    }
+    if (!auditRecord) {
+      throw new Error('finalizeRequestAtomic: auditRecord required');
+    }
+    const ts = timestamp || new Date().toISOString();
+
+    if (this._finalized.has(requestId)) {
+      return { finalized: false, reason: 'already_finalized' };
+    }
+    this._finalized.set(requestId, { requestId, outcome, agentId, protocol, timestamp: ts });
+
+    const r = this._requests.get(requestId);
+    if (r) {
+      r.status = outcome || null;
+      r.updatedAt = ts;
+    } else {
+      this._requests.set(requestId, {
+        requestId, agentId, protocol, status: outcome || null,
+        externalRequestId, timestamp: ts,
+      });
+    }
+
+    for (const a of attempts) {
+      const key = `${requestId}:${a.attemptNumber}`;
+      if (!this._attempts.has(key)) {
+        this._attempts.set(key, { ...a });
+      }
+    }
+
+    if (costRecord && !this._costs.has(requestId)) {
+      this._costs.set(requestId, { ...costRecord });
+    }
+
+    this._auditRecords.push({ ...auditRecord });
+    return { finalized: true };
+  }
+
   async beginTransaction() {
     // Memory store: snapshot state for potential rollback
     return {
