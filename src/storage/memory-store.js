@@ -22,6 +22,7 @@ export class MemoryStore extends StorageInterface {
     this._providerHealth = new Map();
     this._finalized = new Map();
     this._auditRecords = [];
+    this._shadowDecisions = new Map();
   }
 
   async init() { /* no-op for memory store */ }
@@ -252,6 +253,109 @@ export class MemoryStore extends StorageInterface {
     return [...this._auditRecords];
   }
 
+  // --------------------------------------------------------------------------
+  // Shadow 决策持久化（Phase2-A Shadow；内存镜像，语义与 SQLiteStore 一致）
+  // --------------------------------------------------------------------------
+
+  async saveShadowDecision(record) {
+    const prev = this._shadowDecisions.get(record.request_id) || {};
+    this._shadowDecisions.set(record.request_id, {
+      request_id: record.request_id,
+      protocol: record.protocol ?? prev.protocol ?? null,
+      agent_id: record.agent_id ?? prev.agent_id ?? null,
+      requested_model: record.requested_model ?? prev.requested_model ?? null,
+      task_profile: record.task_profile ?? prev.task_profile ?? null,
+      recommendation: record.recommendation ?? prev.recommendation ?? null,
+      ranked_candidates: record.ranked_candidates ?? prev.ranked_candidates ?? null,
+      predictions: record.predictions ?? prev.predictions ?? null,
+      explanation: record.explanation ?? prev.explanation ?? null,
+      created_at: record.created_at || prev.created_at || new Date().toISOString(),
+      actual_final_model: prev.actual_final_model ?? null,
+      actual_final_provider: prev.actual_final_provider ?? null,
+      actual_outcome: prev.actual_outcome ?? null,
+      actual_attempt_count: prev.actual_attempt_count ?? null,
+      actual_usage: prev.actual_usage ?? null,
+      actual_cost: prev.actual_cost ?? null,
+      actual_latency: prev.actual_latency ?? null,
+      comparison_status: prev.comparison_status ?? null,
+      finalized_at: prev.finalized_at ?? null,
+    });
+    return { saved: true };
+  }
+
+  async finalizeShadowDecision(record) {
+    const row = this._shadowDecisions.get(record.request_id);
+    if (!row) return { saved: false, changes: 0 };
+    row.actual_final_model = record.actual_final_model ?? null;
+    row.actual_final_provider = record.actual_final_provider ?? null;
+    row.actual_outcome = record.actual_outcome ?? null;
+    row.actual_attempt_count = record.actual_attempt_count ?? null;
+    row.actual_usage = record.actual_usage ?? null;
+    row.actual_cost = record.actual_cost ?? null;
+    row.actual_latency = record.actual_latency ?? null;
+    row.comparison_status = record.comparison_status ?? null;
+    row.finalized_at = record.finalized_at || new Date().toISOString();
+    return { saved: true, changes: 1 };
+  }
+
+  async getShadowDecision(requestId) {
+    const row = this._shadowDecisions.get(requestId);
+    if (!row) return null;
+    return {
+      requestId: row.request_id,
+      protocol: row.protocol,
+      agentId: row.agent_id,
+      requestedModel: row.requested_model,
+      taskProfile: row.task_profile ? JSON.parse(row.task_profile) : null,
+      recommendation: row.recommendation ? JSON.parse(row.recommendation) : null,
+      rankedCandidates: row.ranked_candidates ? JSON.parse(row.ranked_candidates) : [],
+      predictions: row.predictions ? JSON.parse(row.predictions) : null,
+      explanation: row.explanation ? JSON.parse(row.explanation) : null,
+      actualFinalModel: row.actual_final_model,
+      actualFinalProvider: row.actual_final_provider,
+      actualOutcome: row.actual_outcome,
+      actualAttemptCount: row.actual_attempt_count,
+      actualUsage: row.actual_usage ? JSON.parse(row.actual_usage) : null,
+      actualCost: row.actual_cost ? JSON.parse(row.actual_cost) : null,
+      actualLatency: row.actual_latency,
+      comparisonStatus: row.comparison_status,
+      createdAt: row.created_at,
+      finalizedAt: row.finalized_at,
+    };
+  }
+
+  async listShadowDecisions() {
+    const out = [];
+    for (const row of this._shadowDecisions.values()) {
+      out.push({
+        requestId: row.request_id,
+        protocol: row.protocol,
+        agentId: row.agent_id,
+        requestedModel: row.requested_model,
+        taskProfile: row.task_profile ? JSON.parse(row.task_profile) : null,
+        recommendation: row.recommendation ? JSON.parse(row.recommendation) : null,
+        rankedCandidates: row.ranked_candidates ? JSON.parse(row.ranked_candidates) : [],
+        predictions: row.predictions ? JSON.parse(row.predictions) : null,
+        explanation: row.explanation ? JSON.parse(row.explanation) : null,
+        actualFinalModel: row.actual_final_model,
+        actualFinalProvider: row.actual_final_provider,
+        actualOutcome: row.actual_outcome,
+        actualAttemptCount: row.actual_attempt_count,
+        actualUsage: row.actual_usage ? JSON.parse(row.actual_usage) : null,
+        actualCost: row.actual_cost ? JSON.parse(row.actual_cost) : null,
+        actualLatency: row.actual_latency,
+        comparisonStatus: row.comparison_status,
+        createdAt: row.created_at,
+        finalizedAt: row.finalized_at,
+      });
+    }
+    return out;
+  }
+
+  async pruneShadowDecisions(_retentionDays = 30) {
+    return 0; // 内存版由上层负责清空
+  }
+
   // --- test helpers ---
 
   _reset() {
@@ -262,6 +366,7 @@ export class MemoryStore extends StorageInterface {
     this._providerHealth.clear();
     this._finalized.clear();
     this._auditRecords = [];
+    this._shadowDecisions.clear();
   }
 
   snapshot() {

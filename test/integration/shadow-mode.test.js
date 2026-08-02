@@ -1,15 +1,14 @@
 // test/integration/shadow-mode.test.js
-// Smart Router Mainline - Phase 2-A (Shadow)
+// Smart Router Mainline - Phase 2-A (Shadow) Sealed
 // Shadow 模式集成测试：
 //   - 三协议（chat / responses / anthropic）同一内部 requestId
-//   - Shadow 记录：智能建议 + 传统路由真实结果
-//   - Shadow 不增加上游调用（与 off 模式调用次数一致）
-//   - Shadow 不影响用户响应（响应内容与 off 一致）
-//   - 可立即切回 off
+//   - 建议在执行前生成（suggest），真实结果在 Finalize 后由观察者回填
+//   - Shadow 不增加上游调用、不影响用户响应
+//   - off 模式：无 Shadow 记录、Phase1 行为不变
 
 import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert';
-import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
+import { mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
@@ -30,6 +29,7 @@ function buildShadowConfig(mockPort, dataDir) {
       mode: 'shadow',
       shadow: {
         policy: { tierPreference: true, preferFree: true },
+        retentionDays: 30,
       },
     },
     routing: {
@@ -47,7 +47,7 @@ function buildShadowConfig(mockPort, dataDir) {
       { name: 'mock-a', base_url: `http://127.0.0.1:${mockPort}/v1`, api_key: 'k-a', auth_header: 'Authorization', auth_prefix: 'Bearer ' },
     ],
     models: [
-      { id: 'test-model-a', tier: 'tier1', provider: 'mock-a', apiModel: 'test-model-a', enabled: true, paid: false, capability: ['chat', 'tool_use', 'streaming'], price: { input_cost_per_1k: 0, output_cost_per_1k: 0, currency: 'USD' } },
+      { id: 'test-model-a', tier: 'tier1', provider: 'mock-a', apiModel: 'test-model-a', enabled: true, paid: false, capability: ['chat', 'tool_use', 'streaming'], max_tokens: 64000, price: { input_cost_per_1k: 0, output_cost_per_1k: 0, currency: 'USD' } },
     ],
     agent_bindings: {},
     circuit_breaker: { enabled: false, failure_threshold: 100, failure_window_sec: 60, open_state_sec: 120, half_open_max_calls: 2, key_disable_on_auth_invalid: true },
@@ -61,7 +61,7 @@ function countChatPosts(provider) {
   ).length;
 }
 
-describe('Phase2-A Shadow Mode (HTTP)', () => {
+describe('Phase2-A Shadow Mode (HTTP) Sealed', () => {
   let tmpDir, mockProvider, mockPort;
 
   before(async () => {
@@ -76,7 +76,7 @@ describe('Phase2-A Shadow Mode (HTTP)', () => {
     try { rmSync(tmpDir, { recursive: true, force: true }); } catch {}
   });
 
-  test('chat: shadow records same requestId, response unchanged, no extra upstream calls', async () => {
+  test('chat: suggestion before execution, actuals after finalize, same requestId, no extra upstream calls', async () => {
     const dataDir = mkdtempSync(join(tmpdir(), 'sr-shadow-chat-'));
     mockProvider.setDefaultResponse({
       status: 200,
@@ -95,38 +95,39 @@ describe('Phase2-A Shadow Mode (HTTP)', () => {
         body: { model: 'test-model-a', messages: [{ role: 'user', content: 'Write a JS function' }] },
         headers: { 'x-request-id': 'shadow-chat-ext' },
       });
-      // 用户响应不变
       assert.strictEqual(resp.status, 200);
-      const parsed = JSON.parse(resp.body);
-      assert.ok(parsed.choices[0].message.content.includes('SHADOW_OK'));
+      assert.ok(JSON.parse(resp.body).choices[0].message.content.includes('SHADOW_OK'));
 
-      // 上游调用次数：仅 1 次（无额外调用）
+      // 上游调用仅 1 次（Shadow 不增加调用）
       assert.strictEqual(countChatPosts(mockProvider), 1, 'shadow must not add upstream calls');
 
-      // 记录存在：同 requestId + 智能建议 + 传统结果
       const layer = router.server._components.intelligence;
       assert.strictEqual(layer.isShadow(), true);
-      const records = layer.getRecords();
+      const records = await layer.getRecords();
       assert.strictEqual(records.length, 1);
-           const rec = records[0];
+      const rec = records[0];
       assert.ok(rec.requestId.startsWith('sr_'), 'internal requestId sr_ format');
-      assert.ok(rec.intelligence?.recommendation, 'intelligence suggestion recorded');
-      assert.strictEqual(rec.intelligence.recommendation.modelId, 'test-model-a');
-      assert.ok(rec.intelligence.predictions.quality !== null);
-      assert.ok(rec.intelligence.explanation.summary.length > 0);
-      assert.strictEqual(rec.traditional?.finalModel, 'test-model-a');
-      assert.strictEqual(rec.traditional?.outcome, 'completed');
-
-      // 对照摘要
-      const comp = layer.getComparison();
-      assert.strictEqual(comp.total, 1);
+      assert.strictEqual(rec.protocol, 'chat');
+      // 建议（执行前）完整
+      assert.ok(rec.recommendation, 'suggestion recorded');
+      assert.strictEqual(rec.recommendation.modelId, 'test-model-a');
+      assert.ok(rec.taskProfile, 'sanitized task profile recorded');
+      assert.ok(!('lastUserText' in rec.taskProfile), 'lastUserText must not be persisted');
+      assert.ok(rec.predictions.quality !== null);
+      assert.ok(rec.explanation.summary.length > 0);
+      // 真实结果（Finalize 后）与 Audit 一致
+      assert.strictEqual(rec.actualOutcome, 'completed');
+      assert.strictEqual(rec.actualFinalModel, 'test-model-a');
+      assert.strictEqual(rec.actualFinalProvider, 'mock-a');
+      assert.strictEqual(rec.comparisonStatus, 'exact_match');
+      assert.ok(rec.createdAt <= rec.finalizedAt, 'suggestion precedes finalize');
     } finally {
       await stopSmartRouter(router);
       try { rmSync(dataDir, { recursive: true, force: true }); } catch {}
     }
   });
 
-  test('responses: shadow records with same internal requestId', async () => {
+  test('responses: shadow record with same internal requestId', async () => {
     const dataDir = mkdtempSync(join(tmpdir(), 'sr-shadow-resp-'));
     mockProvider.setDefaultResponse({
       status: 200,
@@ -148,20 +149,21 @@ describe('Phase2-A Shadow Mode (HTTP)', () => {
       assert.strictEqual(resp.status, 200);
 
       const layer = router.server._components.intelligence;
-      const records = layer.getRecords();
+      const records = await layer.getRecords();
       assert.strictEqual(records.length, 1);
-           const rec = records[0];
+      const rec = records[0];
       assert.ok(rec.requestId.startsWith('sr_'));
       assert.strictEqual(rec.protocol, 'responses');
-      assert.ok(rec.task?.taskType, "task analysis recorded");
-      assert.strictEqual(rec.traditional?.finalProvider, 'mock-a');
+      assert.ok(rec.taskProfile?.taskType, 'task analysis recorded');
+      assert.strictEqual(rec.actualFinalProvider, 'mock-a');
+      assert.strictEqual(rec.comparisonStatus, 'exact_match');
     } finally {
       await stopSmartRouter(router);
       try { rmSync(dataDir, { recursive: true, force: true }); } catch {}
     }
   });
 
-  test('anthropic stream: shadow records with same internal requestId, stream unaffected', async () => {
+  test('anthropic stream: shadow records same requestId, stream unaffected', async () => {
     const dataDir = mkdtempSync(join(tmpdir(), 'sr-shadow-anth-'));
     mockProvider.setDefaultResponse({
       status: 200,
@@ -186,19 +188,20 @@ describe('Phase2-A Shadow Mode (HTTP)', () => {
       assert.ok(all.includes('ANTH_OK'), 'stream content must reach client');
 
       const layer = router.server._components.intelligence;
-      const records = layer.getRecords();
+      const records = await layer.getRecords();
       assert.strictEqual(records.length, 1);
-           const rec = records[0];
+      const rec = records[0];
       assert.ok(rec.requestId.startsWith('sr_'));
       assert.strictEqual(rec.protocol, 'anthropic');
-      assert.ok(rec.task?.codeRelated === true || rec.task !== null);
+      assert.ok(rec.taskProfile, 'task profile recorded');
+      assert.strictEqual(rec.actualOutcome, 'completed');
     } finally {
       await stopSmartRouter(router);
       try { rmSync(dataDir, { recursive: true, force: true }); } catch {}
     }
   });
 
-  test('off mode: zero records, zero overhead, response unchanged', async () => {
+  test('off mode: zero shadow records, response unchanged', async () => {
     const dataDir = mkdtempSync(join(tmpdir(), 'sr-off-'));
     mockProvider.setDefaultResponse({
       status: 200,
@@ -221,7 +224,9 @@ describe('Phase2-A Shadow Mode (HTTP)', () => {
       assert.ok(resp.body.includes('OFF_OK'));
       const layer = router.server._components.intelligence;
       assert.strictEqual(layer.status().mode, 'off');
-      assert.strictEqual(layer.getRecords().length, 0, 'off mode must record nothing');
+      assert.strictEqual((await layer.getRecords()).length, 0, 'off mode must record nothing');
+      const store = router.server._components.store;
+      assert.strictEqual((await store.listShadowDecisions()).length, 0, 'off mode must persist nothing');
     } finally {
       await stopSmartRouter(router);
       try { rmSync(dataDir, { recursive: true, force: true }); } catch {}

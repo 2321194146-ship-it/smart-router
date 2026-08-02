@@ -1,0 +1,1480 @@
+
+> smart-router-mainline@1.0.0-phase2-shadow test:integration
+> node --test test/integration/*.test.js
+
+[config-loader][2026-08-02T23:26:52.838Z] loading config from /tmp/sr-test-anthropic-1785713212836/config-425102c2.json
+[config-loader][2026-08-02T23:26:52.841Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:52.841Z] server: config loaded
+[config-loader][2026-08-02T23:26:52.843Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:52.843Z] server: config validated
+[config-loader][2026-08-02T23:26:52.843Z] server: storage initialized
+[config-loader][2026-08-02T23:26:52.845Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:52.845Z] server: all components initialized
+[health][2026-08-02T23:26:52.845Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:52.846Z] probing mock-a: GET http://127.0.0.1:55316/v1/models
+[health][2026-08-02T23:26:52.858Z] probing mock-b: GET http://127.0.0.1:55316/v1/models
+[config-loader][2026-08-02T23:26:52.859Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:52.859Z] server: created (timeout=30000ms, keepAlive=5000ms)
+[anthropic-protocol][2026-08-02T23:26:52.902Z] [sr_1785713212900_ef9eb4] agent=claude-code model=test-model-a claudeCode=true patches=[]
+[health][2026-08-02T23:26:52.927Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:52.927Z] probe mock-a: OK (81ms)
+[health][2026-08-02T23:26:52.937Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:52.937Z] probe mock-b: OK (79ms)
+[fallback][2026-08-02T23:26:52.946Z] first byte received, model switching disabled
+[execution][2026-08-02T23:26:52.947Z] cost recorded: mock-a/test-model-a 0 USD
+[execution][2026-08-02T23:26:52.947Z] request completed: mock-a/test-model-a (32ms, 1 upstream calls)
+[config-loader][2026-08-02T23:26:52.951Z] [finalizer] quality feedback: mock-a:test-model-a success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.951Z] [finalizer] transaction: finalized sr_1785713212900_ef9eb4 outcome=completed attempts=1 (atomic)
+▶ Anthropic Messages Integration
+  ✔ non-streaming Anthropic request (86.973916ms)
+[anthropic-stream-protocol][2026-08-02T23:26:52.969Z] [sr_1785713212968_9e0ca5] stream agent=claude-code model=test-model-a claudeCode=true
+[execution][2026-08-02T23:26:52.987Z] stream pre-read valid, 1 chunks buffered
+[execution][2026-08-02T23:26:52.987Z] request completed: mock-a/test-model-a (15ms, 1 upstream calls)
+[anthropic-stream-protocol][2026-08-02T23:26:52.993Z] [sr_1785713212968_9e0ca5] first byte received, model switching disabled
+[anthropic-stream-protocol][2026-08-02T23:26:53.032Z] [sr_1785713212968_9e0ca5] stream completed, bytes=726
+[anthropic-stream-protocol][2026-08-02T23:26:53.032Z] [sr_1785713212968_9e0ca5] no usage found in SSE stream
+[config-loader][2026-08-02T23:26:53.034Z] [finalizer] quality feedback: mock-a:test-model-a success=2 failure=0 (completed)
+[config-loader][2026-08-02T23:26:53.034Z] [finalizer] transaction: finalized sr_1785713212968_9e0ca5 outcome=completed attempts=1 (atomic)
+  ✔ streaming Anthropic with message_stop (76.07725ms)
+[anthropic-stream-protocol][2026-08-02T23:26:53.078Z] [sr_1785713213078_5709e7] stream agent=claude-code model=test-model-a claudeCode=true
+[execution][2026-08-02T23:26:53.091Z] stream pre-read valid, 1 chunks buffered
+[execution][2026-08-02T23:26:53.091Z] request completed: mock-a/test-model-a (11ms, 1 upstream calls)
+[anthropic-stream-protocol][2026-08-02T23:26:53.091Z] [sr_1785713213078_5709e7] first byte received, model switching disabled
+[anthropic-stream-protocol][2026-08-02T23:26:53.107Z] SSE conversion error: terminated
+[anthropic-stream-protocol][2026-08-02T23:26:53.108Z] [sr_1785713213078_5709e7] stream error, bytes=573
+[anthropic-stream-protocol][2026-08-02T23:26:53.108Z] [sr_1785713213078_5709e7] no usage found in SSE stream
+[config-loader][2026-08-02T23:26:53.108Z] [finalizer] quality feedback: mock-a:test-model-a success=2 failure=1 (incomplete)
+[config-loader][2026-08-02T23:26:53.108Z] [finalizer] transaction: finalized sr_1785713213078_5709e7 outcome=incomplete attempts=1 (atomic)
+  ✔ abnormal EOF does not fake completed (72.278833ms)
+  ✔ count_tokens endpoint (3.2515ms)
+[anthropic-protocol][2026-08-02T23:26:53.116Z] [sr_1785713213116_9d7a7c] agent=claude-code model=test-model-a claudeCode=true patches=[]
+[fallback][2026-08-02T23:26:53.123Z] first byte received, model switching disabled
+[execution][2026-08-02T23:26:53.123Z] cost recorded: mock-a/test-model-a 0 USD
+[execution][2026-08-02T23:26:53.123Z] request completed: mock-a/test-model-a (5ms, 1 upstream calls)
+[config-loader][2026-08-02T23:26:53.124Z] [finalizer] quality feedback: mock-a:test-model-a success=3 failure=1 (completed)
+[config-loader][2026-08-02T23:26:53.124Z] [finalizer] transaction: finalized sr_1785713213116_9d7a7c outcome=completed attempts=1 (atomic)
+  ✔ tool_use/tool_result passthrough (12.217583ms)
+✔ Anthropic Messages Integration (314.468209ms)
+[config-loader][2026-08-02T23:26:52.866Z] loading config from /tmp/sr-test-config-1785713212864/config-576ff247.json
+[config-loader][2026-08-02T23:26:52.871Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:52.871Z] server: config loaded
+[config-loader][2026-08-02T23:26:52.873Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:52.873Z] server: config validated
+[config-loader][2026-08-02T23:26:52.874Z] server: storage initialized
+[config-loader][2026-08-02T23:26:52.876Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:52.876Z] server: all components initialized
+[health][2026-08-02T23:26:52.876Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:52.877Z] probing mock-a: GET http://127.0.0.1:55319/v1/models
+[health][2026-08-02T23:26:52.892Z] probing mock-b: GET http://127.0.0.1:55319/v1/models
+[config-loader][2026-08-02T23:26:52.893Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:52.893Z] server: created (timeout=30000ms, keepAlive=5000ms)
+[chat-protocol][2026-08-02T23:26:52.935Z] [sr_1785713212934_96ea01] agent=generic model=test-model-a claudeCode=false patches=[]
+[health][2026-08-02T23:26:52.956Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:52.956Z] probe mock-a: OK (79ms)
+[health][2026-08-02T23:26:52.975Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:52.975Z] probe mock-b: OK (83ms)
+[fallback][2026-08-02T23:26:52.994Z] first byte received, model switching disabled
+[execution][2026-08-02T23:26:52.996Z] cost recorded: mock-a/test-model-a 0 USD
+[execution][2026-08-02T23:26:52.996Z] request completed: mock-a/test-model-a (44ms, 1 upstream calls)
+[config-loader][2026-08-02T23:26:52.999Z] [finalizer] quality feedback: mock-a:test-model-a success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.999Z] [finalizer] transaction: finalized sr_1785713212934_96ea01 outcome=completed attempts=1 (atomic)
+▶ Chat Completions Integration
+  ✔ non-streaming complete request (101.023958ms)
+[chat-stream-protocol][2026-08-02T23:26:53.017Z] [sr_1785713213017_84c3e3] stream agent=generic model=test-model-a claudeCode=false
+[execution][2026-08-02T23:26:53.027Z] stream pre-read valid, 1 chunks buffered
+[execution][2026-08-02T23:26:53.028Z] request completed: mock-a/test-model-a (6ms, 1 upstream calls)
+[chat-stream-protocol][2026-08-02T23:26:53.030Z] [sr_1785713213017_84c3e3] first byte received, model switching disabled
+[chat-stream-protocol][2026-08-02T23:26:53.047Z] [sr_1785713213017_84c3e3] stream completed, bytes=262 done=true
+[chat-stream-protocol][2026-08-02T23:26:53.047Z] [sr_1785713213017_84c3e3] no usage found in SSE stream
+[config-loader][2026-08-02T23:26:53.048Z] [finalizer] quality feedback: mock-a:test-model-a success=2 failure=0 (completed)
+[config-loader][2026-08-02T23:26:53.048Z] [finalizer] transaction: finalized sr_1785713213017_84c3e3 outcome=completed attempts=1 (atomic)
+  ✔ streaming complete request with [DONE] (43.537625ms)
+[chat-protocol][2026-08-02T23:26:53.053Z] [sr_1785713213053_769386] agent=generic model=test-model-a claudeCode=false patches=[]
+[fallback][2026-08-02T23:26:53.058Z] first byte received, model switching disabled
+[execution][2026-08-02T23:26:53.058Z] cost recorded: mock-a/test-model-a 0 USD
+[execution][2026-08-02T23:26:53.058Z] request completed: mock-a/test-model-a (5ms, 1 upstream calls)
+[config-loader][2026-08-02T23:26:53.059Z] [finalizer] quality feedback: mock-a:test-model-a success=3 failure=0 (completed)
+[config-loader][2026-08-02T23:26:53.059Z] [finalizer] transaction: finalized sr_1785713213053_769386 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:53.061Z] loading config from /tmp/sr-test-strict-1785713213060/config-6b4c1a14.json
+[config-loader][2026-08-02T23:26:53.062Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:53.062Z] server: config loaded
+[config-loader][2026-08-02T23:26:53.062Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:53.062Z] server: config warning: budget.strictModel=true but allowedModels is empty; strictModel has no effect
+[config-loader][2026-08-02T23:26:53.062Z] server: config validated
+[config-loader][2026-08-02T23:26:53.063Z] server: storage initialized
+[config-loader][2026-08-02T23:26:53.063Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:53.063Z] server: all components initialized
+[health][2026-08-02T23:26:53.063Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:53.063Z] probing mock-a: GET http://127.0.0.1:55319/v1/models
+[health][2026-08-02T23:26:53.064Z] probing mock-b: GET http://127.0.0.1:55319/v1/models
+[config-loader][2026-08-02T23:26:53.064Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:53.064Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ tool_calls in response (10.452833ms)
+[health][2026-08-02T23:26:53.069Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:53.069Z] probe mock-a: OK (6ms)
+[health][2026-08-02T23:26:53.070Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:53.070Z] probe mock-b: OK (6ms)
+[chat-protocol][2026-08-02T23:26:53.070Z] [sr_1785713213070_13aedf] agent=generic model=nonexistent-model claudeCode=false patches=[]
+[candidates][2026-08-02T23:26:53.070Z] strictModel=true and model "nonexistent-model" not found; returning empty candidates
+[chat-protocol][2026-08-02T23:26:53.070Z] [sr_1785713213070_13aedf] no candidates available
+[config-loader][2026-08-02T23:26:53.071Z] [finalizer] transaction: finalized sr_1785713213070_13aedf outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:53.076Z] loading config from /tmp/sr-test-nopaid-1785713213075/config-3be18ae7.json
+[config-loader][2026-08-02T23:26:53.077Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:53.077Z] server: config loaded
+[config-loader][2026-08-02T23:26:53.077Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:53.077Z] server: config validated
+[config-loader][2026-08-02T23:26:53.077Z] server: storage initialized
+[config-loader][2026-08-02T23:26:53.078Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:53.078Z] server: all components initialized
+[health][2026-08-02T23:26:53.078Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:53.078Z] probing mock-a: GET http://127.0.0.1:55319/v1/models
+[health][2026-08-02T23:26:53.079Z] probing mock-b: GET http://127.0.0.1:55319/v1/models
+[config-loader][2026-08-02T23:26:53.079Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:53.079Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ strict model prevents model switch (14.293208ms)
+[health][2026-08-02T23:26:53.086Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:53.087Z] probe mock-a: OK (8ms)
+[health][2026-08-02T23:26:53.087Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:53.087Z] probe mock-b: OK (8ms)
+[chat-protocol][2026-08-02T23:26:53.088Z] [sr_1785713213087_753ad7] agent=generic model=test-model-b claudeCode=false patches=[]
+[execution][2026-08-02T23:26:53.088Z] all candidates budget-blocked (allowPaid=false, paid models only)
+[config-loader][2026-08-02T23:26:53.089Z] [finalizer] transaction: finalized sr_1785713213087_753ad7 outcome=budget_exceeded attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:53.091Z] loading config from /tmp/sr-test-nocand-1785713213090/config-90e854d5.json
+[config-loader][2026-08-02T23:26:53.092Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:53.092Z] server: config loaded
+[config-loader][2026-08-02T23:26:53.092Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:53.092Z] server: config warning: budget.strictModel=true but allowedModels is empty; strictModel has no effect
+[config-loader][2026-08-02T23:26:53.092Z] server: config validated
+[config-loader][2026-08-02T23:26:53.092Z] server: storage initialized
+[config-loader][2026-08-02T23:26:53.093Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:53.093Z] server: all components initialized
+[health][2026-08-02T23:26:53.093Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:53.093Z] probing mock-a: GET http://127.0.0.1:55319/v1/models
+[health][2026-08-02T23:26:53.093Z] probing mock-b: GET http://127.0.0.1:55319/v1/models
+[config-loader][2026-08-02T23:26:53.094Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:53.094Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ allowPaid=false blocks paid models (15.231708ms)
+[health][2026-08-02T23:26:53.104Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:53.104Z] probe mock-a: OK (11ms)
+[chat-protocol][2026-08-02T23:26:53.104Z] [sr_1785713213104_0e4d2a] agent=generic model=nonexistent-model-xyz claudeCode=false patches=[]
+[candidates][2026-08-02T23:26:53.104Z] strictModel=true and model "nonexistent-model-xyz" not found; returning empty candidates
+[chat-protocol][2026-08-02T23:26:53.104Z] [sr_1785713213104_0e4d2a] no candidates available
+[config-loader][2026-08-02T23:26:53.105Z] [finalizer] transaction: finalized sr_1785713213104_0e4d2a outcome=no_candidate attempts=0 (atomic)
+[health][2026-08-02T23:26:53.106Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:53.106Z] probe mock-b: OK (13ms)
+  ✔ no candidates returns error (16.808709ms)
+✔ Chat Completions Integration (268.138292ms)
+[config-loader][2026-08-02T23:26:52.788Z] [finalizer] quality feedback: mock-a:test-model success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.789Z] [finalizer] transaction: finalized req-000 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.790Z] [finalizer] quality feedback: mock-a:test-model success=1 failure=1 (incomplete)
+[config-loader][2026-08-02T23:26:52.790Z] [finalizer] transaction: finalized req-001 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.790Z] [finalizer] transaction: finalized req-002 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.790Z] [finalizer] transaction: finalized req-003 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.791Z] [finalizer] quality feedback: mock-a:test-model success=2 failure=1 (completed)
+[config-loader][2026-08-02T23:26:52.791Z] [finalizer] transaction: finalized req-004 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.792Z] [finalizer] quality feedback: mock-a:test-model success=2 failure=2 (incomplete)
+[config-loader][2026-08-02T23:26:52.792Z] [finalizer] transaction: finalized req-005 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.792Z] [finalizer] transaction: finalized req-006 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.793Z] [finalizer] transaction: finalized req-007 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.793Z] [finalizer] quality feedback: mock-a:test-model success=3 failure=2 (completed)
+[config-loader][2026-08-02T23:26:52.793Z] [finalizer] transaction: finalized req-008 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.794Z] [finalizer] quality feedback: mock-a:test-model success=3 failure=3 (incomplete)
+[config-loader][2026-08-02T23:26:52.794Z] [finalizer] transaction: finalized req-009 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.794Z] [finalizer] transaction: finalized req-010 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.795Z] [finalizer] transaction: finalized req-011 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.795Z] [finalizer] quality feedback: mock-a:test-model success=4 failure=3 (completed)
+[config-loader][2026-08-02T23:26:52.795Z] [finalizer] transaction: finalized req-012 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.796Z] [finalizer] quality feedback: mock-a:test-model success=4 failure=4 (incomplete)
+[config-loader][2026-08-02T23:26:52.796Z] [finalizer] transaction: finalized req-013 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.796Z] [finalizer] transaction: finalized req-014 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.797Z] [finalizer] transaction: finalized req-015 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.797Z] [finalizer] quality feedback: mock-a:test-model success=5 failure=4 (completed)
+[config-loader][2026-08-02T23:26:52.797Z] [finalizer] transaction: finalized req-016 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.797Z] [finalizer] quality feedback: mock-a:test-model success=5 failure=5 (incomplete)
+[config-loader][2026-08-02T23:26:52.797Z] [finalizer] transaction: finalized req-017 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.798Z] [finalizer] transaction: finalized req-018 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.798Z] [finalizer] transaction: finalized req-019 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.799Z] [finalizer] quality feedback: mock-a:test-model success=6 failure=5 (completed)
+[config-loader][2026-08-02T23:26:52.799Z] [finalizer] transaction: finalized req-020 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.799Z] [finalizer] quality feedback: mock-a:test-model success=6 failure=6 (incomplete)
+[config-loader][2026-08-02T23:26:52.799Z] [finalizer] transaction: finalized req-021 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.800Z] [finalizer] transaction: finalized req-022 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.800Z] [finalizer] transaction: finalized req-023 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.801Z] [finalizer] quality feedback: mock-a:test-model success=7 failure=6 (completed)
+[config-loader][2026-08-02T23:26:52.801Z] [finalizer] transaction: finalized req-024 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.801Z] [finalizer] quality feedback: mock-a:test-model success=7 failure=7 (incomplete)
+[config-loader][2026-08-02T23:26:52.801Z] [finalizer] transaction: finalized req-025 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.801Z] [finalizer] transaction: finalized req-026 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.802Z] [finalizer] transaction: finalized req-027 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.802Z] [finalizer] quality feedback: mock-a:test-model success=8 failure=7 (completed)
+[config-loader][2026-08-02T23:26:52.802Z] [finalizer] transaction: finalized req-028 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.803Z] [finalizer] quality feedback: mock-a:test-model success=8 failure=8 (incomplete)
+[config-loader][2026-08-02T23:26:52.803Z] [finalizer] transaction: finalized req-029 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.803Z] [finalizer] transaction: finalized req-030 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.803Z] [finalizer] transaction: finalized req-031 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.804Z] [finalizer] quality feedback: mock-a:test-model success=9 failure=8 (completed)
+[config-loader][2026-08-02T23:26:52.804Z] [finalizer] transaction: finalized req-032 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.804Z] [finalizer] quality feedback: mock-a:test-model success=9 failure=9 (incomplete)
+[config-loader][2026-08-02T23:26:52.804Z] [finalizer] transaction: finalized req-033 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.805Z] [finalizer] transaction: finalized req-034 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.805Z] [finalizer] transaction: finalized req-035 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.805Z] [finalizer] quality feedback: mock-a:test-model success=10 failure=9 (completed)
+[config-loader][2026-08-02T23:26:52.805Z] [finalizer] transaction: finalized req-036 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.806Z] [finalizer] quality feedback: mock-a:test-model success=10 failure=10 (incomplete)
+[config-loader][2026-08-02T23:26:52.806Z] [finalizer] transaction: finalized req-037 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.808Z] [finalizer] transaction: finalized req-038 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.809Z] [finalizer] transaction: finalized req-039 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.810Z] [finalizer] quality feedback: mock-a:test-model success=11 failure=10 (completed)
+[config-loader][2026-08-02T23:26:52.810Z] [finalizer] transaction: finalized req-040 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.811Z] [finalizer] quality feedback: mock-a:test-model success=11 failure=11 (incomplete)
+[config-loader][2026-08-02T23:26:52.811Z] [finalizer] transaction: finalized req-041 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.812Z] [finalizer] transaction: finalized req-042 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.812Z] [finalizer] transaction: finalized req-043 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.812Z] [finalizer] quality feedback: mock-a:test-model success=12 failure=11 (completed)
+[config-loader][2026-08-02T23:26:52.813Z] [finalizer] transaction: finalized req-044 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.813Z] [finalizer] quality feedback: mock-a:test-model success=12 failure=12 (incomplete)
+[config-loader][2026-08-02T23:26:52.813Z] [finalizer] transaction: finalized req-045 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.814Z] [finalizer] transaction: finalized req-046 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.814Z] [finalizer] transaction: finalized req-047 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.814Z] [finalizer] quality feedback: mock-a:test-model success=13 failure=12 (completed)
+[config-loader][2026-08-02T23:26:52.814Z] [finalizer] transaction: finalized req-048 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.815Z] [finalizer] quality feedback: mock-a:test-model success=13 failure=13 (incomplete)
+[config-loader][2026-08-02T23:26:52.815Z] [finalizer] transaction: finalized req-049 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.815Z] [finalizer] transaction: finalized req-050 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.816Z] [finalizer] transaction: finalized req-051 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.816Z] [finalizer] quality feedback: mock-a:test-model success=14 failure=13 (completed)
+[config-loader][2026-08-02T23:26:52.816Z] [finalizer] transaction: finalized req-052 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.817Z] [finalizer] quality feedback: mock-a:test-model success=14 failure=14 (incomplete)
+[config-loader][2026-08-02T23:26:52.817Z] [finalizer] transaction: finalized req-053 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.817Z] [finalizer] transaction: finalized req-054 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.818Z] [finalizer] transaction: finalized req-055 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.818Z] [finalizer] quality feedback: mock-a:test-model success=15 failure=14 (completed)
+[config-loader][2026-08-02T23:26:52.818Z] [finalizer] transaction: finalized req-056 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.819Z] [finalizer] quality feedback: mock-a:test-model success=15 failure=15 (incomplete)
+[config-loader][2026-08-02T23:26:52.819Z] [finalizer] transaction: finalized req-057 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.820Z] [finalizer] transaction: finalized req-058 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.820Z] [finalizer] transaction: finalized req-059 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.820Z] [finalizer] quality feedback: mock-a:test-model success=16 failure=15 (completed)
+[config-loader][2026-08-02T23:26:52.820Z] [finalizer] transaction: finalized req-060 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.821Z] [finalizer] quality feedback: mock-a:test-model success=16 failure=16 (incomplete)
+[config-loader][2026-08-02T23:26:52.821Z] [finalizer] transaction: finalized req-061 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.821Z] [finalizer] transaction: finalized req-062 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.822Z] [finalizer] transaction: finalized req-063 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.822Z] [finalizer] quality feedback: mock-a:test-model success=17 failure=16 (completed)
+[config-loader][2026-08-02T23:26:52.822Z] [finalizer] transaction: finalized req-064 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.823Z] [finalizer] quality feedback: mock-a:test-model success=17 failure=17 (incomplete)
+[config-loader][2026-08-02T23:26:52.823Z] [finalizer] transaction: finalized req-065 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.823Z] [finalizer] transaction: finalized req-066 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.824Z] [finalizer] transaction: finalized req-067 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.824Z] [finalizer] quality feedback: mock-a:test-model success=18 failure=17 (completed)
+[config-loader][2026-08-02T23:26:52.824Z] [finalizer] transaction: finalized req-068 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.825Z] [finalizer] quality feedback: mock-a:test-model success=18 failure=18 (incomplete)
+[config-loader][2026-08-02T23:26:52.825Z] [finalizer] transaction: finalized req-069 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.825Z] [finalizer] transaction: finalized req-070 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.826Z] [finalizer] transaction: finalized req-071 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.826Z] [finalizer] quality feedback: mock-a:test-model success=19 failure=18 (completed)
+[config-loader][2026-08-02T23:26:52.826Z] [finalizer] transaction: finalized req-072 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.827Z] [finalizer] quality feedback: mock-a:test-model success=19 failure=19 (incomplete)
+[config-loader][2026-08-02T23:26:52.827Z] [finalizer] transaction: finalized req-073 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.827Z] [finalizer] transaction: finalized req-074 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.828Z] [finalizer] transaction: finalized req-075 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.828Z] [finalizer] quality feedback: mock-a:test-model success=20 failure=19 (completed)
+[config-loader][2026-08-02T23:26:52.828Z] [finalizer] transaction: finalized req-076 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.829Z] [finalizer] quality feedback: mock-a:test-model success=20 failure=20 (incomplete)
+[config-loader][2026-08-02T23:26:52.829Z] [finalizer] transaction: finalized req-077 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.829Z] [finalizer] transaction: finalized req-078 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.829Z] [finalizer] transaction: finalized req-079 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.830Z] [finalizer] quality feedback: mock-a:test-model success=21 failure=20 (completed)
+[config-loader][2026-08-02T23:26:52.830Z] [finalizer] transaction: finalized req-080 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.830Z] [finalizer] quality feedback: mock-a:test-model success=21 failure=21 (incomplete)
+[config-loader][2026-08-02T23:26:52.830Z] [finalizer] transaction: finalized req-081 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.831Z] [finalizer] transaction: finalized req-082 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.831Z] [finalizer] transaction: finalized req-083 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.833Z] [finalizer] quality feedback: mock-a:test-model success=22 failure=21 (completed)
+[config-loader][2026-08-02T23:26:52.833Z] [finalizer] transaction: finalized req-084 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.834Z] [finalizer] quality feedback: mock-a:test-model success=22 failure=22 (incomplete)
+[config-loader][2026-08-02T23:26:52.834Z] [finalizer] transaction: finalized req-085 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.834Z] [finalizer] transaction: finalized req-086 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.834Z] [finalizer] transaction: finalized req-087 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.835Z] [finalizer] quality feedback: mock-a:test-model success=23 failure=22 (completed)
+[config-loader][2026-08-02T23:26:52.835Z] [finalizer] transaction: finalized req-088 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.835Z] [finalizer] quality feedback: mock-a:test-model success=23 failure=23 (incomplete)
+[config-loader][2026-08-02T23:26:52.835Z] [finalizer] transaction: finalized req-089 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.836Z] [finalizer] transaction: finalized req-090 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.836Z] [finalizer] transaction: finalized req-091 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.836Z] [finalizer] quality feedback: mock-a:test-model success=24 failure=23 (completed)
+[config-loader][2026-08-02T23:26:52.836Z] [finalizer] transaction: finalized req-092 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.837Z] [finalizer] quality feedback: mock-a:test-model success=24 failure=24 (incomplete)
+[config-loader][2026-08-02T23:26:52.837Z] [finalizer] transaction: finalized req-093 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.837Z] [finalizer] transaction: finalized req-094 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.837Z] [finalizer] transaction: finalized req-095 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.837Z] [finalizer] quality feedback: mock-a:test-model success=25 failure=24 (completed)
+[config-loader][2026-08-02T23:26:52.837Z] [finalizer] transaction: finalized req-096 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.838Z] [finalizer] quality feedback: mock-a:test-model success=25 failure=25 (incomplete)
+[config-loader][2026-08-02T23:26:52.838Z] [finalizer] transaction: finalized req-097 outcome=incomplete attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.838Z] [finalizer] transaction: finalized req-098 outcome=client_aborted attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.839Z] [finalizer] transaction: finalized req-099 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.875Z] [finalizer] quality feedback: mock-a:test-model success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.875Z] [finalizer] transaction: finalized file-req-000 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.875Z] [finalizer] transaction: finalized file-req-001 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.876Z] [finalizer] quality feedback: mock-a:test-model success=2 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.876Z] [finalizer] transaction: finalized file-req-002 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.876Z] [finalizer] transaction: finalized file-req-003 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.877Z] [finalizer] quality feedback: mock-a:test-model success=3 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.877Z] [finalizer] transaction: finalized file-req-004 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.877Z] [finalizer] transaction: finalized file-req-005 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.878Z] [finalizer] quality feedback: mock-a:test-model success=4 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.878Z] [finalizer] transaction: finalized file-req-006 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.879Z] [finalizer] transaction: finalized file-req-007 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.880Z] [finalizer] quality feedback: mock-a:test-model success=5 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.880Z] [finalizer] transaction: finalized file-req-008 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.880Z] [finalizer] transaction: finalized file-req-009 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.883Z] [finalizer] quality feedback: mock-a:test-model success=6 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.883Z] [finalizer] transaction: finalized file-req-010 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.884Z] [finalizer] transaction: finalized file-req-011 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.884Z] [finalizer] quality feedback: mock-a:test-model success=7 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.884Z] [finalizer] transaction: finalized file-req-012 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.885Z] [finalizer] transaction: finalized file-req-013 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.886Z] [finalizer] quality feedback: mock-a:test-model success=8 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.886Z] [finalizer] transaction: finalized file-req-014 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.886Z] [finalizer] transaction: finalized file-req-015 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.887Z] [finalizer] quality feedback: mock-a:test-model success=9 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.887Z] [finalizer] transaction: finalized file-req-016 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.887Z] [finalizer] transaction: finalized file-req-017 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.888Z] [finalizer] quality feedback: mock-a:test-model success=10 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.888Z] [finalizer] transaction: finalized file-req-018 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.888Z] [finalizer] transaction: finalized file-req-019 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.889Z] [finalizer] quality feedback: mock-a:test-model success=11 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.889Z] [finalizer] transaction: finalized file-req-020 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.889Z] [finalizer] transaction: finalized file-req-021 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.890Z] [finalizer] quality feedback: mock-a:test-model success=12 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.890Z] [finalizer] transaction: finalized file-req-022 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.890Z] [finalizer] transaction: finalized file-req-023 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.891Z] [finalizer] quality feedback: mock-a:test-model success=13 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.891Z] [finalizer] transaction: finalized file-req-024 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.891Z] [finalizer] transaction: finalized file-req-025 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.892Z] [finalizer] quality feedback: mock-a:test-model success=14 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.892Z] [finalizer] transaction: finalized file-req-026 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.892Z] [finalizer] transaction: finalized file-req-027 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.893Z] [finalizer] quality feedback: mock-a:test-model success=15 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.893Z] [finalizer] transaction: finalized file-req-028 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.893Z] [finalizer] transaction: finalized file-req-029 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.897Z] [finalizer] quality feedback: mock-a:test-model success=16 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.897Z] [finalizer] transaction: finalized file-req-030 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.897Z] [finalizer] transaction: finalized file-req-031 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.898Z] [finalizer] quality feedback: mock-a:test-model success=17 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.898Z] [finalizer] transaction: finalized file-req-032 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.898Z] [finalizer] transaction: finalized file-req-033 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.899Z] [finalizer] quality feedback: mock-a:test-model success=18 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.899Z] [finalizer] transaction: finalized file-req-034 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.900Z] [finalizer] transaction: finalized file-req-035 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.901Z] [finalizer] quality feedback: mock-a:test-model success=19 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.901Z] [finalizer] transaction: finalized file-req-036 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.901Z] [finalizer] transaction: finalized file-req-037 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.902Z] [finalizer] quality feedback: mock-a:test-model success=20 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.902Z] [finalizer] transaction: finalized file-req-038 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.902Z] [finalizer] transaction: finalized file-req-039 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.903Z] [finalizer] quality feedback: mock-a:test-model success=21 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.903Z] [finalizer] transaction: finalized file-req-040 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.903Z] [finalizer] transaction: finalized file-req-041 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.904Z] [finalizer] quality feedback: mock-a:test-model success=22 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.904Z] [finalizer] transaction: finalized file-req-042 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.904Z] [finalizer] transaction: finalized file-req-043 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.905Z] [finalizer] quality feedback: mock-a:test-model success=23 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.905Z] [finalizer] transaction: finalized file-req-044 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.906Z] [finalizer] transaction: finalized file-req-045 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.907Z] [finalizer] quality feedback: mock-a:test-model success=24 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.907Z] [finalizer] transaction: finalized file-req-046 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.907Z] [finalizer] transaction: finalized file-req-047 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.909Z] [finalizer] quality feedback: mock-a:test-model success=25 failure=0 (completed)
+[config-loader][2026-08-02T23:26:52.909Z] [finalizer] transaction: finalized file-req-048 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:52.911Z] [finalizer] transaction: finalized file-req-049 outcome=no_candidate attempts=0 (atomic)
+▶ Concurrent finalizeRequestTransaction (100+ on one SQLiteStore)
+  ✔ 100 concurrent finalizes: no transaction nesting error, no lost/duplicate writes (99.428208ms)
+  ✔ 50 concurrent finalizes on a FILE-backed SQLiteStore (WAL mode) (66.128833ms)
+✔ Concurrent finalizeRequestTransaction (100+ on one SQLiteStore) (168.612541ms)
+[key-pool][2026-08-02T23:26:52.737Z] key "mock-a-0" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
+[key-pool][2026-08-02T23:26:52.901Z] key "mock-a-0" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
+▶ Key Cooldown Persistence and Restart Recovery
+  ✔ 429 transient -> cooldown persisted to SQLite (cooldown_until in future) (166.866709ms)
+[key-pool][2026-08-02T23:26:53.054Z] restored key "mock-a-0" as cooling from store
+[key-pool][2026-08-02T23:26:53.054Z] key "mock-a-0" cooldown expired, restoring to active
+[key-pool][2026-08-02T23:26:53.057Z] key "mock-a-0" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
+  ✔ restart: expired cooldown -> key recovers to ACTIVE and is reselectable (156.039167ms)
+[key-pool][2026-08-02T23:26:53.208Z] restored key "mock-a-0" as cooling from store
+[key-pool][2026-08-02T23:26:53.210Z] key "mock-a-0" permanently disabled (AUTH_INVALID / 401)
+  ✔ restart: active cooldown -> key stays COOLING (not recoverable until expiry) (153.873792ms)
+[key-pool][2026-08-02T23:26:53.362Z] restored key "mock-a-0" as invalid from store
+[key-pool][2026-08-02T23:26:53.363Z] key "mock-a-0" manually disabled
+  ✔ restart: 401 invalid stays INVALID permanently (153.141042ms)
+[key-pool][2026-08-02T23:26:53.514Z] restored key "mock-a-0" as disabled from store
+[key-pool][2026-08-02T23:26:53.515Z] restored key "mock-a-0" as cooling from store
+[key-pool][2026-08-02T23:26:53.515Z] key "mock-a-0" cooling without cooldownUntil, restoring to active
+  ✔ restart: disabled stays DISABLED (152.03525ms)
+  ✔ COOLING with cooldownUntil=null must NOT be permanently stuck (1.126209ms)
+✔ Key Cooldown Persistence and Restart Recovery (786.846708ms)
+[config-loader][2026-08-02T23:26:52.868Z] [finalizer] transaction: failed for nc-rollback-1: injected saveAuditRecord failure
+[config-loader][2026-08-02T23:26:52.871Z] [finalizer] transaction: finalized nc-rollback-1 outcome=no_candidate attempts=0 (atomic)
+[config-loader][2026-08-02T23:26:52.901Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-nc-chat-vfNgkO/config-fd746440.json
+[config-loader][2026-08-02T23:26:52.903Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:52.903Z] server: config loaded
+[config-loader][2026-08-02T23:26:52.905Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:52.905Z] server: config warning: budget.strictModel=true but allowedModels is empty; strictModel has no effect
+[config-loader][2026-08-02T23:26:52.905Z] server: config validated
+[config-loader][2026-08-02T23:26:52.923Z] server: storage initialized
+[config-loader][2026-08-02T23:26:52.925Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:52.925Z] server: all components initialized
+[health][2026-08-02T23:26:52.925Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:52.926Z] probing mock-a: GET http://127.0.0.1:55324/v1/models
+[health][2026-08-02T23:26:52.939Z] probing mock-b: GET http://127.0.0.1:55324/v1/models
+[config-loader][2026-08-02T23:26:52.941Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:52.941Z] server: created (timeout=30000ms, keepAlive=5000ms)
+▶ A. no_candidate transaction rollback
+  ✔ audit write failure -> rollback, no half-state, safe retry to no_candidate (13.058667ms)
+✔ A. no_candidate transaction rollback (16.63525ms)
+[health][2026-08-02T23:26:53.056Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:53.056Z] probe mock-a: OK (130ms)
+[health][2026-08-02T23:26:53.064Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:53.064Z] probe mock-b: OK (124ms)
+[chat-protocol][2026-08-02T23:26:53.162Z] [sr_1785713213160_3a18b4] agent=generic model=nonexistent-model claudeCode=false patches=[]
+[candidates][2026-08-02T23:26:53.163Z] strictModel=true and model "nonexistent-model" not found; returning empty candidates
+[chat-protocol][2026-08-02T23:26:53.163Z] [sr_1785713213160_3a18b4] no candidates available
+[config-loader][2026-08-02T23:26:53.163Z] [finalizer] transaction: finalized sr_1785713213160_3a18b4 outcome=no_candidate attempts=0 (atomic)
+[health][2026-08-02T23:26:53.168Z] health check stopped
+[config-loader][2026-08-02T23:26:53.174Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-nc-resp-fx1Knk/config-074bb52c.json
+[config-loader][2026-08-02T23:26:53.175Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:53.175Z] server: config loaded
+[config-loader][2026-08-02T23:26:53.175Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:53.175Z] server: config warning: budget.strictModel=true but allowedModels is empty; strictModel has no effect
+[config-loader][2026-08-02T23:26:53.175Z] server: config validated
+[config-loader][2026-08-02T23:26:53.183Z] server: storage initialized
+[config-loader][2026-08-02T23:26:53.183Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:53.183Z] server: all components initialized
+[health][2026-08-02T23:26:53.183Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:53.183Z] probing mock-a: GET http://127.0.0.1:55351/v1/models
+[health][2026-08-02T23:26:53.184Z] probing mock-b: GET http://127.0.0.1:55351/v1/models
+[config-loader][2026-08-02T23:26:53.185Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:53.185Z] server: created (timeout=30000ms, keepAlive=5000ms)
+▶ B. Three-protocol HTTP no-candidate
+  ✔ Chat: nonexistent model (strictModel) -> 503, no_candidate evidence (296.588167ms)
+[health][2026-08-02T23:26:53.199Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:53.199Z] probe mock-a: OK (16ms)
+[health][2026-08-02T23:26:53.200Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:53.200Z] probe mock-b: OK (16ms)
+[responses-protocol][2026-08-02T23:26:53.390Z] [sr_1785713213390_8e0fba] responses non-stream model=nonexistent-model
+[chat-protocol][2026-08-02T23:26:53.390Z] [sr_1785713213390_8e0fba] agent=codex model=nonexistent-model claudeCode=false patches=[]
+[candidates][2026-08-02T23:26:53.391Z] strictModel=true and model "nonexistent-model" not found; returning empty candidates
+[chat-protocol][2026-08-02T23:26:53.391Z] [sr_1785713213390_8e0fba] no candidates available
+[config-loader][2026-08-02T23:26:53.391Z] [finalizer] transaction: finalized sr_1785713213390_8e0fba outcome=no_candidate attempts=0 (atomic)
+[responses-protocol][2026-08-02T23:26:53.391Z] [sr_1785713213390_8e0fba] upstream error: No available models for the requested model: nonexistent-model
+[health][2026-08-02T23:26:53.393Z] health check stopped
+[config-loader][2026-08-02T23:26:53.396Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-nc-anth-DmOjBH/config-2315cae4.json
+[config-loader][2026-08-02T23:26:53.396Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:53.396Z] server: config loaded
+[config-loader][2026-08-02T23:26:53.396Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:53.396Z] server: config warning: budget.strictModel=true but allowedModels is empty; strictModel has no effect
+[config-loader][2026-08-02T23:26:53.396Z] server: config validated
+[config-loader][2026-08-02T23:26:53.401Z] server: storage initialized
+[config-loader][2026-08-02T23:26:53.401Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:53.401Z] server: all components initialized
+[health][2026-08-02T23:26:53.401Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:53.401Z] probing mock-a: GET http://127.0.0.1:55367/v1/models
+[health][2026-08-02T23:26:53.402Z] probing mock-b: GET http://127.0.0.1:55367/v1/models
+[config-loader][2026-08-02T23:26:53.402Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:53.402Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ Responses: nonexistent model (strictModel) -> 503, no_candidate evidence (222.451334ms)
+[health][2026-08-02T23:26:53.406Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:53.406Z] probe mock-a: OK (5ms)
+[health][2026-08-02T23:26:53.406Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:53.406Z] probe mock-b: OK (4ms)
+[anthropic-protocol][2026-08-02T23:26:53.606Z] [sr_1785713213605_78132c] agent=claude-code model=nonexistent-model claudeCode=true patches=[]
+[candidates][2026-08-02T23:26:53.606Z] strictModel=true and model "nonexistent-model" not found; returning empty candidates
+[anthropic-protocol][2026-08-02T23:26:53.606Z] [sr_1785713213605_78132c] no candidates available
+[config-loader][2026-08-02T23:26:53.606Z] [finalizer] transaction: finalized sr_1785713213605_78132c outcome=no_candidate attempts=0 (atomic)
+[health][2026-08-02T23:26:53.607Z] health check stopped
+  ✔ Anthropic: nonexistent model (strictModel) -> 503, no_candidate evidence (213.519834ms)
+✔ B. Three-protocol HTTP no-candidate (733.938ms)
+▶ Persistence: SQLite Store Restart
+  ✔ audit records survive store close/reopen (13.504042ms)
+  ✔ cost records survive restart with deduplication (5.713209ms)
+  ✔ finalized idempotency survives restart (4.88025ms)
+  ✔ key status survives restart (401 permanent failure) (5.429083ms)
+  ✔ provider health (circuit breaker) survives restart (3.942209ms)
+  ✔ request metadata survives restart (2.977166ms)
+  ✔ attempt records survive restart (4.368583ms)
+  ✔ MemoryStore provides same interface as SQLiteStore (0.937083ms)
+✔ Persistence: SQLite Store Restart (47.536292ms)
+[config-loader][2026-08-02T23:26:52.918Z] loading config from /tmp/sr-test-fb401-1785713212913/config-4831ad1b.json
+[config-loader][2026-08-02T23:26:52.922Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:52.922Z] server: config loaded
+[config-loader][2026-08-02T23:26:52.925Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:52.925Z] server: config validated
+[config-loader][2026-08-02T23:26:52.925Z] server: storage initialized
+[config-loader][2026-08-02T23:26:52.927Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:52.927Z] server: all components initialized
+[health][2026-08-02T23:26:52.928Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:52.929Z] probing mock-a: GET http://127.0.0.1:55326/v1/models
+[health][2026-08-02T23:26:52.947Z] probing mock-b: GET http://127.0.0.1:55326/v1/models
+[config-loader][2026-08-02T23:26:52.948Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:52.949Z] server: created (timeout=30000ms, keepAlive=5000ms)
+[chat-protocol][2026-08-02T23:26:53.061Z] [sr_1785713213059_6ae389] agent=generic model=test-model-a claudeCode=false patches=[]
+[health][2026-08-02T23:26:53.103Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:53.103Z] probe mock-a: OK (174ms)
+[health][2026-08-02T23:26:53.113Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:53.113Z] probe mock-b: OK (166ms)
+[key-pool][2026-08-02T23:26:53.120Z] key "mock-a-0" permanently disabled (AUTH_INVALID / 401)
+[health][2026-08-02T23:26:53.120Z] provider "mock-a" status: active → degraded
+[provider-client][2026-08-02T23:26:53.121Z] upstream error from mock-a/test-model-a: HTTP 401 (auth_invalid): {"error":{"message":"Invalid API key","type":"invalid_request_error"}}
+[execution][2026-08-02T23:26:53.123Z] key-level error (auth_invalid) for mock-a; will retry with different key
+[fallback][2026-08-02T23:26:53.124Z] free candidate failed (retriable=false); paid fallback blocked
+[execution][2026-08-02T23:26:53.124Z] no available keys for provider "mock-a"
+[fallback][2026-08-02T23:26:53.124Z] free candidate failed (retriable=false); paid fallback blocked
+[config-loader][2026-08-02T23:26:53.125Z] [finalizer] transaction: finalized sr_1785713213059_6ae389 outcome=no_candidate attempts=2 (atomic)
+[config-loader][2026-08-02T23:26:53.134Z] loading config from /tmp/sr-test-fb429-1785713213133/config-8b9e9dbe.json
+[config-loader][2026-08-02T23:26:53.135Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:53.135Z] server: config loaded
+[config-loader][2026-08-02T23:26:53.135Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:53.135Z] server: config validated
+[config-loader][2026-08-02T23:26:53.136Z] server: storage initialized
+[config-loader][2026-08-02T23:26:53.136Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:53.136Z] server: all components initialized
+[health][2026-08-02T23:26:53.136Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:53.136Z] probing mock-a: GET http://127.0.0.1:55326/v1/models
+[health][2026-08-02T23:26:53.137Z] probing mock-b: GET http://127.0.0.1:55326/v1/models
+[config-loader][2026-08-02T23:26:53.137Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:53.138Z] server: created (timeout=30000ms, keepAlive=5000ms)
+▶ Provider and Fallback Integration
+  ✔ 401 error triggers key failure (219.389042ms)
+[health][2026-08-02T23:26:53.150Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:53.150Z] probe mock-a: OK (14ms)
+[health][2026-08-02T23:26:53.150Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:53.150Z] probe mock-b: OK (13ms)
+[chat-protocol][2026-08-02T23:26:53.151Z] [sr_1785713213151_e3395e] agent=generic model=test-model-a claudeCode=false patches=[]
+[key-pool][2026-08-02T23:26:53.159Z] key "mock-a-0" permanently disabled (AUTH_INVALID / 401)
+[health][2026-08-02T23:26:53.159Z] provider "mock-a" status: active → degraded
+[provider-client][2026-08-02T23:26:53.159Z] upstream error from mock-a/test-model-a: HTTP 401 (auth_invalid): {"error":{"message":"Invalid API key","type":"invalid_request_error"}}
+[execution][2026-08-02T23:26:53.160Z] key-level error (auth_invalid) for mock-a; will retry with different key
+[fallback][2026-08-02T23:26:53.160Z] free candidate failed (retriable=false); paid fallback blocked
+[execution][2026-08-02T23:26:53.160Z] no available keys for provider "mock-a"
+[fallback][2026-08-02T23:26:53.160Z] free candidate failed (retriable=false); paid fallback blocked
+[config-loader][2026-08-02T23:26:53.160Z] [finalizer] transaction: finalized sr_1785713213151_e3395e outcome=no_candidate attempts=2 (atomic)
+[config-loader][2026-08-02T23:26:53.164Z] loading config from /tmp/sr-test-fb500-1785713213163/config-59a7f8bc.json
+[config-loader][2026-08-02T23:26:53.165Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:53.165Z] server: config loaded
+[config-loader][2026-08-02T23:26:53.165Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:53.165Z] server: config validated
+[config-loader][2026-08-02T23:26:53.165Z] server: storage initialized
+[config-loader][2026-08-02T23:26:53.166Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:53.166Z] server: all components initialized
+[health][2026-08-02T23:26:53.166Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:53.166Z] probing mock-a: GET http://127.0.0.1:55326/v1/models
+[health][2026-08-02T23:26:53.166Z] probing mock-b: GET http://127.0.0.1:55326/v1/models
+[config-loader][2026-08-02T23:26:53.167Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:53.167Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ 429 transient error allows fallback (29.389792ms)
+[health][2026-08-02T23:26:53.171Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:53.171Z] probe mock-a: OK (5ms)
+[health][2026-08-02T23:26:53.172Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:53.172Z] probe mock-b: OK (6ms)
+[chat-protocol][2026-08-02T23:26:53.173Z] [sr_1785713213173_14d1a6] agent=generic model=test-model-a claudeCode=false patches=[]
+[key-pool][2026-08-02T23:26:53.178Z] key "mock-a-0" permanently disabled (AUTH_INVALID / 401)
+[health][2026-08-02T23:26:53.178Z] provider "mock-a" status: active → degraded
+[provider-client][2026-08-02T23:26:53.178Z] upstream error from mock-a/test-model-a: HTTP 401 (auth_invalid): {"error":{"message":"Invalid API key","type":"invalid_request_error"}}
+[execution][2026-08-02T23:26:53.178Z] key-level error (auth_invalid) for mock-a; will retry with different key
+[fallback][2026-08-02T23:26:53.178Z] free candidate failed (retriable=false); paid fallback blocked
+[execution][2026-08-02T23:26:53.178Z] no available keys for provider "mock-a"
+[fallback][2026-08-02T23:26:53.178Z] free candidate failed (retriable=false); paid fallback blocked
+[config-loader][2026-08-02T23:26:53.179Z] [finalizer] transaction: finalized sr_1785713213173_14d1a6 outcome=no_candidate attempts=2 (atomic)
+[config-loader][2026-08-02T23:26:53.182Z] loading config from /tmp/sr-test-budget-1785713213181/config-e6f04168.json
+[config-loader][2026-08-02T23:26:53.183Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:53.183Z] server: config loaded
+[config-loader][2026-08-02T23:26:53.183Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:53.183Z] server: config validated
+[config-loader][2026-08-02T23:26:53.183Z] server: storage initialized
+[config-loader][2026-08-02T23:26:53.183Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:53.184Z] server: all components initialized
+[health][2026-08-02T23:26:53.184Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:53.184Z] probing mock-a: GET http://127.0.0.1:55326/v1/models
+[health][2026-08-02T23:26:53.184Z] probing mock-b: GET http://127.0.0.1:55326/v1/models
+[config-loader][2026-08-02T23:26:53.185Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:53.185Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ 500 server error triggers fallback (17.796292ms)
+[health][2026-08-02T23:26:53.189Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:53.189Z] probe mock-a: OK (5ms)
+[health][2026-08-02T23:26:53.189Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:53.189Z] probe mock-b: OK (5ms)
+[chat-protocol][2026-08-02T23:26:53.190Z] [sr_1785713213189_20fc2e] agent=generic model=test-model-b claudeCode=false patches=[]
+[execution][2026-08-02T23:26:53.190Z] all candidates budget-blocked (allowPaid=false, paid models only)
+[config-loader][2026-08-02T23:26:53.190Z] [finalizer] transaction: finalized sr_1785713213189_20fc2e outcome=budget_exceeded attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:53.193Z] loading config from /tmp/sr-test-freefb-1785713213192/config-74a44929.json
+[config-loader][2026-08-02T23:26:53.193Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:53.193Z] server: config loaded
+[config-loader][2026-08-02T23:26:53.193Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:53.193Z] server: config validated
+[config-loader][2026-08-02T23:26:53.194Z] server: storage initialized
+[config-loader][2026-08-02T23:26:53.194Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:53.194Z] server: all components initialized
+[health][2026-08-02T23:26:53.194Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:53.194Z] probing mock-a: GET http://127.0.0.1:55326/v1/models
+[health][2026-08-02T23:26:53.194Z] probing mock-b: GET http://127.0.0.1:55326/v1/models
+[config-loader][2026-08-02T23:26:53.195Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:53.195Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ budget insufficient prevents paid fallback (10.627ms)
+[health][2026-08-02T23:26:53.198Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:53.198Z] probe mock-a: OK (4ms)
+[health][2026-08-02T23:26:53.203Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:53.203Z] probe mock-b: OK (9ms)
+[chat-protocol][2026-08-02T23:26:53.203Z] [sr_1785713213203_b86439] agent=generic model=test-model-a claudeCode=false patches=[]
+[key-pool][2026-08-02T23:26:53.207Z] key "mock-a-0" permanently disabled (AUTH_INVALID / 401)
+[health][2026-08-02T23:26:53.207Z] provider "mock-a" status: active → degraded
+[provider-client][2026-08-02T23:26:53.207Z] upstream error from mock-a/test-model-a: HTTP 401 (auth_invalid): {"error":{"message":"Invalid API key","type":"invalid_request_error"}}
+[execution][2026-08-02T23:26:53.207Z] key-level error (auth_invalid) for mock-a; will retry with different key
+[fallback][2026-08-02T23:26:53.207Z] free candidate failed (retriable=false); paid fallback blocked
+[execution][2026-08-02T23:26:53.207Z] no available keys for provider "mock-a"
+[fallback][2026-08-02T23:26:53.207Z] free candidate failed (retriable=false); paid fallback blocked
+[config-loader][2026-08-02T23:26:53.208Z] [finalizer] transaction: finalized sr_1785713213203_b86439 outcome=no_candidate attempts=2 (atomic)
+  ✔ free model failure allows fallback to another free model (17.048208ms)
+✔ Provider and Fallback Integration (323.910583ms)
+[config-loader][2026-08-02T23:26:53.306Z] loading config from /tmp/sr-test-responses-1785713213304/config-7a844bed.json
+[config-loader][2026-08-02T23:26:53.309Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:53.309Z] server: config loaded
+[config-loader][2026-08-02T23:26:53.311Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:53.311Z] server: config validated
+[config-loader][2026-08-02T23:26:53.311Z] server: storage initialized
+[config-loader][2026-08-02T23:26:53.313Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:53.313Z] server: all components initialized
+[health][2026-08-02T23:26:53.313Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:53.313Z] probing mock-a: GET http://127.0.0.1:55359/v1/models
+[health][2026-08-02T23:26:53.321Z] probing mock-b: GET http://127.0.0.1:55359/v1/models
+[config-loader][2026-08-02T23:26:53.322Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:53.322Z] server: created (timeout=30000ms, keepAlive=5000ms)
+[responses-protocol][2026-08-02T23:26:53.343Z] [sr_1785713213342_d51cdb] responses non-stream model=test-model-a
+[chat-protocol][2026-08-02T23:26:53.344Z] [sr_1785713213342_d51cdb] agent=codex model=test-model-a claudeCode=false patches=[]
+[health][2026-08-02T23:26:53.355Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:53.355Z] probe mock-a: OK (42ms)
+[health][2026-08-02T23:26:53.361Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:53.361Z] probe mock-b: OK (40ms)
+[fallback][2026-08-02T23:26:53.365Z] first byte received, model switching disabled
+[execution][2026-08-02T23:26:53.366Z] cost recorded: mock-a/test-model-a 0 USD
+[execution][2026-08-02T23:26:53.366Z] request completed: mock-a/test-model-a (17ms, 1 upstream calls)
+[config-loader][2026-08-02T23:26:53.367Z] [finalizer] quality feedback: mock-a:test-model-a success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:53.367Z] [finalizer] transaction: finalized sr_1785713213342_d51cdb outcome=completed attempts=1 (atomic)
+[responses-protocol][2026-08-02T23:26:53.368Z] [sr_1785713213342_d51cdb] responses completed: output_items=1 status=completed
+▶ Responses API Integration
+  ✔ non-streaming Responses request (43.466625ms)
+[responses-stream-protocol][2026-08-02T23:26:53.374Z] [sr_1785713213373_c9b0a6] responses stream agent=codex model=test-model-a claudeCode=false
+[execution][2026-08-02T23:26:53.381Z] stream pre-read valid, 1 chunks buffered
+[execution][2026-08-02T23:26:53.381Z] request completed: mock-a/test-model-a (5ms, 1 upstream calls)
+[responses-stream-protocol][2026-08-02T23:26:53.382Z] [sr_1785713213373_c9b0a6] first byte received, model switching disabled
+[responses-stream-protocol][2026-08-02T23:26:53.402Z] [sr_1785713213373_c9b0a6] responses stream completed, bytes=1459
+[responses-stream-protocol][2026-08-02T23:26:53.402Z] [sr_1785713213373_c9b0a6] no usage found in responses SSE stream
+[config-loader][2026-08-02T23:26:53.402Z] [finalizer] quality feedback: mock-a:test-model-a success=2 failure=0 (completed)
+[config-loader][2026-08-02T23:26:53.402Z] [finalizer] transaction: finalized sr_1785713213373_c9b0a6 outcome=completed attempts=1 (atomic)
+  ✔ streaming Responses with response.completed (31.745917ms)
+[responses-protocol][2026-08-02T23:26:53.404Z] [sr_1785713213404_4bc6bc] responses non-stream model=test-model-a
+[chat-protocol][2026-08-02T23:26:53.404Z] [sr_1785713213404_4bc6bc] agent=codex model=test-model-a claudeCode=false patches=[]
+[fallback][2026-08-02T23:26:53.410Z] first byte received, model switching disabled
+[execution][2026-08-02T23:26:53.410Z] cost recorded: mock-a/test-model-a 0 USD
+[execution][2026-08-02T23:26:53.410Z] request completed: mock-a/test-model-a (5ms, 1 upstream calls)
+[config-loader][2026-08-02T23:26:53.410Z] [finalizer] quality feedback: mock-a:test-model-a success=3 failure=0 (completed)
+[config-loader][2026-08-02T23:26:53.410Z] [finalizer] transaction: finalized sr_1785713213404_4bc6bc outcome=completed attempts=1 (atomic)
+[responses-protocol][2026-08-02T23:26:53.410Z] [sr_1785713213404_4bc6bc] responses completed: output_items=1 status=completed
+  ✔ function_call in Responses (8.477916ms)
+[responses-protocol][2026-08-02T23:26:53.412Z] [sr_1785713213412_01b6d0] responses non-stream model=test-model-a
+[chat-protocol][2026-08-02T23:26:53.412Z] [sr_1785713213412_01b6d0] agent=codex model=test-model-a claudeCode=false patches=[]
+[fallback][2026-08-02T23:26:53.416Z] first byte received, model switching disabled
+[execution][2026-08-02T23:26:53.416Z] cost recorded: mock-a/test-model-a 0 USD
+[execution][2026-08-02T23:26:53.416Z] request completed: mock-a/test-model-a (3ms, 1 upstream calls)
+[config-loader][2026-08-02T23:26:53.416Z] [finalizer] quality feedback: mock-a:test-model-a success=4 failure=0 (completed)
+[config-loader][2026-08-02T23:26:53.416Z] [finalizer] transaction: finalized sr_1785713213412_01b6d0 outcome=completed attempts=1 (atomic)
+[responses-protocol][2026-08-02T23:26:53.416Z] [sr_1785713213412_01b6d0] responses completed: output_items=1 status=completed
+  ✔ upstream receives correct request body (5.533208ms)
+✔ Responses API Integration (129.7665ms)
+[config-loader][2026-08-02T23:26:53.380Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-shadow-chat-hTUWBB/config-12e27715.json
+[config-loader][2026-08-02T23:26:53.383Z] config loaded (intelligence.mode=shadow)
+[config-loader][2026-08-02T23:26:53.383Z] server: config loaded
+[config-loader][2026-08-02T23:26:53.384Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:53.384Z] server: config validated
+[config-loader][2026-08-02T23:26:53.389Z] server: storage initialized
+[config-loader][2026-08-02T23:26:53.391Z] server: intelligence layer initialized (mode=shadow)
+[config-loader][2026-08-02T23:26:53.391Z] server: all components initialized
+[health][2026-08-02T23:26:53.392Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:53.392Z] probing mock-a: GET http://127.0.0.1:55365/v1/models
+[config-loader][2026-08-02T23:26:53.402Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:53.402Z] server: created (timeout=30000ms, keepAlive=5000ms)
+[health][2026-08-02T23:26:53.425Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:53.425Z] probe mock-a: OK (33ms)
+[chat-protocol][2026-08-02T23:26:53.612Z] [sr_1785713213611_e3af7c] agent=generic model=test-model-a claudeCode=false patches=[]
+[fallback][2026-08-02T23:26:53.626Z] first byte received, model switching disabled
+[execution][2026-08-02T23:26:53.627Z] cost recorded: mock-a/test-model-a 0 USD
+[execution][2026-08-02T23:26:53.627Z] request completed: mock-a/test-model-a (8ms, 1 upstream calls)
+[config-loader][2026-08-02T23:26:53.628Z] [finalizer] quality feedback: mock-a:test-model-a success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:53.628Z] [finalizer] transaction: finalized sr_1785713213611_e3af7c outcome=completed attempts=1 (atomic)
+[health][2026-08-02T23:26:53.631Z] health check stopped
+[config-loader][2026-08-02T23:26:53.635Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-shadow-resp-DeqFaF/config-2b3d36a7.json
+[config-loader][2026-08-02T23:26:53.635Z] config loaded (intelligence.mode=shadow)
+[config-loader][2026-08-02T23:26:53.635Z] server: config loaded
+[config-loader][2026-08-02T23:26:53.635Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:53.635Z] server: config validated
+[config-loader][2026-08-02T23:26:53.638Z] server: storage initialized
+[config-loader][2026-08-02T23:26:53.638Z] server: intelligence layer initialized (mode=shadow)
+[config-loader][2026-08-02T23:26:53.638Z] server: all components initialized
+[health][2026-08-02T23:26:53.638Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:53.638Z] probing mock-a: GET http://127.0.0.1:55365/v1/models
+[config-loader][2026-08-02T23:26:53.639Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:53.639Z] server: created (timeout=30000ms, keepAlive=5000ms)
+▶ Phase2-A Shadow Mode (HTTP) Sealed
+  ✔ chat: suggestion before execution, actuals after finalize, same requestId, no extra upstream calls (256.483875ms)
+[health][2026-08-02T23:26:53.644Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:53.644Z] probe mock-a: OK (6ms)
+[responses-protocol][2026-08-02T23:26:53.841Z] [sr_1785713213841_373876] responses non-stream model=test-model-a
+[chat-protocol][2026-08-02T23:26:53.842Z] [sr_1785713213841_373876] agent=codex model=test-model-a claudeCode=false patches=[]
+[fallback][2026-08-02T23:26:53.847Z] first byte received, model switching disabled
+[execution][2026-08-02T23:26:53.847Z] cost recorded: mock-a/test-model-a 0 USD
+[execution][2026-08-02T23:26:53.847Z] request completed: mock-a/test-model-a (3ms, 1 upstream calls)
+[config-loader][2026-08-02T23:26:53.848Z] [finalizer] quality feedback: mock-a:test-model-a success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:53.848Z] [finalizer] transaction: finalized sr_1785713213841_373876 outcome=completed attempts=1 (atomic)
+[responses-protocol][2026-08-02T23:26:53.848Z] [sr_1785713213841_373876] responses completed: output_items=0 status=completed
+[health][2026-08-02T23:26:53.849Z] health check stopped
+[config-loader][2026-08-02T23:26:53.851Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-shadow-anth-jrWUzX/config-7d3d031c.json
+[config-loader][2026-08-02T23:26:53.852Z] config loaded (intelligence.mode=shadow)
+[config-loader][2026-08-02T23:26:53.852Z] server: config loaded
+[config-loader][2026-08-02T23:26:53.852Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:53.852Z] server: config validated
+[config-loader][2026-08-02T23:26:53.854Z] server: storage initialized
+[config-loader][2026-08-02T23:26:53.855Z] server: intelligence layer initialized (mode=shadow)
+[config-loader][2026-08-02T23:26:53.855Z] server: all components initialized
+[health][2026-08-02T23:26:53.855Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:53.855Z] probing mock-a: GET http://127.0.0.1:55365/v1/models
+[config-loader][2026-08-02T23:26:53.855Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:53.855Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ responses: shadow record with same internal requestId (216.704292ms)
+[health][2026-08-02T23:26:53.857Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:53.857Z] probe mock-a: OK (2ms)
+[anthropic-stream-protocol][2026-08-02T23:26:54.058Z] [sr_1785713214058_701931] stream agent=claude-code model=test-model-a claudeCode=true
+[execution][2026-08-02T23:26:54.063Z] stream pre-read valid, 1 chunks buffered
+[execution][2026-08-02T23:26:54.063Z] request completed: mock-a/test-model-a (3ms, 1 upstream calls)
+[anthropic-stream-protocol][2026-08-02T23:26:54.064Z] [sr_1785713214058_701931] first byte received, model switching disabled
+[anthropic-stream-protocol][2026-08-02T23:26:54.084Z] [sr_1785713214058_701931] stream completed, bytes=732
+[anthropic-stream-protocol][2026-08-02T23:26:54.084Z] [sr_1785713214058_701931] no usage found in SSE stream
+[config-loader][2026-08-02T23:26:54.085Z] [finalizer] quality feedback: mock-a:test-model-a success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:54.085Z] [finalizer] transaction: finalized sr_1785713214058_701931 outcome=completed attempts=1 (atomic)
+[health][2026-08-02T23:26:54.085Z] health check stopped
+[config-loader][2026-08-02T23:26:54.087Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-off-ctf0YQ/config-6a1defa5.json
+[config-loader][2026-08-02T23:26:54.087Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:54.087Z] server: config loaded
+[config-loader][2026-08-02T23:26:54.087Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:54.087Z] server: config validated
+[config-loader][2026-08-02T23:26:54.090Z] server: storage initialized
+[config-loader][2026-08-02T23:26:54.090Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:54.090Z] server: all components initialized
+[health][2026-08-02T23:26:54.090Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:54.090Z] probing mock-a: GET http://127.0.0.1:55365/v1/models
+[config-loader][2026-08-02T23:26:54.090Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:54.090Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ anthropic stream: shadow records same requestId, stream unaffected (235.815125ms)
+[health][2026-08-02T23:26:54.091Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:54.091Z] probe mock-a: OK (1ms)
+[chat-protocol][2026-08-02T23:26:54.294Z] [sr_1785713214294_c3ae98] agent=generic model=test-model-a claudeCode=false patches=[]
+[fallback][2026-08-02T23:26:54.298Z] first byte received, model switching disabled
+[execution][2026-08-02T23:26:54.299Z] cost recorded: mock-a/test-model-a 0 USD
+[execution][2026-08-02T23:26:54.299Z] request completed: mock-a/test-model-a (4ms, 1 upstream calls)
+[config-loader][2026-08-02T23:26:54.299Z] [finalizer] quality feedback: mock-a:test-model-a success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:54.299Z] [finalizer] transaction: finalized sr_1785713214294_c3ae98 outcome=completed attempts=1 (atomic)
+[health][2026-08-02T23:26:54.300Z] health check stopped
+  ✔ off mode: zero shadow records, response unchanged (214.884ms)
+✔ Phase2-A Shadow Mode (HTTP) Sealed (942.290209ms)
+[config-loader][2026-08-02T23:26:53.514Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-sealed-eof-Qk4i8i/config-9767c009.json
+[config-loader][2026-08-02T23:26:53.516Z] config loaded (intelligence.mode=shadow)
+[config-loader][2026-08-02T23:26:53.516Z] server: config loaded
+[config-loader][2026-08-02T23:26:53.517Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:53.517Z] server: config validated
+[config-loader][2026-08-02T23:26:53.521Z] server: storage initialized
+[config-loader][2026-08-02T23:26:53.523Z] server: intelligence layer initialized (mode=shadow)
+[config-loader][2026-08-02T23:26:53.523Z] server: all components initialized
+[health][2026-08-02T23:26:53.523Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:53.523Z] probing mock-a: GET http://127.0.0.1:55373/v1/models
+[config-loader][2026-08-02T23:26:53.530Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:53.530Z] server: created (timeout=30000ms, keepAlive=5000ms)
+[health][2026-08-02T23:26:53.547Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:53.547Z] probe mock-a: OK (24ms)
+[anthropic-stream-protocol][2026-08-02T23:26:53.739Z] [sr_1785713213738_04345a] stream agent=claude-code model=test-model-a claudeCode=true
+[execution][2026-08-02T23:26:53.754Z] stream pre-read valid, 1 chunks buffered
+[execution][2026-08-02T23:26:53.755Z] request completed: mock-a/test-model-a (9ms, 1 upstream calls)
+[anthropic-stream-protocol][2026-08-02T23:26:53.755Z] [sr_1785713213738_04345a] first byte received, model switching disabled
+[anthropic-stream-protocol][2026-08-02T23:26:53.763Z] SSE conversion error: terminated
+[anthropic-stream-protocol][2026-08-02T23:26:53.764Z] [sr_1785713213738_04345a] stream error, bytes=575
+[anthropic-stream-protocol][2026-08-02T23:26:53.764Z] [sr_1785713213738_04345a] no usage found in SSE stream
+[config-loader][2026-08-02T23:26:53.765Z] [finalizer] quality feedback: mock-a:test-model-a success=0 failure=1 (incomplete)
+[config-loader][2026-08-02T23:26:53.765Z] [finalizer] transaction: finalized sr_1785713213738_04345a outcome=incomplete attempts=1 (atomic)
+[health][2026-08-02T23:26:54.068Z] health check stopped
+[config-loader][2026-08-02T23:26:54.071Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-sealed-abort-c0avyo/config-9b71ebdd.json
+[config-loader][2026-08-02T23:26:54.072Z] config loaded (intelligence.mode=shadow)
+[config-loader][2026-08-02T23:26:54.072Z] server: config loaded
+[config-loader][2026-08-02T23:26:54.072Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:54.072Z] server: config validated
+[config-loader][2026-08-02T23:26:54.075Z] server: storage initialized
+[config-loader][2026-08-02T23:26:54.075Z] server: intelligence layer initialized (mode=shadow)
+[config-loader][2026-08-02T23:26:54.075Z] server: all components initialized
+[health][2026-08-02T23:26:54.075Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:54.075Z] probing mock-a: GET http://127.0.0.1:55373/v1/models
+[config-loader][2026-08-02T23:26:54.075Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:54.075Z] server: created (timeout=30000ms, keepAlive=5000ms)
+▶ Phase2-A Shadow Sealed 回归
+  ✔ 1. Anthropic stream EOF → actualOutcome=incomplete, matches SQLite Audit (557.888041ms)
+[health][2026-08-02T23:26:54.077Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:54.077Z] probe mock-a: OK (2ms)
+[chat-stream-protocol][2026-08-02T23:26:54.279Z] [sr_1785713214278_764639] stream agent=generic model=test-model-a claudeCode=false
+[execution][2026-08-02T23:26:54.283Z] stream pre-read valid, 1 chunks buffered
+[execution][2026-08-02T23:26:54.283Z] request completed: mock-a/test-model-a (3ms, 1 upstream calls)
+[chat-stream-protocol][2026-08-02T23:26:54.284Z] [sr_1785713214278_764639] first byte received, model switching disabled
+[chat-stream-protocol][2026-08-02T23:26:54.533Z] client aborted during SSE piping, stopping
+[chat-stream-protocol][2026-08-02T23:26:54.533Z] [sr_1785713214278_764639] stream client aborted, bytes=3453
+[chat-stream-protocol][2026-08-02T23:26:54.533Z] [sr_1785713214278_764639] no usage found in SSE stream
+[config-loader][2026-08-02T23:26:54.534Z] [finalizer] transaction: finalized sr_1785713214278_764639 outcome=client_aborted attempts=1 (atomic)
+[health][2026-08-02T23:26:55.132Z] health check stopped
+[config-loader][2026-08-02T23:26:55.137Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-sealed-nc-ckMGzO/config-a1cc1f0e.json
+[config-loader][2026-08-02T23:26:55.138Z] config loaded (intelligence.mode=shadow)
+[config-loader][2026-08-02T23:26:55.138Z] server: config loaded
+[config-loader][2026-08-02T23:26:55.138Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:55.139Z] server: config warning: budget.strictModel=true but allowedModels is empty; strictModel has no effect
+[config-loader][2026-08-02T23:26:55.139Z] server: config validated
+[config-loader][2026-08-02T23:26:55.144Z] server: storage initialized
+[config-loader][2026-08-02T23:26:55.144Z] server: intelligence layer initialized (mode=shadow)
+[config-loader][2026-08-02T23:26:55.144Z] server: all components initialized
+[health][2026-08-02T23:26:55.144Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:55.145Z] probing mock-a: GET http://127.0.0.1:55373/v1/models
+[config-loader][2026-08-02T23:26:55.145Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:55.145Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ 2. Chat client cancel → actualOutcome=client_aborted (not completed) (1064.810167ms)
+[health][2026-08-02T23:26:55.148Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:55.148Z] probe mock-a: OK (3ms)
+[chat-protocol][2026-08-02T23:26:55.351Z] [sr_1785713215350_4279d4] agent=generic model=nonexistent-model claudeCode=false patches=[]
+[candidates][2026-08-02T23:26:55.351Z] strictModel=true and model "nonexistent-model" not found; returning empty candidates
+[chat-protocol][2026-08-02T23:26:55.352Z] [sr_1785713215350_4279d4] no candidates available
+[config-loader][2026-08-02T23:26:55.353Z] [finalizer] transaction: finalized sr_1785713215350_4279d4 outcome=no_candidate attempts=0 (atomic)
+[health][2026-08-02T23:26:55.355Z] health check stopped
+[config-loader][2026-08-02T23:26:55.359Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-sealed-budget-gdPcBg/config-90b06370.json
+[config-loader][2026-08-02T23:26:55.359Z] config loaded (intelligence.mode=shadow)
+[config-loader][2026-08-02T23:26:55.359Z] server: config loaded
+[config-loader][2026-08-02T23:26:55.359Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:55.359Z] server: config validated
+[config-loader][2026-08-02T23:26:55.365Z] server: storage initialized
+[config-loader][2026-08-02T23:26:55.365Z] server: intelligence layer initialized (mode=shadow)
+[config-loader][2026-08-02T23:26:55.365Z] server: all components initialized
+[health][2026-08-02T23:26:55.365Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:55.365Z] probing mock-a: GET http://127.0.0.1:55373/v1/models
+[config-loader][2026-08-02T23:26:55.366Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:55.366Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ 3. no_candidate → shadow record with policy_agreement (221.77475ms)
+[health][2026-08-02T23:26:55.371Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:55.371Z] probe mock-a: OK (6ms)
+[chat-protocol][2026-08-02T23:26:55.570Z] [sr_1785713215570_ad6404] agent=generic model=test-model-paid claudeCode=false patches=[]
+[execution][2026-08-02T23:26:55.572Z] all candidates budget-blocked (allowPaid=false, paid models only)
+[config-loader][2026-08-02T23:26:55.573Z] [finalizer] transaction: finalized sr_1785713215570_ad6404 outcome=budget_exceeded attempts=1 (atomic)
+[health][2026-08-02T23:26:55.575Z] health check stopped
+[config-loader][2026-08-02T23:26:55.578Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-sealed-restart-ujBCdX/config-2e525029.json
+[config-loader][2026-08-02T23:26:55.579Z] config loaded (intelligence.mode=shadow)
+[config-loader][2026-08-02T23:26:55.579Z] server: config loaded
+[config-loader][2026-08-02T23:26:55.579Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:55.579Z] server: config validated
+[config-loader][2026-08-02T23:26:55.584Z] server: storage initialized
+[config-loader][2026-08-02T23:26:55.585Z] server: intelligence layer initialized (mode=shadow)
+[config-loader][2026-08-02T23:26:55.585Z] server: all components initialized
+[health][2026-08-02T23:26:55.585Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:55.585Z] probing mock-a: GET http://127.0.0.1:55373/v1/models
+[config-loader][2026-08-02T23:26:55.586Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:55.586Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ 4. budget_exceeded → shadow record with policy_agreement + rejection reason (219.601375ms)
+[health][2026-08-02T23:26:55.588Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:55.588Z] probe mock-a: OK (3ms)
+[chat-protocol][2026-08-02T23:26:55.788Z] [sr_1785713215788_e90b2f] agent=generic model=test-model-a claudeCode=false patches=[]
+[fallback][2026-08-02T23:26:55.793Z] first byte received, model switching disabled
+[execution][2026-08-02T23:26:55.793Z] cost recorded: mock-a/test-model-a 0 USD
+[execution][2026-08-02T23:26:55.794Z] request completed: mock-a/test-model-a (3ms, 1 upstream calls)
+[config-loader][2026-08-02T23:26:55.794Z] [finalizer] quality feedback: mock-a:test-model-a success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:55.794Z] [finalizer] transaction: finalized sr_1785713215788_e90b2f outcome=completed attempts=1 (atomic)
+[health][2026-08-02T23:26:55.795Z] health check stopped
+[config-loader][2026-08-02T23:26:55.796Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-sealed-restart-ujBCdX/config-2e525029.json
+[config-loader][2026-08-02T23:26:55.796Z] config loaded (intelligence.mode=shadow)
+[config-loader][2026-08-02T23:26:55.796Z] server: config loaded
+[config-loader][2026-08-02T23:26:55.796Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:55.796Z] server: config validated
+[config-loader][2026-08-02T23:26:55.797Z] server: storage initialized
+[config-loader][2026-08-02T23:26:55.797Z] server: intelligence layer initialized (mode=shadow)
+[config-loader][2026-08-02T23:26:55.797Z] server: all components initialized
+[health][2026-08-02T23:26:55.797Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:55.797Z] probing mock-a: GET http://127.0.0.1:55373/v1/models
+[config-loader][2026-08-02T23:26:55.797Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:55.797Z] server: created (timeout=30000ms, keepAlive=5000ms)
+[health][2026-08-02T23:26:55.797Z] restored provider "mock-a" status: active
+[health][2026-08-02T23:26:55.797Z] restored circuit "mock-a" state: active
+[health][2026-08-02T23:26:55.798Z] probe mock-a: OK (1ms)
+[health][2026-08-02T23:26:55.999Z] health check stopped
+  ✔ 5. persistence across restart: suggestion + final both survive (422.018ms)
+✔ Phase2-A Shadow Sealed 回归 (2500.13625ms)
+[config-loader][2026-08-02T23:26:53.741Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-chat-fb-YPyfoB/config-3f47c831.json
+[config-loader][2026-08-02T23:26:53.743Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:53.743Z] server: config loaded
+[config-loader][2026-08-02T23:26:53.744Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:53.744Z] server: config validated
+[config-loader][2026-08-02T23:26:53.748Z] server: storage initialized
+[config-loader][2026-08-02T23:26:53.749Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:53.749Z] server: all components initialized
+[health][2026-08-02T23:26:53.749Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:53.750Z] probing mock-a: GET http://127.0.0.1:55380/v1/models
+[health][2026-08-02T23:26:53.755Z] probing mock-b: GET http://127.0.0.1:55382/v1/models
+[config-loader][2026-08-02T23:26:53.756Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:53.756Z] server: created (timeout=30000ms, keepAlive=5000ms)
+[health][2026-08-02T23:26:53.770Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:53.770Z] probe mock-a: OK (20ms)
+[health][2026-08-02T23:26:53.771Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:53.771Z] probe mock-b: OK (16ms)
+[chat-stream-protocol][2026-08-02T23:26:53.962Z] [sr_1785713213962_fda22d] stream agent=generic model=auto claudeCode=false
+[execution][2026-08-02T23:26:53.975Z] stream pre-read invalid: empty_stream; allowing fallback
+[execution][2026-08-02T23:26:53.976Z] retriable model-level error (content_invalid) for mock-a/test-model-a; falling back
+[fallback][2026-08-02T23:26:53.976Z] free candidate failed (retriable=true); paid fallback allowed
+[execution][2026-08-02T23:26:53.984Z] stream pre-read valid, 1 chunks buffered
+[execution][2026-08-02T23:26:53.985Z] request completed: mock-b/test-model-a-fb (6ms, 2 upstream calls)
+[chat-stream-protocol][2026-08-02T23:26:53.986Z] [sr_1785713213962_fda22d] first byte received, model switching disabled
+[chat-stream-protocol][2026-08-02T23:26:54.004Z] [sr_1785713213962_fda22d] stream completed, bytes=334 done=true
+[chat-stream-protocol][2026-08-02T23:26:54.004Z] [sr_1785713213962_fda22d] no usage found in SSE stream
+[config-loader][2026-08-02T23:26:54.006Z] [finalizer] quality feedback: mock-b:test-model-a-fb success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:54.006Z] [finalizer] transaction: finalized sr_1785713213962_fda22d outcome=completed attempts=2 (atomic)
+[health][2026-08-02T23:26:54.007Z] health check stopped
+[config-loader][2026-08-02T23:26:54.011Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-resp-fb-YE4IoA/config-07ce31f5.json
+[config-loader][2026-08-02T23:26:54.012Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:54.012Z] server: config loaded
+[config-loader][2026-08-02T23:26:54.012Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:54.012Z] server: config validated
+[config-loader][2026-08-02T23:26:54.015Z] server: storage initialized
+[config-loader][2026-08-02T23:26:54.015Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:54.015Z] server: all components initialized
+[health][2026-08-02T23:26:54.015Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:54.015Z] probing mock-a: GET http://127.0.0.1:55390/v1/models
+[health][2026-08-02T23:26:54.015Z] probing mock-b: GET http://127.0.0.1:55391/v1/models
+[config-loader][2026-08-02T23:26:54.016Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:54.016Z] server: created (timeout=30000ms, keepAlive=5000ms)
+▶ Streaming Pre-First-Content Fallback (empty SSE)
+  ✔ Chat: A empty SSE -> B normal SSE, completed, 2 attempts (283.248125ms)
+[health][2026-08-02T23:26:54.021Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:54.021Z] probe mock-a: OK (6ms)
+[health][2026-08-02T23:26:54.021Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:54.021Z] probe mock-b: OK (6ms)
+[responses-stream-protocol][2026-08-02T23:26:54.220Z] [sr_1785713214219_fd190a] responses stream agent=codex model=auto claudeCode=false
+[execution][2026-08-02T23:26:54.226Z] stream pre-read invalid: empty_stream; allowing fallback
+[execution][2026-08-02T23:26:54.227Z] retriable model-level error (content_invalid) for mock-a/test-model-a; falling back
+[fallback][2026-08-02T23:26:54.227Z] free candidate failed (retriable=true); paid fallback allowed
+[execution][2026-08-02T23:26:54.231Z] stream pre-read valid, 1 chunks buffered
+[execution][2026-08-02T23:26:54.232Z] request completed: mock-b/test-model-a-fb (4ms, 2 upstream calls)
+[responses-stream-protocol][2026-08-02T23:26:54.233Z] [sr_1785713214219_fd190a] first byte received, model switching disabled
+[responses-stream-protocol][2026-08-02T23:26:54.253Z] [sr_1785713214219_fd190a] responses stream completed, bytes=1544
+[responses-stream-protocol][2026-08-02T23:26:54.253Z] [sr_1785713214219_fd190a] no usage found in responses SSE stream
+[config-loader][2026-08-02T23:26:54.254Z] [finalizer] quality feedback: mock-b:test-model-a-fb success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:54.254Z] [finalizer] transaction: finalized sr_1785713214219_fd190a outcome=completed attempts=2 (atomic)
+[health][2026-08-02T23:26:54.255Z] health check stopped
+[config-loader][2026-08-02T23:26:54.261Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-anth-fb-WkCnDn/config-395d0584.json
+[config-loader][2026-08-02T23:26:54.261Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:54.261Z] server: config loaded
+[config-loader][2026-08-02T23:26:54.261Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:54.261Z] server: config validated
+[config-loader][2026-08-02T23:26:54.266Z] server: storage initialized
+[config-loader][2026-08-02T23:26:54.266Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:54.266Z] server: all components initialized
+[health][2026-08-02T23:26:54.266Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:54.266Z] probing mock-a: GET http://127.0.0.1:55400/v1/models
+[health][2026-08-02T23:26:54.267Z] probing mock-b: GET http://127.0.0.1:55401/v1/models
+[config-loader][2026-08-02T23:26:54.268Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:54.268Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ Responses: A no valid events -> B response.completed, completed, 2 attempts (247.542583ms)
+[health][2026-08-02T23:26:54.271Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:54.271Z] probe mock-a: OK (5ms)
+[health][2026-08-02T23:26:54.271Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:54.271Z] probe mock-b: OK (4ms)
+[anthropic-stream-protocol][2026-08-02T23:26:54.473Z] [sr_1785713214472_8719ca] stream agent=claude-code model=auto claudeCode=true
+[execution][2026-08-02T23:26:54.479Z] stream pre-read invalid: empty_stream; allowing fallback
+[execution][2026-08-02T23:26:54.480Z] retriable model-level error (content_invalid) for mock-a/test-model-a; falling back
+[fallback][2026-08-02T23:26:54.481Z] free candidate failed (retriable=true); paid fallback allowed
+[execution][2026-08-02T23:26:54.485Z] stream pre-read valid, 1 chunks buffered
+[execution][2026-08-02T23:26:54.485Z] request completed: mock-b/test-model-a-fb (3ms, 2 upstream calls)
+[anthropic-stream-protocol][2026-08-02T23:26:54.486Z] [sr_1785713214472_8719ca] first byte received, model switching disabled
+[anthropic-stream-protocol][2026-08-02T23:26:54.505Z] [sr_1785713214472_8719ca] stream completed, bytes=749
+[anthropic-stream-protocol][2026-08-02T23:26:54.505Z] [sr_1785713214472_8719ca] no usage found in SSE stream
+[config-loader][2026-08-02T23:26:54.506Z] [finalizer] quality feedback: mock-b:test-model-a-fb success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:54.506Z] [finalizer] transaction: finalized sr_1785713214472_8719ca outcome=completed attempts=2 (atomic)
+[health][2026-08-02T23:26:54.507Z] health check stopped
+  ✔ Anthropic: A no valid events before termination -> B message_stop, completed, 2 attempts (251.070333ms)
+✔ Streaming Pre-First-Content Fallback (empty SSE) (784.513125ms)
+[config-loader][2026-08-02T23:26:55.762Z] [finalizer] transaction: failed for txn-cost-fail: injected saveCost failure
+[config-loader][2026-08-02T23:26:55.764Z] [finalizer] quality feedback: mock-a:test-model success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:55.764Z] [finalizer] transaction: finalized txn-cost-fail outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:55.766Z] [finalizer] transaction: failed for txn-audit-fail: injected saveAuditRecord failure
+[config-loader][2026-08-02T23:26:55.766Z] [finalizer] quality feedback: mock-a:test-model success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:55.766Z] [finalizer] transaction: finalized txn-audit-fail outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:55.767Z] [finalizer] quality feedback: mock-a:test-model success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:55.767Z] [finalizer] transaction: finalized txn-success outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:55.768Z] [finalizer] transaction: already finalized, skipping: txn-success
+▶ Transaction Atomicity (finalizeRequestAtomic)
+  ✔ cost_records write failure -> full rollback + safe retry (5.911583ms)
+  ✔ audit_records write failure -> full rollback + safe retry (1.438042ms)
+  ✔ success path: all 5 tables written, cost recorded exactly once (1.145583ms)
+✔ Transaction Atomicity (finalizeRequestAtomic) (9.761417ms)
+[config-loader][2026-08-02T23:26:55.979Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-restart-turz6R/config-c6f9036b.json
+[config-loader][2026-08-02T23:26:55.980Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:55.980Z] server: config loaded
+[config-loader][2026-08-02T23:26:55.981Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:55.981Z] server: config validated
+[config-loader][2026-08-02T23:26:55.985Z] server: storage initialized
+[config-loader][2026-08-02T23:26:55.986Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:55.986Z] server: all components initialized
+[health][2026-08-02T23:26:55.986Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:55.987Z] probing mock-a: GET http://127.0.0.1:55424/v1/models
+[health][2026-08-02T23:26:55.992Z] probing mock-b: GET http://127.0.0.1:55424/v1/models
+[config-loader][2026-08-02T23:26:55.994Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:55.994Z] server: created (timeout=30000ms, keepAlive=5000ms)
+[health][2026-08-02T23:26:55.997Z] health check stopped
+[config-loader][2026-08-02T23:26:56.000Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-restart-turz6R/config-70e82c3d.json
+[config-loader][2026-08-02T23:26:56.000Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:56.000Z] server: config loaded
+[config-loader][2026-08-02T23:26:56.000Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:56.000Z] server: config validated
+[config-loader][2026-08-02T23:26:56.000Z] server: storage initialized
+[config-loader][2026-08-02T23:26:56.000Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:56.000Z] server: all components initialized
+[health][2026-08-02T23:26:56.001Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:56.001Z] probing mock-a: GET http://127.0.0.1:55424/v1/models
+[health][2026-08-02T23:26:56.001Z] probing mock-b: GET http://127.0.0.1:55424/v1/models
+[config-loader][2026-08-02T23:26:56.001Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:56.001Z] server: created (timeout=30000ms, keepAlive=5000ms)
+[health][2026-08-02T23:26:56.002Z] health check stopped
+[config-loader][2026-08-02T23:26:56.003Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-restart-db-cDBR9m/config-bbe15456.json
+[config-loader][2026-08-02T23:26:56.003Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:56.003Z] server: config loaded
+[config-loader][2026-08-02T23:26:56.003Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:56.003Z] server: config validated
+[config-loader][2026-08-02T23:26:56.006Z] server: storage initialized
+[config-loader][2026-08-02T23:26:56.006Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:56.006Z] server: all components initialized
+[health][2026-08-02T23:26:56.006Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:56.006Z] probing mock-a: GET http://127.0.0.1:55431/v1/models
+[health][2026-08-02T23:26:56.007Z] probing mock-b: GET http://127.0.0.1:55431/v1/models
+[config-loader][2026-08-02T23:26:56.007Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:56.007Z] server: created (timeout=30000ms, keepAlive=5000ms)
+▶ 1. SQLite Restart Recovery
+  ✔ SQLiteStore used when data_dir is set (21.609625ms)
+  ✔ MemoryStore used when no data_dir (2.659ms)
+[health][2026-08-02T23:26:56.020Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:56.020Z] probe mock-a: OK (33ms)
+[health][2026-08-02T23:26:56.020Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:56.020Z] probe mock-a: OK (14ms)
+[health][2026-08-02T23:26:56.021Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:56.021Z] probe mock-b: OK (29ms)
+[health][2026-08-02T23:26:56.022Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:56.022Z] probe mock-b: OK (15ms)
+[health][2026-08-02T23:26:56.022Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:56.022Z] probe mock-a: OK (21ms)
+[health][2026-08-02T23:26:56.022Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:56.022Z] probe mock-b: OK (21ms)
+[chat-protocol][2026-08-02T23:26:56.219Z] [sr_1785713216218_d21fe8] agent=generic model=auto claudeCode=false patches=[]
+[key-pool][2026-08-02T23:26:56.233Z] key "mock-a-0" permanently disabled (AUTH_INVALID / 401)
+[health][2026-08-02T23:26:56.233Z] provider "mock-a" status: active → degraded
+[provider-client][2026-08-02T23:26:56.234Z] upstream error from mock-a/test-model-a: HTTP 401 (auth_invalid): {"error":{"message":"Invalid key","type":"invalid_request_error"}}
+[execution][2026-08-02T23:26:56.234Z] key-level error (auth_invalid) for mock-a; will retry with different key
+[fallback][2026-08-02T23:26:56.235Z] free candidate failed (retriable=false); paid fallback blocked
+[execution][2026-08-02T23:26:56.235Z] no available keys for provider "mock-a"
+[fallback][2026-08-02T23:26:56.235Z] free candidate failed (retriable=false); paid fallback blocked
+[fallback][2026-08-02T23:26:56.239Z] first byte received, model switching disabled
+[execution][2026-08-02T23:26:56.239Z] cost recorded: mock-b/test-model-a-fb 0 USD
+[execution][2026-08-02T23:26:56.239Z] request completed: mock-b/test-model-a-fb (3ms, 2 upstream calls)
+[config-loader][2026-08-02T23:26:56.241Z] [finalizer] quality feedback: mock-b:test-model-a-fb success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:56.241Z] [finalizer] transaction: finalized sr_1785713216218_d21fe8 outcome=completed attempts=3 (atomic)
+[health][2026-08-02T23:26:56.543Z] health check stopped
+[config-loader][2026-08-02T23:26:56.846Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-restart-db-cDBR9m/config-bbe15456.json
+[config-loader][2026-08-02T23:26:56.848Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:56.848Z] server: config loaded
+[config-loader][2026-08-02T23:26:56.849Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:56.849Z] server: config validated
+[config-loader][2026-08-02T23:26:56.850Z] server: storage initialized
+[config-loader][2026-08-02T23:26:56.851Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:56.851Z] server: all components initialized
+[health][2026-08-02T23:26:56.851Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:56.851Z] probing mock-a: GET http://127.0.0.1:55431/v1/models
+[health][2026-08-02T23:26:56.852Z] probing mock-b: GET http://127.0.0.1:55431/v1/models
+[config-loader][2026-08-02T23:26:56.853Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:56.853Z] server: created (timeout=30000ms, keepAlive=5000ms)
+[key-pool][2026-08-02T23:26:56.853Z] restored key "mock-a-0" as invalid from store
+[health][2026-08-02T23:26:56.853Z] restored provider "mock-a" status: degraded
+[health][2026-08-02T23:26:56.853Z] restored provider "mock-b" status: active
+[health][2026-08-02T23:26:56.853Z] restored circuit "mock-a" state: degraded
+[health][2026-08-02T23:26:56.853Z] restored circuit "mock-b" state: active
+[health][2026-08-02T23:26:56.856Z] provider "mock-a" status: degraded → active
+[health][2026-08-02T23:26:56.856Z] probe mock-a: OK (5ms)
+[health][2026-08-02T23:26:56.857Z] probe mock-b: OK (5ms)
+[chat-protocol][2026-08-02T23:26:57.158Z] [sr_1785713217158_38b1b4] agent=generic model=auto claudeCode=false patches=[]
+[candidates][2026-08-02T23:26:57.159Z] no available keys for provider "mock-a", skipping model "test-model-a"
+[fallback][2026-08-02T23:26:57.166Z] first byte received, model switching disabled
+[execution][2026-08-02T23:26:57.167Z] cost recorded: mock-b/test-model-a-fb 0 USD
+[execution][2026-08-02T23:26:57.167Z] request completed: mock-b/test-model-a-fb (5ms, 1 upstream calls)
+[config-loader][2026-08-02T23:26:57.168Z] [finalizer] quality feedback: mock-b:test-model-a-fb success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:57.168Z] [finalizer] transaction: finalized sr_1785713217158_38b1b4 outcome=completed attempts=1 (atomic)
+[health][2026-08-02T23:26:57.169Z] health check stopped
+[config-loader][2026-08-02T23:26:57.179Z] [finalizer] quality feedback: mock-a:test-model success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:57.179Z] [finalizer] transaction: finalized txn-001 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:57.180Z] [finalizer] quality feedback: mock-a:test-model success=2 failure=0 (completed)
+[config-loader][2026-08-02T23:26:57.180Z] [finalizer] transaction: finalized txn-002 outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:57.180Z] [finalizer] transaction: already finalized, skipping: txn-002
+[config-loader][2026-08-02T23:26:57.181Z] [finalizer] quality feedback: mock-a:test-model success=3 failure=0 (completed)
+[config-loader][2026-08-02T23:26:57.181Z] [finalizer] transaction: finalized txn-proto-r outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:57.182Z] [finalizer] quality feedback: mock-a:test-model success=4 failure=0 (completed)
+[config-loader][2026-08-02T23:26:57.182Z] [finalizer] transaction: finalized txn-proto-a outcome=completed attempts=1 (atomic)
+[config-loader][2026-08-02T23:26:57.188Z] [finalizer] transaction: failed for txn-rollback: Simulated failure
+[config-loader][2026-08-02T23:26:57.189Z] [finalizer] quality feedback: mock-a:test-model success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:57.189Z] [finalizer] transaction: finalized txn-rollback outcome=completed attempts=1 (atomic)
+  ✔ state survives restart: key status, provider health, requests, audits (1168.463459ms)
+[config-loader][2026-08-02T23:26:57.193Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-rid-8SNn2g/config-6ff72ece.json
+[config-loader][2026-08-02T23:26:57.193Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:57.193Z] server: config loaded
+[config-loader][2026-08-02T23:26:57.193Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:57.193Z] server: config validated
+[config-loader][2026-08-02T23:26:57.197Z] server: storage initialized
+[config-loader][2026-08-02T23:26:57.197Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:57.197Z] server: all components initialized
+[health][2026-08-02T23:26:57.197Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:57.197Z] probing mock-a: GET http://127.0.0.1:55441/v1/models
+[health][2026-08-02T23:26:57.198Z] probing mock-b: GET http://127.0.0.1:55441/v1/models
+[config-loader][2026-08-02T23:26:57.198Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:57.198Z] server: created (timeout=30000ms, keepAlive=5000ms)
+✔ 1. SQLite Restart Recovery (1205.883542ms)
+▶ 2. Finalize Transaction
+  ✔ finalizeRequestTransaction writes all 5 tables atomically (2.009041ms)
+  ✔ idempotency: second call returns already_finalized (1.010083ms)
+  ✔ protocol correctly recorded: responses and anthropic (1.69025ms)
+  ✔ transaction rollback on failure: no half-state (7.322958ms)
+✔ 2. Finalize Transaction (19.016333ms)
+[health][2026-08-02T23:26:57.205Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:57.205Z] probe mock-a: OK (8ms)
+[health][2026-08-02T23:26:57.205Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:57.205Z] probe mock-b: OK (7ms)
+[chat-protocol][2026-08-02T23:26:57.401Z] [sr_1785713217401_4325bd] agent=generic model=test-model-a claudeCode=false patches=[]
+[fallback][2026-08-02T23:26:57.410Z] first byte received, model switching disabled
+[execution][2026-08-02T23:26:57.411Z] cost recorded: mock-a/test-model-a 0 USD
+[execution][2026-08-02T23:26:57.411Z] request completed: mock-a/test-model-a (6ms, 1 upstream calls)
+[config-loader][2026-08-02T23:26:57.412Z] [finalizer] quality feedback: mock-a:test-model-a success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:57.412Z] [finalizer] transaction: finalized sr_1785713217401_4325bd outcome=completed attempts=1 (atomic)
+[health][2026-08-02T23:26:57.715Z] health check stopped
+[config-loader][2026-08-02T23:26:57.720Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-rid-2-9DGykG/config-6e537e9b.json
+[config-loader][2026-08-02T23:26:57.721Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:57.721Z] server: config loaded
+[config-loader][2026-08-02T23:26:57.721Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:57.721Z] server: config validated
+[config-loader][2026-08-02T23:26:57.728Z] server: storage initialized
+[config-loader][2026-08-02T23:26:57.728Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:57.728Z] server: all components initialized
+[health][2026-08-02T23:26:57.728Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:57.728Z] probing mock-a: GET http://127.0.0.1:55441/v1/models
+[health][2026-08-02T23:26:57.729Z] probing mock-b: GET http://127.0.0.1:55441/v1/models
+[config-loader][2026-08-02T23:26:57.729Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:57.729Z] server: created (timeout=30000ms, keepAlive=5000ms)
+▶ 3. Request ID Uniqueness
+  ✔ external x-request-id NOT used as internal requestId (526.163042ms)
+[health][2026-08-02T23:26:57.731Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:57.731Z] probe mock-a: OK (3ms)
+[health][2026-08-02T23:26:57.731Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:57.731Z] probe mock-b: OK (2ms)
+[responses-protocol][2026-08-02T23:26:57.932Z] [sr_1785713217932_cbbe01] responses non-stream model=test-model-a
+[chat-protocol][2026-08-02T23:26:57.933Z] [sr_1785713217932_cbbe01] agent=codex model=test-model-a claudeCode=false patches=[]
+[fallback][2026-08-02T23:26:57.940Z] first byte received, model switching disabled
+[execution][2026-08-02T23:26:57.941Z] cost recorded: mock-a/test-model-a 0 USD
+[execution][2026-08-02T23:26:57.941Z] request completed: mock-a/test-model-a (5ms, 1 upstream calls)
+[config-loader][2026-08-02T23:26:57.942Z] [finalizer] quality feedback: mock-a:test-model-a success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:57.942Z] [finalizer] transaction: finalized sr_1785713217932_cbbe01 outcome=completed attempts=1 (atomic)
+[responses-protocol][2026-08-02T23:26:57.943Z] [sr_1785713217932_cbbe01] responses completed: output_items=1 status=completed
+[health][2026-08-02T23:26:58.245Z] health check stopped
+[config-loader][2026-08-02T23:26:58.253Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-rid-3-sy6IlS/config-0bb626dc.json
+[config-loader][2026-08-02T23:26:58.254Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:58.254Z] server: config loaded
+[config-loader][2026-08-02T23:26:58.254Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:58.254Z] server: config validated
+[config-loader][2026-08-02T23:26:58.260Z] server: storage initialized
+[config-loader][2026-08-02T23:26:58.261Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:58.261Z] server: all components initialized
+[health][2026-08-02T23:26:58.261Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:58.261Z] probing mock-a: GET http://127.0.0.1:55441/v1/models
+[health][2026-08-02T23:26:58.261Z] probing mock-b: GET http://127.0.0.1:55441/v1/models
+[config-loader][2026-08-02T23:26:58.262Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:58.262Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ Responses protocol records protocol=responses (532.047166ms)
+[health][2026-08-02T23:26:58.263Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:58.263Z] probe mock-a: OK (2ms)
+[health][2026-08-02T23:26:58.264Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:58.264Z] probe mock-b: OK (3ms)
+[anthropic-protocol][2026-08-02T23:26:58.468Z] [sr_1785713218466_fe02a4] agent=claude-code model=test-model-a claudeCode=true patches=[]
+[fallback][2026-08-02T23:26:58.475Z] first byte received, model switching disabled
+[execution][2026-08-02T23:26:58.476Z] cost recorded: mock-a/test-model-a 0 USD
+[execution][2026-08-02T23:26:58.476Z] request completed: mock-a/test-model-a (5ms, 1 upstream calls)
+[config-loader][2026-08-02T23:26:58.478Z] [finalizer] quality feedback: mock-a:test-model-a success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:58.478Z] [finalizer] transaction: finalized sr_1785713218466_fe02a4 outcome=completed attempts=1 (atomic)
+[health][2026-08-02T23:26:58.780Z] health check stopped
+[config-loader][2026-08-02T23:26:58.785Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-rid-4-NTw1pf/config-ba94b7da.json
+[config-loader][2026-08-02T23:26:58.785Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:58.785Z] server: config loaded
+[config-loader][2026-08-02T23:26:58.785Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:58.786Z] server: config validated
+[config-loader][2026-08-02T23:26:58.791Z] server: storage initialized
+[config-loader][2026-08-02T23:26:58.791Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:58.791Z] server: all components initialized
+[health][2026-08-02T23:26:58.791Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:58.791Z] probing mock-a: GET http://127.0.0.1:55441/v1/models
+[health][2026-08-02T23:26:58.791Z] probing mock-b: GET http://127.0.0.1:55441/v1/models
+[config-loader][2026-08-02T23:26:58.791Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:58.791Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ Anthropic protocol records protocol=anthropic (not chat) (532.529209ms)
+[health][2026-08-02T23:26:58.793Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:58.793Z] probe mock-a: OK (2ms)
+[health][2026-08-02T23:26:58.793Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:58.793Z] probe mock-b: OK (2ms)
+[chat-protocol][2026-08-02T23:26:58.995Z] [sr_1785713218995_706670] agent=generic model=test-model-a claudeCode=false patches=[]
+[fallback][2026-08-02T23:26:59.003Z] first byte received, model switching disabled
+[execution][2026-08-02T23:26:59.004Z] cost recorded: mock-a/test-model-a 0 USD
+[execution][2026-08-02T23:26:59.004Z] request completed: mock-a/test-model-a (6ms, 1 upstream calls)
+[config-loader][2026-08-02T23:26:59.005Z] [finalizer] quality feedback: mock-a:test-model-a success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:59.005Z] [finalizer] transaction: finalized sr_1785713218995_706670 outcome=completed attempts=1 (atomic)
+[health][2026-08-02T23:26:59.308Z] health check stopped
+  ✔ one request = one requestId = one cost = one audit (526.787833ms)
+[config-loader][2026-08-02T23:26:59.313Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-pfb-1-gZ1sMQ/config-a451aef6.json
+[config-loader][2026-08-02T23:26:59.314Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:59.314Z] server: config loaded
+[config-loader][2026-08-02T23:26:59.314Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:59.315Z] server: config validated
+[config-loader][2026-08-02T23:26:59.319Z] server: storage initialized
+[config-loader][2026-08-02T23:26:59.319Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:59.319Z] server: all components initialized
+[health][2026-08-02T23:26:59.319Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:59.319Z] probing mock-a: GET http://127.0.0.1:55455/v1/models
+[health][2026-08-02T23:26:59.320Z] probing mock-b: GET http://127.0.0.1:55456/v1/models
+[config-loader][2026-08-02T23:26:59.320Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:59.320Z] server: created (timeout=30000ms, keepAlive=5000ms)
+✔ 3. Request ID Uniqueness (2120.242042ms)
+[health][2026-08-02T23:26:59.323Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:59.323Z] probe mock-a: OK (4ms)
+[health][2026-08-02T23:26:59.324Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:59.324Z] probe mock-b: OK (4ms)
+[chat-protocol][2026-08-02T23:26:59.523Z] [sr_1785713219523_ae4b92] agent=generic model=auto claudeCode=false patches=[]
+[execution][2026-08-02T23:26:59.529Z] upstream returned 200 with empty body
+[execution][2026-08-02T23:26:59.529Z] upstream 200 but content invalid; allowing fallback to next candidate
+[execution][2026-08-02T23:26:59.530Z] retriable model-level error (content_invalid) for mock-a/test-model-a; falling back
+[fallback][2026-08-02T23:26:59.530Z] free candidate failed (retriable=true); paid fallback allowed
+[fallback][2026-08-02T23:26:59.535Z] first byte received, model switching disabled
+[execution][2026-08-02T23:26:59.535Z] cost recorded: mock-b/test-model-a-fb 0 USD
+[execution][2026-08-02T23:26:59.535Z] request completed: mock-b/test-model-a-fb (4ms, 2 upstream calls)
+[config-loader][2026-08-02T23:26:59.536Z] [finalizer] quality feedback: mock-b:test-model-a-fb success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:26:59.536Z] [finalizer] transaction: finalized sr_1785713219523_ae4b92 outcome=completed attempts=2 (atomic)
+[health][2026-08-02T23:26:59.839Z] health check stopped
+[config-loader][2026-08-02T23:26:59.844Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-pfb-2-SvklAu/config-91dce2ac.json
+[config-loader][2026-08-02T23:26:59.844Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:26:59.844Z] server: config loaded
+[config-loader][2026-08-02T23:26:59.845Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:26:59.845Z] server: config validated
+[config-loader][2026-08-02T23:26:59.850Z] server: storage initialized
+[config-loader][2026-08-02T23:26:59.851Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:26:59.851Z] server: all components initialized
+[health][2026-08-02T23:26:59.851Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:26:59.851Z] probing mock-a: GET http://127.0.0.1:55462/v1/models
+[health][2026-08-02T23:26:59.851Z] probing mock-b: GET http://127.0.0.1:55463/v1/models
+[config-loader][2026-08-02T23:26:59.851Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:26:59.851Z] server: created (timeout=30000ms, keepAlive=5000ms)
+▶ 4. Pre-First-Content Fallback
+  ✔ 200 empty body -> fallback to next candidate (530.055416ms)
+[health][2026-08-02T23:26:59.854Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:26:59.854Z] probe mock-a: OK (3ms)
+[health][2026-08-02T23:26:59.854Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:26:59.854Z] probe mock-b: OK (3ms)
+[chat-protocol][2026-08-02T23:27:00.055Z] [sr_1785713220055_396608] agent=generic model=auto claudeCode=false patches=[]
+[execution][2026-08-02T23:27:00.062Z] upstream returned 200 but body is not valid JSON: Unexpected token 'o', "not json {{{" is not valid JSON
+[execution][2026-08-02T23:27:00.062Z] upstream 200 but content invalid; allowing fallback to next candidate
+[execution][2026-08-02T23:27:00.065Z] retriable model-level error (content_invalid) for mock-a/test-model-a; falling back
+[fallback][2026-08-02T23:27:00.065Z] free candidate failed (retriable=true); paid fallback allowed
+[fallback][2026-08-02T23:27:00.070Z] first byte received, model switching disabled
+[execution][2026-08-02T23:27:00.071Z] cost recorded: mock-b/test-model-a-fb 0 USD
+[execution][2026-08-02T23:27:00.071Z] request completed: mock-b/test-model-a-fb (4ms, 2 upstream calls)
+[config-loader][2026-08-02T23:27:00.072Z] [finalizer] quality feedback: mock-b:test-model-a-fb success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:27:00.072Z] [finalizer] transaction: finalized sr_1785713220055_396608 outcome=completed attempts=2 (atomic)
+[health][2026-08-02T23:27:00.373Z] health check stopped
+[config-loader][2026-08-02T23:27:00.380Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-pfb-3-jD9tGc/config-9c252d54.json
+[config-loader][2026-08-02T23:27:00.381Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:27:00.381Z] server: config loaded
+[config-loader][2026-08-02T23:27:00.381Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:27:00.381Z] server: config validated
+[config-loader][2026-08-02T23:27:00.387Z] server: storage initialized
+[config-loader][2026-08-02T23:27:00.387Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:27:00.387Z] server: all components initialized
+[health][2026-08-02T23:27:00.387Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:27:00.387Z] probing mock-a: GET http://127.0.0.1:55469/v1/models
+[health][2026-08-02T23:27:00.388Z] probing mock-b: GET http://127.0.0.1:55470/v1/models
+[config-loader][2026-08-02T23:27:00.388Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:27:00.388Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ 200 invalid JSON -> fallback to next candidate (535.56075ms)
+[health][2026-08-02T23:27:00.392Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:27:00.392Z] probe mock-a: OK (5ms)
+[health][2026-08-02T23:27:00.392Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:27:00.392Z] probe mock-b: OK (4ms)
+[chat-stream-protocol][2026-08-02T23:27:00.595Z] [sr_1785713220594_7f4a17] stream agent=generic model=auto claudeCode=false
+[execution][2026-08-02T23:27:00.603Z] stream pre-read valid, 1 chunks buffered
+[execution][2026-08-02T23:27:00.604Z] request completed: mock-a/test-model-a (5ms, 1 upstream calls)
+[chat-stream-protocol][2026-08-02T23:27:00.606Z] [sr_1785713220594_7f4a17] first byte received, model switching disabled
+[chat-stream-protocol][2026-08-02T23:27:00.610Z] [sr_1785713220594_7f4a17] stream incomplete (no [DONE]), bytes=74
+[chat-stream-protocol][2026-08-02T23:27:00.610Z] [sr_1785713220594_7f4a17] no usage found in SSE stream
+[config-loader][2026-08-02T23:27:00.611Z] [finalizer] quality feedback: mock-a:test-model-a success=0 failure=1 (incomplete)
+[config-loader][2026-08-02T23:27:00.611Z] [finalizer] transaction: finalized sr_1785713220594_7f4a17 outcome=incomplete attempts=1 (atomic)
+[health][2026-08-02T23:27:01.113Z] health check stopped
+[config-loader][2026-08-02T23:27:01.121Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-rfb-1-VfzTDE/config-fa917e3d.json
+[config-loader][2026-08-02T23:27:01.121Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:27:01.121Z] server: config loaded
+[config-loader][2026-08-02T23:27:01.122Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:27:01.122Z] server: config validated
+[config-loader][2026-08-02T23:27:01.125Z] server: storage initialized
+[config-loader][2026-08-02T23:27:01.125Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:27:01.125Z] server: all components initialized
+[health][2026-08-02T23:27:01.125Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:27:01.125Z] probing mock-a: GET http://127.0.0.1:55479/v1/models
+[health][2026-08-02T23:27:01.126Z] probing mock-b: GET http://127.0.0.1:55480/v1/models
+[config-loader][2026-08-02T23:27:01.126Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:27:01.126Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ first byte sent -> no fallback, mark incomplete on failure (739.389833ms)
+✔ 4. Pre-First-Content Fallback (1805.691875ms)
+[health][2026-08-02T23:27:01.132Z] provider "mock-a" status: unknown → degraded
+[health][2026-08-02T23:27:01.132Z] probe mock-a: DEGRADED (HTTP 401, 7ms)
+[health][2026-08-02T23:27:01.132Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:27:01.132Z] probe mock-b: OK (6ms)
+[chat-protocol][2026-08-02T23:27:01.331Z] [sr_1785713221331_823aef] agent=generic model=auto claudeCode=false patches=[]
+[key-pool][2026-08-02T23:27:01.335Z] key "mock-a-0" permanently disabled (AUTH_INVALID / 401)
+[provider-client][2026-08-02T23:27:01.335Z] upstream error from mock-a/test-model-a: HTTP 401 (auth_invalid): {"error":{"message":"Invalid API key","type":"invalid_request_error"}}
+[execution][2026-08-02T23:27:01.336Z] key-level error (auth_invalid) for mock-a; will retry with different key
+[fallback][2026-08-02T23:27:01.336Z] free candidate failed (retriable=false); paid fallback blocked
+[execution][2026-08-02T23:27:01.336Z] no available keys for provider "mock-a"
+[fallback][2026-08-02T23:27:01.336Z] free candidate failed (retriable=false); paid fallback blocked
+[fallback][2026-08-02T23:27:01.338Z] first byte received, model switching disabled
+[execution][2026-08-02T23:27:01.339Z] cost recorded: mock-b/test-model-a-fb 0 USD
+[execution][2026-08-02T23:27:01.339Z] request completed: mock-b/test-model-a-fb (2ms, 2 upstream calls)
+[config-loader][2026-08-02T23:27:01.339Z] [finalizer] quality feedback: mock-b:test-model-a-fb success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:27:01.339Z] [finalizer] transaction: finalized sr_1785713221331_823aef outcome=completed attempts=3 (atomic)
+[health][2026-08-02T23:27:01.642Z] health check stopped
+[config-loader][2026-08-02T23:27:01.649Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-cc-1-uzbojE/config-118583fc.json
+[config-loader][2026-08-02T23:27:01.650Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:27:01.650Z] server: config loaded
+[config-loader][2026-08-02T23:27:01.650Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:27:01.650Z] server: config validated
+[config-loader][2026-08-02T23:27:01.654Z] server: storage initialized
+[config-loader][2026-08-02T23:27:01.654Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:27:01.654Z] server: all components initialized
+[health][2026-08-02T23:27:01.654Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:27:01.654Z] probing mock-a: GET http://127.0.0.1:55487/v1/models
+[health][2026-08-02T23:27:01.654Z] probing mock-b: GET http://127.0.0.1:55487/v1/models
+[config-loader][2026-08-02T23:27:01.654Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:27:01.654Z] server: created (timeout=30000ms, keepAlive=5000ms)
+▶ 5. Real Failure Fallback Evidence
+  ✔ Provider A 401 -> Provider B success: two attempts, same requestId (530.052875ms)
+✔ 5. Real Failure Fallback Evidence (530.533083ms)
+[health][2026-08-02T23:27:01.657Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:27:01.657Z] probe mock-a: OK (3ms)
+[health][2026-08-02T23:27:01.657Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:27:01.657Z] probe mock-b: OK (3ms)
+[anthropic-protocol][2026-08-02T23:27:01.857Z] [sr_1785713221857_0c0261] agent=claude-code model=test-model-a claudeCode=true patches=[]
+[fallback][2026-08-02T23:27:01.864Z] first byte received, model switching disabled
+[execution][2026-08-02T23:27:01.865Z] cost recorded: mock-a/test-model-a 0 USD
+[execution][2026-08-02T23:27:01.865Z] request completed: mock-a/test-model-a (5ms, 1 upstream calls)
+[config-loader][2026-08-02T23:27:01.866Z] [finalizer] quality feedback: mock-a:test-model-a success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:27:01.866Z] [finalizer] transaction: finalized sr_1785713221857_0c0261 outcome=completed attempts=1 (atomic)
+[health][2026-08-02T23:27:02.070Z] health check stopped
+[config-loader][2026-08-02T23:27:02.075Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-cc-2-Ndkz3z/config-17d2eae4.json
+[config-loader][2026-08-02T23:27:02.076Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:27:02.076Z] server: config loaded
+[config-loader][2026-08-02T23:27:02.076Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:27:02.076Z] server: config validated
+[config-loader][2026-08-02T23:27:02.082Z] server: storage initialized
+[config-loader][2026-08-02T23:27:02.082Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:27:02.082Z] server: all components initialized
+[health][2026-08-02T23:27:02.082Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:27:02.082Z] probing mock-a: GET http://127.0.0.1:55492/v1/models
+[health][2026-08-02T23:27:02.082Z] probing mock-b: GET http://127.0.0.1:55492/v1/models
+[config-loader][2026-08-02T23:27:02.083Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:27:02.083Z] server: created (timeout=30000ms, keepAlive=5000ms)
+▶ 6. Claude Code Protocol Compatibility
+  ✔ Anthropic Messages endpoint works with Claude Code headers (425.658542ms)
+[health][2026-08-02T23:27:02.084Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:27:02.084Z] probe mock-a: OK (2ms)
+[health][2026-08-02T23:27:02.085Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:27:02.085Z] probe mock-b: OK (3ms)
+[anthropic-stream-protocol][2026-08-02T23:27:02.286Z] [sr_1785713222285_c7ad07] stream agent=claude-code model=test-model-a claudeCode=true
+[execution][2026-08-02T23:27:02.292Z] stream pre-read valid, 1 chunks buffered
+[execution][2026-08-02T23:27:02.293Z] request completed: mock-a/test-model-a (4ms, 1 upstream calls)
+[anthropic-stream-protocol][2026-08-02T23:27:02.294Z] [sr_1785713222285_c7ad07] first byte received, model switching disabled
+[anthropic-stream-protocol][2026-08-02T23:27:02.345Z] [sr_1785713222285_c7ad07] stream completed, bytes=625
+[anthropic-stream-protocol][2026-08-02T23:27:02.346Z] [sr_1785713222285_c7ad07] usage extracted from stream: input=0 output=3
+[config-loader][2026-08-02T23:27:02.347Z] [finalizer] quality feedback: mock-a:test-model-a success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:27:02.347Z] [finalizer] transaction: finalized sr_1785713222285_c7ad07 outcome=completed attempts=1 (atomic)
+[health][2026-08-02T23:27:02.549Z] health check stopped
+[config-loader][2026-08-02T23:27:02.554Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-cc-3-6nVDfv/config-e76108e5.json
+[config-loader][2026-08-02T23:27:02.555Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:27:02.555Z] server: config loaded
+[config-loader][2026-08-02T23:27:02.555Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:27:02.555Z] server: config validated
+[config-loader][2026-08-02T23:27:02.559Z] server: storage initialized
+[config-loader][2026-08-02T23:27:02.559Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:27:02.559Z] server: all components initialized
+[health][2026-08-02T23:27:02.559Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:27:02.559Z] probing mock-a: GET http://127.0.0.1:55498/v1/models
+[health][2026-08-02T23:27:02.560Z] probing mock-b: GET http://127.0.0.1:55498/v1/models
+[config-loader][2026-08-02T23:27:02.560Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:27:02.560Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ Anthropic streaming works with Claude Code headers (478.446916ms)
+[health][2026-08-02T23:27:02.561Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:27:02.561Z] probe mock-a: OK (2ms)
+[health][2026-08-02T23:27:02.562Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:27:02.562Z] probe mock-b: OK (2ms)
+[anthropic-protocol][2026-08-02T23:27:02.762Z] [sr_1785713222761_862278] agent=claude-code model=test-model-a claudeCode=true patches=[]
+[fallback][2026-08-02T23:27:02.768Z] first byte received, model switching disabled
+[execution][2026-08-02T23:27:02.769Z] cost recorded: mock-a/test-model-a 0 USD
+[execution][2026-08-02T23:27:02.769Z] request completed: mock-a/test-model-a (4ms, 1 upstream calls)
+[config-loader][2026-08-02T23:27:02.770Z] [finalizer] quality feedback: mock-a:test-model-a success=1 failure=0 (completed)
+[config-loader][2026-08-02T23:27:02.770Z] [finalizer] transaction: finalized sr_1785713222761_862278 outcome=completed attempts=1 (atomic)
+[health][2026-08-02T23:27:02.972Z] health check stopped
+[config-loader][2026-08-02T23:27:02.978Z] loading config from /var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/sr-cancel-2SlwVL/config-6f4956f8.json
+[config-loader][2026-08-02T23:27:02.979Z] config loaded (intelligence.mode=off)
+[config-loader][2026-08-02T23:27:02.979Z] server: config loaded
+[config-loader][2026-08-02T23:27:02.979Z] server: config warning: agent_bindings is empty; all agents will use the global model pool
+[config-loader][2026-08-02T23:27:02.979Z] server: config validated
+[config-loader][2026-08-02T23:27:02.983Z] server: storage initialized
+[config-loader][2026-08-02T23:27:02.983Z] server: intelligence layer initialized (mode=off)
+[config-loader][2026-08-02T23:27:02.983Z] server: all components initialized
+[health][2026-08-02T23:27:02.983Z] starting periodic health check every 999999000ms
+[health][2026-08-02T23:27:02.983Z] probing mock-a: GET http://127.0.0.1:55503/v1/models
+[health][2026-08-02T23:27:02.984Z] probing mock-b: GET http://127.0.0.1:55503/v1/models
+[config-loader][2026-08-02T23:27:02.984Z] server: health check started (interval=999999s)
+[config-loader][2026-08-02T23:27:02.984Z] server: created (timeout=30000ms, keepAlive=5000ms)
+  ✔ tool_use / tool_result cycle works via Anthropic protocol (422.742625ms)
+✔ 6. Claude Code Protocol Compatibility (1327.563167ms)
+[health][2026-08-02T23:27:02.986Z] provider "mock-a" status: unknown → active
+[health][2026-08-02T23:27:02.986Z] probe mock-a: OK (3ms)
+[health][2026-08-02T23:27:02.986Z] provider "mock-b" status: unknown → active
+[health][2026-08-02T23:27:02.986Z] probe mock-b: OK (2ms)
+[chat-stream-protocol][2026-08-02T23:27:03.188Z] [sr_1785713223188_012d8a] stream agent=generic model=test-model-a claudeCode=false
+[execution][2026-08-02T23:27:03.193Z] stream pre-read valid, 1 chunks buffered
+[execution][2026-08-02T23:27:03.194Z] request completed: mock-a/test-model-a (5ms, 1 upstream calls)
+[chat-stream-protocol][2026-08-02T23:27:03.195Z] [sr_1785713223188_012d8a] first byte received, model switching disabled
+[chat-stream-protocol][2026-08-02T23:27:03.201Z] client aborted during SSE piping, stopping
+[chat-stream-protocol][2026-08-02T23:27:03.202Z] [sr_1785713223188_012d8a] stream client aborted, bytes=73
+[chat-stream-protocol][2026-08-02T23:27:03.202Z] [sr_1785713223188_012d8a] no usage found in SSE stream
+[config-loader][2026-08-02T23:27:03.202Z] [finalizer] transaction: finalized sr_1785713223188_012d8a outcome=client_aborted attempts=1 (atomic)
+[health][2026-08-02T23:27:04.298Z] health check stopped
+▶ 7. Cancel Evidence
+  ✔ client cancel mid-stream: server records align with client (1325.856375ms)
+✔ 7. Cancel Evidence (1326.327334ms)
+ℹ tests 74
+ℹ suites 20
+ℹ pass 74
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 20681.324084

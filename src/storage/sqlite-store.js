@@ -121,6 +121,29 @@ export class SQLiteStore extends StorageInterface {
         timestamp TEXT NOT NULL
       );
       CREATE INDEX IF NOT EXISTS idx_audit_request_id ON audit_records(request_id);
+
+      CREATE TABLE IF NOT EXISTS shadow_decisions (
+        request_id TEXT PRIMARY KEY,
+        protocol TEXT,
+        agent_id TEXT,
+        requested_model TEXT,
+        task_profile TEXT,
+        recommendation TEXT,
+        ranked_candidates TEXT,
+        predictions TEXT,
+        explanation TEXT,
+        actual_final_model TEXT,
+        actual_final_provider TEXT,
+        actual_outcome TEXT,
+        actual_attempt_count INTEGER,
+        actual_usage TEXT,
+        actual_cost TEXT,
+        actual_latency INTEGER,
+        comparison_status TEXT,
+        created_at TEXT NOT NULL,
+        finalized_at TEXT
+      );
+      CREATE INDEX IF NOT EXISTS idx_shadow_created_at ON shadow_decisions(created_at);
     `);
 
     // --- Schema migrations for existing databases ---
@@ -674,6 +697,101 @@ export class SQLiteStore extends StorageInterface {
       attempts: JSON.parse(r.attempts || '[]'),
       timestamp: r.timestamp,
     }));
+  }
+
+  // --------------------------------------------------------------------------
+  // Shadow 决策持久化（Phase2-A Shadow）
+  // 执行前 upsert 建议；Finalize 后更新真实最终结果。
+  // 不保存完整用户 Prompt；task_profile 仅含脱敏任务特征。
+  // --------------------------------------------------------------------------
+
+  async saveShadowDecision(record) {
+    const ts = record.created_at || new Date().toISOString();
+    this._db.prepare(`
+      INSERT INTO shadow_decisions (
+        request_id, protocol, agent_id, requested_model, task_profile, recommendation,
+        ranked_candidates, predictions, explanation, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(request_id) DO UPDATE SET
+        protocol=excluded.protocol, agent_id=excluded.agent_id,
+        requested_model=excluded.requested_model, task_profile=excluded.task_profile,
+        recommendation=excluded.recommendation, ranked_candidates=excluded.ranked_candidates,
+        predictions=excluded.predictions, explanation=excluded.explanation,
+        created_at=excluded.created_at
+    `).run(
+      record.request_id, record.protocol || null, record.agent_id || null,
+      record.requested_model || null, record.task_profile || null,
+      record.recommendation || null, record.ranked_candidates || null,
+      record.predictions || null, record.explanation || null, ts,
+    );
+    return { saved: true };
+  }
+
+  async finalizeShadowDecision(record) {
+    const result = this._db.prepare(`
+      UPDATE shadow_decisions SET
+        actual_final_model=?, actual_final_provider=?, actual_outcome=?,
+        actual_attempt_count=?, actual_usage=?, actual_cost=?, actual_latency=?,
+        comparison_status=?, finalized_at=?
+      WHERE request_id=?
+    `).run(
+      record.actual_final_model || null, record.actual_final_provider || null,
+      record.actual_outcome || null, record.actual_attempt_count ?? null,
+      record.actual_usage || null, record.actual_cost || null,
+      record.actual_latency ?? null, record.comparison_status || null,
+      record.finalized_at || new Date().toISOString(),
+      record.request_id,
+    );
+    return { saved: result.changes > 0, changes: result.changes };
+  }
+
+  async getShadowDecision(requestId) {
+    const row = this._db.prepare('SELECT * FROM shadow_decisions WHERE request_id = ?').get(requestId);
+    if (!row) return null;
+    return this._parseShadowRow(row);
+  }
+
+  async listShadowDecisions() {
+    const rows = this._db.prepare('SELECT * FROM shadow_decisions ORDER BY created_at').all();
+    return rows.map((r) => this._parseShadowRow(r));
+  }
+
+  _parseShadowRow(row) {
+    return {
+      requestId: row.request_id,
+      protocol: row.protocol,
+      agentId: row.agent_id,
+      requestedModel: row.requested_model,
+      taskProfile: row.task_profile ? JSON.parse(row.task_profile) : null,
+      recommendation: row.recommendation ? JSON.parse(row.recommendation) : null,
+      rankedCandidates: row.ranked_candidates ? JSON.parse(row.ranked_candidates) : [],
+      predictions: row.predictions ? JSON.parse(row.predictions) : null,
+      explanation: row.explanation ? JSON.parse(row.explanation) : null,
+      actualFinalModel: row.actual_final_model,
+      actualFinalProvider: row.actual_final_provider,
+      actualOutcome: row.actual_outcome,
+      actualAttemptCount: row.actual_attempt_count,
+      actualUsage: row.actual_usage ? JSON.parse(row.actual_usage) : null,
+      actualCost: row.actual_cost ? JSON.parse(row.actual_cost) : null,
+      actualLatency: row.actual_latency,
+      comparisonStatus: row.comparison_status,
+      createdAt: row.created_at,
+      finalizedAt: row.finalized_at,
+    };
+  }
+
+  /**
+   * 按保留天数清理过期 Shadow 记录（配置 intelligence.shadow.retentionDays）。
+   * @param {number} retentionDays 保留天数（默认 30）
+   * @returns {number} 删除条数
+   */
+  async pruneShadowDecisions(retentionDays = 30) {
+    const cutoffMs = Date.now() - retentionDays * 86400000;
+    const cutoff = new Date(cutoffMs).toISOString();
+    const result = this._db.prepare(
+      'DELETE FROM shadow_decisions WHERE created_at < ?'
+    ).run(cutoff);
+    return result.changes || 0;
   }
 }
 

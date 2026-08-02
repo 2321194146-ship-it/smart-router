@@ -126,8 +126,12 @@ export async function createServer(configPath) {
     store,
   );
 
-  // 4b. 初始化智能层（Phase2-A Shadow；off 模式零开销）
-  const intelligence = new IntelligenceLayer(config);
+  // 4b. 初始化智能层（Phase2-A Shadow；off 模式零开销；Shadow 记录持久化到 store）
+  const intelligence = new IntelligenceLayer(config, store);
+  // 真实最终结果仅在 Finalize 原子事务成功后记录（观察者钩子失败不影响主流程）
+  intelligence.attachTo(finalizer);
+  // 启动时按保留天数清理过期 Shadow 记录（intelligence.shadow.retentionDays，默认 30）
+  intelligence.prune().catch(() => {});
   log(`server: intelligence layer initialized (mode=${intelligence.mode})`);
 
   log('server: all components initialized');

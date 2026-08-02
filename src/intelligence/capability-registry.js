@@ -1,28 +1,23 @@
 // src/intelligence/capability-registry.js
 // Smart Router Mainline - Phase 2-A (Shadow)
-// Capability Registry：模型能力注册与查询。
+// Capability Registry：模型能力注册与查询（以 modelId + provider 为统一身份）。
 //
-// 从 config.models 构建能力索引（Shadow 版只读；不做在线更新、不修改生产配置）。
-// 查询能力：capability（chat/tool_use/vision/streaming）、tier、provider、
-// max_tokens、price、paid、enabled。
+// Shadow 版只读；从 config.models 构建索引。查询能力：capability / tier / provider /
+// contextWindow / price / paid / protocols / enabled。
+//
+// 统一候选身份：modelId + provider（同一模型在不同 Provider 可能有不同价格、
+// 上下文、协议、稳定性、能力，必须分开处理）。
 //
 // 仅使用 Node.js 内置模块，无第三方依赖。
-
-// ----------------------------------------------------------------------------
-// 标准能力集
-// ----------------------------------------------------------------------------
 
 export const Capability = Object.freeze({
   CHAT: 'chat',
   TOOL_USE: 'tool_use',
   VISION: 'vision',
   STREAMING: 'streaming',
-  REASONING: 'reasoning', // 推理能力（如 DeepSeek-R1 / reasoning 模型）
+  REASONING: 'reasoning',
 });
 
-/**
- * 判断模型是否具备指定能力。
- */
 export function hasCapability(model, capability) {
   if (!capability) return true;
   if (!model || !Array.isArray(model.capability)) return false;
@@ -31,39 +26,48 @@ export function hasCapability(model, capability) {
   );
 }
 
-/**
- * 判断模型是否可用（enabled 且非空 id）。
- */
 export function isEnabled(model) {
   return !!model && typeof model.id === 'string' && model.id.length > 0 && model.enabled !== false;
 }
 
-// ----------------------------------------------------------------------------
-// Registry
-// ----------------------------------------------------------------------------
-
 /**
- * 模型能力注册表（Shadow 版）。
+ * 推导模型支持的协议（无显式 protocols 字段时）。
+ * 规则（native 或 adapter 兼容）：
+ *   - chat 能力（或未声明能力）→ 经协议适配层可服务全部三协议
+ *     （responses / anthropic 协议处理器内部转换为 chat 兼容执行，属于 adapter 兼容）
+ *   - provider 为 gateway → 原生支持 responses / anthropic（无需适配）
+ * 无法适配的模型（无 chat 能力且无 gateway）→ 协议阻塞由硬约束负责。
  */
+export function deriveProtocols(model) {
+  const caps = Array.isArray(model?.capability) ? model.capability.map(String) : [];
+  const provider = model?.provider || '';
+  const protocols = [];
+  if (caps.includes('chat') || caps.length === 0) {
+    // adapter 兼容：chat 能力（或未声明能力，默认 chat）经转换服务三协议
+    protocols.push('chat', 'responses', 'anthropic');
+  } else if (provider === 'gateway') {
+    protocols.push('responses', 'anthropic');
+  }
+  return protocols;
+}
+
 export class CapabilityRegistry {
-  /**
-   * @param {object} config 已加载配置（含 models 数组）
-   */
   constructor(config) {
     this.models = Array.isArray(config?.models) ? config.models : [];
-    this._byId = new Map();
+    this._byId = new Map(); // modelId -> [entry]
+    this._byIdProvider = new Map(); // "modelId::provider" -> entry
     for (const m of this.models) {
       if (!m || typeof m.id !== 'string' || !m.id) continue;
-      const entry = this._byId.get(m.id);
-      if (!entry) this._byId.set(m.id, []);
+      if (!this._byId.has(m.id)) this._byId.set(m.id, []);
       this._byId.get(m.id).push(m);
+      if (m.provider) {
+        this._byIdProvider.set(`${m.id}::${m.provider}`, m);
+      }
     }
   }
 
   /**
-   * 按模型 id 查询（支持同 id 多 provider）。
-   * @param {string} modelId
-   * @returns {object[]} 匹配的模型条目
+   * 按 modelId 查询（同 id 多 provider）。
    */
   getByModelId(modelId) {
     if (!modelId) return [];
@@ -71,26 +75,64 @@ export class CapabilityRegistry {
   }
 
   /**
-   * 查询所有已启用模型。
-   * @returns {object[]}
+   * 按 modelId + provider 查询标准化条目（统一候选身份）。
+   * @returns {object|null} 配置条目（含 id / provider / tier / paid / capability /
+   *                        context_window / max_tokens / price / protocols / enabled）
    */
+  getByModelAndProvider(modelId, provider) {
+    if (!modelId) return null;
+    if (provider) {
+      const hit = this._byIdProvider.get(`${modelId}::${provider}`);
+      if (hit) return hit;
+    }
+    const entries = this.getByModelId(modelId);
+    if (entries.length === 1) return entries[0];
+    if (entries.length > 1) {
+      // 多 provider 且未指定 provider：按配置顺序返回第一个（调用方应显式指定 provider）
+      return entries[0];
+    }
+    return null;
+  }
+
   getEnabledModels() {
     return this.models.filter(isEnabled);
   }
 
-  /**
-   * 模型是否支持某能力（任一匹配条目支持即 true）。
-   */
-  supports(modelId, capability) {
+  supports(modelId, provider, capability) {
     if (!capability) return true;
-    return this.getByModelId(modelId).some((m) => hasCapability(m, capability));
+    const entry = this.getByModelAndProvider(modelId, provider);
+    return entry ? hasCapability(entry, capability) : false;
   }
 
   /**
-   * 获取模型的能力摘要（合并同 id 多 provider 的能力）。
+   * 标准化候选画像（Decision Engine 使用）。
    * @param {string} modelId
-   * @returns {{capabilities: string[], tiers: number[], providers: string[], maxTokens: number|null, paid: boolean}|null}
+   * @param {string} provider
+   * @returns {object|null} {
+   *   modelId, provider, tier, paid, capabilities, contextWindow, price, protocols, enabled
+   * }
    */
+  getProfile(modelId, provider) {
+    const entry = this.getByModelAndProvider(modelId, provider);
+    if (!entry) return null;
+    const capabilities = Array.isArray(entry.capability) ? [...entry.capability] : [];
+    const contextWindow =
+      typeof entry.context_window === 'number' && entry.context_window > 0
+        ? entry.context_window
+        : (typeof entry.max_tokens === 'number' && entry.max_tokens > 0 ? entry.max_tokens : 0);
+    return {
+      modelId: entry.id,
+      provider: entry.provider,
+      tier: entry.tier || 'tier3',
+      paid: !!entry.paid,
+      capabilities,
+      contextWindow,
+      price: entry.price && typeof entry.price === 'object' ? { ...entry.price } : null,
+      protocols: deriveProtocols(entry),
+      enabled: isEnabled(entry),
+    };
+  }
+
   summarize(modelId) {
     const entries = this.getByModelId(modelId);
     if (entries.length === 0) return null;
@@ -117,12 +159,6 @@ export class CapabilityRegistry {
     };
   }
 
-  /**
-   * 按任务需求筛选候选（仅本地计算，不改变生产候选顺序）。
-   * @param {object} task 任务画像（task-analyzer 输出）
-   * @param {object} [opts] { allowedModels, allowedProviders, allowPaid }
-   * @returns {object[]} 排序后的模型摘要（分数降序）
-   */
   match(task, opts = {}) {
     const allowedModels = opts.allowedModels || [];
     const allowedProviders = opts.allowedProviders || [];
@@ -131,7 +167,6 @@ export class CapabilityRegistry {
       if (allowedModels.length > 0 && !allowedModels.includes(m.id)) continue;
       if (allowedProviders.length > 0 && !allowedProviders.includes(m.provider)) continue;
       if (m.paid && opts.allowPaid === false) continue;
-      // 能力匹配
       if (task?.needsToolUse && !hasCapability(m, Capability.TOOL_USE)) continue;
       if (task?.needsVision && !hasCapability(m, Capability.VISION)) continue;
       results.push({
@@ -143,11 +178,10 @@ export class CapabilityRegistry {
         capability: Array.isArray(m.capability) ? [...m.capability] : [],
       });
     }
-    // 按 tier 排序（tier1 > tier2 > tier3）
     const tierRank = { tier1: 0, tier2: 1, tier3: 2 };
     results.sort((a, b) => (tierRank[a.tier] ?? 9) - (tierRank[b.tier] ?? 9));
     return results;
   }
 }
 
-export default { Capability, CapabilityRegistry, hasCapability, isEnabled };
+export default { Capability, CapabilityRegistry, hasCapability, isEnabled, deriveProtocols };

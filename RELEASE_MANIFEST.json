@@ -4,19 +4,17 @@
   "branch": "phase2-shadow",
   "base_commit": "feb735d",
   "pilot_fix_commit": "247495b",
-  "date": "2026-08-02T22:48:30.151Z",
-  "description": "Smart Router Mainline Phase 2-A Shadow - intelligent decision layer in shadow mode (Task Analyzer / Capability Registry / Policy / Budget / Decision Engine / Explainability / Shadow Recorder)",
+  "date": "2026-08-02T23:27:38.373Z",
+  "description": "Smart Router Mainline Phase 2-A Shadow Sealed - suggest-before-execute + finalize-observer recordFinalized, SQLite shadow_decisions persistence, capability-registry-driven decision with hard constraints, deterministic predictions, 5-state comparison",
   "pilot_summary": {
     "status": "passed",
     "total": 9,
     "passed": 9,
-    "note": "真实外部 Provider Pilot 9/9 通过：modelscope 直连 chat / 7878 网关 Anthropic+Responses / 真实 401 fallback / tool_use / 流式取消 / 禁付费 / strict / 真实 usage 成本 Attempt 记录。",
-    "reports": [
-      "PILOT_REPORT.md"
-    ]
+    "note": "真实外部 Provider Pilot 9/9：ModelScope 直连 chat；Anthropic/Responses 经 7878 网关真实转发；真实 401 fallback；tool_use；流式取消；禁付费；strict；真实 usage/成本/Attempt。"
   },
   "phase2_summary": {
     "mode": "off|shadow",
+    "flow": "candidates -> suggest() (pre-execution) -> Phase1 execution -> protocol validation -> finalizeRequestAtomic (commit) -> recordFinalized() (observer, from final Audit)",
     "modules": [
       "task-analyzer",
       "capability-registry",
@@ -26,6 +24,51 @@
       "explainability",
       "shadow-recorder",
       "intelligence-index"
+    ],
+    "persistence": {
+      "table": "shadow_decisions",
+      "fields": [
+        "request_id",
+        "protocol",
+        "agent_id",
+        "requested_model",
+        "task_profile",
+        "recommendation",
+        "ranked_candidates",
+        "predictions",
+        "explanation",
+        "actual_final_model",
+        "actual_final_provider",
+        "actual_outcome",
+        "actual_attempt_count",
+        "actual_usage",
+        "actual_cost",
+        "actual_latency",
+        "comparison_status",
+        "created_at",
+        "finalized_at"
+      ],
+      "sanitized": "task_profile 白名单，不含 lastUserText/完整 Prompt",
+      "retention_days": "intelligence.shadow.retentionDays（默认 30）",
+      "restart_persistent": true
+    },
+    "hard_constraints": [
+      "tool_use",
+      "vision",
+      "contextWindow",
+      "protocol"
+    ],
+    "predictions": {
+      "cost": "per-candidate price, non-null when priced",
+      "latency": "deterministic prior, no Math.random",
+      "quality": "after hard constraints, capped 0.95"
+    },
+    "comparison_statuses": [
+      "exact_match",
+      "model_match_provider_diff",
+      "policy_agreement",
+      "different",
+      "not_comparable"
     ],
     "constraints": [
       "不增加上游调用（纯本地计算）",
@@ -39,13 +82,13 @@
   },
   "test_summary": {
     "unit": {
-      "tests": 370,
-      "suites": 84,
+      "tests": 373,
+      "suites": 85,
       "failures": 0
     },
     "integration": {
-      "tests": 69,
-      "suites": 18,
+      "tests": 74,
+      "suites": 19,
       "failures": 0
     },
     "audit": {
@@ -54,31 +97,63 @@
       "failures": 0
     },
     "total": {
-      "tests": 472,
-      "suites": 117,
+      "tests": 480,
+      "suites": 118,
       "failures": 0
     }
   },
-  "shadow_run": {
-    "requests": 6,
-    "records": 6,
-    "agree": 4,
-    "differ": 2,
-    "suggestionAcceptedRate": "66.7%"
+  "shadow_eval": {
+    "script": "scripts/shadow-eval.mjs",
+    "tasks": 33,
+    "records": 33,
+    "runtime": "deterministic local mock providers (reproducible, offline)",
+    "classification_accuracy": "97% (32/33)",
+    "outcome_accuracy": "100% (33/33)",
+    "comparison": {
+      "exact_match": 19,
+      "model_match_provider_diff": 0,
+      "policy_agreement": 6,
+      "different": 6,
+      "not_comparable": 2,
+      "acceptanceRate": 76
+    }
+  },
+  "endpoint_honesty": {
+    "modelscope": "direct real provider (pilot 9/9, evidence/pilot-*.json)",
+    "anthropic_responses": "via local 7878 gateway (real forwarding chain, NOT direct 28788-to-official)",
+    "eval_runtime": "deterministic local mock (shadow decision logic, NOT external network)"
   },
   "source_files": {
     ".gitignore": "8df601f2fa14b88b6d3ade8fd92d239cc7699546619d7c40c505da6999302479",
-    "README.md": "8a604c577a20c8f5e851c1c38f20af5185c3217fdfb9ea2cf40b9d1fb65dcbac",
-    "RELEASE_MANIFEST.json": "d022b2e4afe7594526eef3b2585d6083887ec62add223f146ab61a82dad9419a",
+    "README.md": "db7c26aa0e4b38209850e4ade18835f62677fe127565f36c0eda088663b0aea7",
     "config/config.example.json": "d2fb50a52711b5045ad65c1081c1be5ccff873d3d88d0920855b25c552c21be8",
+    "config/shadow-eval-config.template.json": "273f578711c371689759b51de54057c4fb948b15dc04fffa45c1363e7b87b983",
+    "evidence/git-commit-sha.txt": "bb94da3fdca0044d9e5c66a6ee35569247b275934aa8b896b96c0dc086daa34d",
+    "evidence/node-version.txt": "3dcfac47702a14c367f0cce2a49ef565a2985278864fd981add283be89322181",
+    "evidence/npm-test-output.txt": "2d24e082b9ab1e9471b40eac4a52bbdf96006fc7ff5edfac3affb8caf8ca36a6",
     "evidence/pilot-db-evidence.json": "8de97825fe0c4b2ede60f9d914c95d9ec2f9c131bc914b713afb3ee99e8d57ff",
     "evidence/pilot-evidence.json": "4fdd0f250938ad806d4076702bbdc2b18c90df899472d161791f60bb5de35a28",
     "evidence/pilot-server-log.txt": "279307686a15f1361871953c0419222851f09bff26b2cccfc1455033cec4310c",
     "evidence/pilot-strict-evidence.json": "bce24a301623fa4af71b98822de6f33c8ca37141ad45d788146e1b96e559104a",
     "evidence/pilot-strict-server-log.txt": "3d8766883dbd59fe9fa9fc349e16eed2110961367e98e3bced5bdd2eee8c37ae",
-    "package-lock.json": "6977397067365dd3ee214d1f4b5c6db3a53265be8bc317097348fb01783b5ecd",
-    "package.json": "99adca94583aca800739c857be37876d80c1781719280d7407b3bd005879d994",
+    "evidence/shadow-eval-report.json": "357c9854c1ba296651a391c6424321767588604dd47eb5ec61e450764e54b5b7",
+    "evidence/shadow-eval-report.md": "b8d1c9c1cf348c301014fcbaf932c2055394b13e82b1050da07665e840b69a7d",
+    "evidence/shadow-run-report.json": "9ac0e3608a0b53d7a705986ba9600dbdf11272c7be7a2e83077119a880471f75",
+    "package-lock.json": "8ba660a70f98a87f1b54218c73e317278df73ff07a412e8ac225a8706f4c9a98",
+    "package.json": "459764bd58ed29ec2bacd3e9acf1a898cf5c2b8b3a697c3b8d8a9257ea98ba4f",
+    "phase2-docs/CAPABILITY_REGISTRY.md": "0d3cadde90026bb79dd53aa70477433e6aca6385d1a635944bddf7cf22a2a5bd",
+    "phase2-docs/DECISION_ENGINE_SCORING.md": "f0bf2484a7ae343c9e0be21cdf143ae12d212ef9fedcbcf159aa47fe8517a741",
+    "phase2-docs/EXPLAINABILITY_SAMPLES.md": "08e52f60bc6ee7d5b97e2f471f5ecc1cb6f3c91c2c758b6db92e04bbb64e795d",
+    "phase2-docs/KNOWN_ISSUES.md": "c48573c24dae0fb9912bfbcf180a9f4036902ebe29608d1d396e73c3c55b0335",
+    "phase2-docs/OFF_SHADOW_COMPARISON.md": "0623ae42ef54bcf7ad0d6865f5d4f295abbe8d8ec11c99334932b9e41e3d5628",
+    "phase2-docs/PHASE2_ARCHITECTURE.md": "e33e813bcaa5b7b38cf0e1988939fbe20a67d221ff28fdde338a6922ce52c471",
+    "phase2-docs/PILOT_REPORT.md": "a0a0929b738ae50af703ee3b029be8a7763c4a6781890e86ca7c8a7547185db4",
+    "phase2-docs/POLICY_BUDGET_TEST_REPORT.md": "be301f6b1d14caebe12ce12093eeb25ed9e3119d376b050a5b9c4374f55d42a6",
+    "phase2-docs/SHADOW_RUN_REPORT.md": "10dd8ca15fa507a43d3ec89b0a4f8f60989d532094ccc1d074f987a8bcfcfbe1",
+    "phase2-docs/SHADOW_SEALED_ACCEPTANCE.md": "88c00b426998dc0e1c2d0feadf07eb5db6b02d75d292efea3f5b1da82d78e8cd",
+    "phase2-docs/TASK_ANALYZER_EVAL.md": "60f6b752aef1da303378ba973454bc54d214ea37eecefb43dd9792a0d2b3c088",
     "scripts/pilot-sanitized.mjs": "1699a261e416d885abe60e26f65039745d527397eeb6cecbae997dcf12380042",
+    "scripts/shadow-eval.mjs": "0669a992ee5a7be723d5a0015dbd155c3825373970583ff502d2877707f000aa",
     "src/agent/compatibility.js": "9ae2bf023796af50cb6eb234310fd5ce3c5d8287731ff41f6783a450a76ce91a",
     "src/agent/identity.js": "cdf17de3dfefddb52b09b03f8d1043782bfd15062568552ae2674d3f0792dc99",
     "src/config/loader.js": "e6e0551c78ef3898e10d6a2ce478b844a679c8d30bec7c2b9918a1bca95ae2e5",
@@ -86,18 +161,18 @@
     "src/cost/tracker.js": "d123673201b9244c38a517eaf1ba39771fb7eab93ed977f7823aaf05bdec99d6",
     "src/index.js": "9e58f767ca1719379879dd82411c3aaf8be60da9530b9d80945922cc0aaf904f",
     "src/intelligence/budget.js": "ca20b71d0829c50753035c49d10f3ed4eb7c7e37498b074b534d21922004fb89",
-    "src/intelligence/capability-registry.js": "2061f2d6affaa1deebbb6063d015d02c9b5a3f87edf3a51da484c1cef5bbb0ba",
-    "src/intelligence/decision-engine.js": "de5d3ce45b985518cbefa1ba1427031ce27a7e38ae76d1a85e27c8c005adea2e",
+    "src/intelligence/capability-registry.js": "d9fb5f9a80cc67273803861b12c63401e8a4a544ab896df58ee178590c65e850",
+    "src/intelligence/decision-engine.js": "53c3bb6356f2dd0c1402d2da3c29fb8a61efae70fb6485dcb128dab3adc99a8b",
     "src/intelligence/explainability.js": "f09aab56bd64b64345a94d57bd82e0d922f18221f4012cf0cb9aeca5e80c7408",
-    "src/intelligence/index.js": "66d31074305cd84853b9b5df56afc5646bb7bab3357c137226d1c5bc29ec81e3",
-    "src/intelligence/policy.js": "adc96387600f0d8aad47020a68ff170e6110651497975eb6ebc954c0dfa43970",
-    "src/intelligence/shadow-recorder.js": "1df4acf6d9a40cce6e7f10f568d8e5a5784b5a74faca17bbe2141d29b5e86f2c",
+    "src/intelligence/index.js": "007a3434d5dd3f03ac6c65e8b460b2d5770fe9bdae48816cd075fe0d7fb6e7bf",
+    "src/intelligence/policy.js": "89745ea1b9f327957dffa238e4336e4ec295fa4ab6e15b157c26e8a9b2820366",
+    "src/intelligence/shadow-recorder.js": "e977cab4ef4236a8a505871d5bc1c382c5bc8a9444d9b8b31b054837f568589a",
     "src/intelligence/task-analyzer.js": "34f92a34d1b10b18349970578b6bfc5d948c63cbf78eaf44aebf8b1e4e1d0623",
-    "src/protocols/anthropic-stream.js": "d4fedb437cccfc6564910f55fdbbaf88fb93912a1c0a9d36148dbec83278c641",
-    "src/protocols/anthropic.js": "d5f40cd0656a710488cf53e965eed6074f07dbeb59d249957ef576aaf575a792",
-    "src/protocols/chat-stream.js": "05d81c3cffc90812215939ce5d176d0930e2007b6f950a743009848ad2115e24",
-    "src/protocols/chat.js": "3cf6304f9e62fa21418468832184a1a7af1955162313e63a2af22635ab509ffc",
-    "src/protocols/responses-stream.js": "0c9d3bcc3f5673c1906958892ab7ae142c097260ccbc6d7cd519210410772c8f",
+    "src/protocols/anthropic-stream.js": "e429ee1d85a84ef6e981afd385e93ab2d28e0586470d18c7565900cb2fc53962",
+    "src/protocols/anthropic.js": "862a60b8ef39b5d566b91a3fc95ab0b94d0cdf0eb78e3773c937f8bc84d8652b",
+    "src/protocols/chat-stream.js": "678684561d0a384c68b9f0d5e42f99466a6479eab1cae17ebf1e8aeb73d8788f",
+    "src/protocols/chat.js": "8a2852e8f53e7ec37c65ba6da2766348bf12fc9381550d716cb69d335ece8eea",
+    "src/protocols/responses-stream.js": "d78f844f2e4f7e35dec04c0024952e74066abd1a9f03d03dd0959e940a17b776",
     "src/protocols/responses.js": "99855c555612f1297e4eaaaab1866063d510bdb3b6a5f0809a88a926479acba5",
     "src/provider/client.js": "2aead24d6aabd4d866a2465f892b3a5ddd4cd5e384adcda11546f4ab1e2f6a86",
     "src/provider/errors.js": "01495b49e22b7089ce21600259dabe9e169215537a6b7c42c1eaa8c5a44a19f5",
@@ -108,13 +183,13 @@
     "src/router/fallback.js": "cb2de21ef13430036242d19e88e0863824a8f0eb62caca956c49c742805651e9",
     "src/runtime/attempts.js": "d8b67fc97bcbf4d4a5a9f0de0a07ea0771a2b679009536be4a47a52802d1420d",
     "src/runtime/cancellation.js": "d54004020e9fe61a5e7cfdb58dfbd1354f3126b4377ef34064ca340ac8af60de",
-    "src/runtime/finalization.js": "822ea2fd26d9b34dbb1bd6e5027261d41912e2ffef18992d1af6afdf7a8d93a4",
+    "src/runtime/finalization.js": "5e9eddfdf1ce1a12d3b9e9a83e6825b1f4ab45cb9bfe5572733f797986a26f46",
     "src/runtime/outcomes.js": "bdbe1f097db49dca1a0118f4d178903188831d66b9131b3fef372165830a1ce7",
-    "src/server.js": "b2dbdd970f235c51576bbac8d167fad3e88819f05f0dd90a4ab4df7a4892b078",
+    "src/server.js": "5ab2c1bed4db36ffe0b0857379bd85b75ab9b7765f15b4bb8958b67afaf96899",
     "src/storage/index.js": "146b1e4e61a880d65b08e33e24af109ac656d979c1f9452fdf1d4778b91af7d2",
     "src/storage/interface.js": "91978bc4fec4b6188464cf8b8482ce70323433613bfc3f29f85927e4aa922396",
-    "src/storage/memory-store.js": "50af795b6a42bf26fe745d6a3d1f4b372ad66886221ec49f31e851be9f1707aa",
-    "src/storage/sqlite-store.js": "f51755a619cd0dc3f0abea449c92e79a7a236613596c00364428f62028d890e4",
+    "src/storage/memory-store.js": "e7a2d982e5d18077c03370aa3158d9ccf546113c76bd38c256a294ffcfda2b5b",
+    "src/storage/sqlite-store.js": "ad5fc3a8a0697dfdb649779852fa575d9858cc9630c4a5404aff55a0c5d42dcc",
     "test/audit/release-gate.test.js": "3e2bd8285284748773bb0b1f9aeefe27070f530247e9cf16c6300ad68fd886d7",
     "test/integration/anthropic-integration.test.js": "3bc27cf622f6a822beed7e02ba0b0eb3a38541bee0b34ac881d0859876006a10",
     "test/integration/chat-integration.test.js": "45cb205e9ece24ce984bb50f06c6151d410c4c3a0500ef2c5d1a1381b6eadd54",
@@ -125,14 +200,15 @@
     "test/integration/persistence.test.js": "3aafb2c8c3474206b369dfea06e6ce070c286e5ce278a4abf237f95c174f02c2",
     "test/integration/provider-fallback-integration.test.js": "1dd84d7931d73ec3e4736c029f8033e8865690ca35a8559633cd8e9d8430f51d",
     "test/integration/responses-integration.test.js": "2b3553bd27ccfcac9278db982d2b90b6100bef16fd33e0364b18a1cc099be6b3",
-    "test/integration/shadow-mode.test.js": "3ed7c356de48724bd58862eda1001cbe8739065f9f24ffdbcbb6867f749fbc97",
+    "test/integration/shadow-mode.test.js": "c8a4ad81f02c5f58ad09137841c0f60438183cb409534689cf37736bd9562148",
+    "test/integration/shadow-sealed.test.js": "89afa1066df17ad97c60e3a56d0f00d6379c8bf625297764808901f4e731d353",
     "test/integration/stream-empty-fallback.test.js": "4092167a728bd5c649aa5b9aef768afac5415b60aadd4de4d3bacb82f0d26baa",
     "test/integration/transaction-rollback.test.js": "c4000bd04eae76fb8518e4b9da148f51746be67d86d12385e9dbeaca7000ca8c",
     "test/integration/verified-closure.test.js": "b195170bec93e2eb5eb433c011248d450e9eb9f5d1662e38b60596d55c1da3f0",
     "test/unit/audit.test.js": "a9f1af07ad0675eb1c0c4f89288450a6943bde1f105c3d7230cb3551e17d6189",
     "test/unit/cancellation.test.js": "957fe1e75c0602c1b322c86f25611e4dc9a135d7cdd30dfcba6cc7f2417191e4",
     "test/unit/claude-code-compat.test.js": "54798d7aa7d5108bd506735f91f4d6d90fd34e16a196aaa93f61ad84b220d689",
-    "test/unit/intelligence.test.js": "f01b56d931f893121d5c1574505e917ffcf9418738d1cbdf0657fc0f2f2ccd48",
+    "test/unit/intelligence.test.js": "e78275034722db11c9aafc1299921708451ce3f4a8b0623ab5085498aa5be208",
     "test/unit/protocol-anthropic.test.js": "5e5a5a5ba96422b2430dfe6fb828e4a734cbce9305a095bc82fe390b9cc715aa",
     "test/unit/protocol-chat.test.js": "e25445d6530c6de5455429e085d912a59f50eda91b3464bc8eb4db5ddf5c6346",
     "test/unit/protocol-responses.test.js": "9243287c1c14d7dc6ce0fa6a2f6f21cda5a7879f680c8f36b9d13574a89b02c7",
@@ -141,21 +217,24 @@
     "test/unit/provider-key-pool.test.js": "3711744740cc77840cd5663aa61dc49f6083f237bc681561bc480e9a62742fa2"
   },
   "reports": [
-    "PHASE2_ARCHITECTURE.md",
-    "PILOT_REPORT.md",
-    "SHADOW_RUN_REPORT.md",
-    "TASK_ANALYZER_EVAL.md",
-    "CAPABILITY_REGISTRY.md",
-    "DECISION_ENGINE_SCORING.md",
-    "POLICY_BUDGET_TEST_REPORT.md",
-    "EXPLAINABILITY_SAMPLES.md",
-    "OFF_SHADOW_COMPARISON.md",
-    "KNOWN_ISSUES.md"
+    "phase2-docs/PHASE2_ARCHITECTURE.md",
+    "phase2-docs/PILOT_REPORT.md",
+    "phase2-docs/SHADOW_RUN_REPORT.md",
+    "phase2-docs/SHADOW_SEALED_ACCEPTANCE.md",
+    "phase2-docs/TASK_ANALYZER_EVAL.md",
+    "phase2-docs/CAPABILITY_REGISTRY.md",
+    "phase2-docs/DECISION_ENGINE_SCORING.md",
+    "phase2-docs/POLICY_BUDGET_TEST_REPORT.md",
+    "phase2-docs/EXPLAINABILITY_SAMPLES.md",
+    "phase2-docs/OFF_SHADOW_COMPARISON.md",
+    "phase2-docs/KNOWN_ISSUES.md"
   ],
   "release_consistency": {
-    "package_lock_version": "1.0.0-phase1",
-    "config_example_data_dir": "./data",
-    "pilot_status_honest": true,
-    "shadow_no_execution_change": true
+    "package_json_version": "1.0.0-phase2-shadow",
+    "package_lock_version": "1.0.0-phase2-shadow",
+    "readme_version": "1.0.0-phase2-shadow",
+    "manifest_excludes_self_hash": true,
+    "eval_script": "scripts/shadow-eval.mjs",
+    "config_template": "config/shadow-eval-config.template.json"
   }
 }

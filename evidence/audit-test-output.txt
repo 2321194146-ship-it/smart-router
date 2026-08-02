@@ -1,0 +1,75 @@
+
+> smart-router-mainline@1.0.0-phase2-shadow test:audit
+> node --test test/audit/*.test.js
+
+▶ Release Gate Audit
+  ▶ 1. No API keys in source
+    ✔ src/ .js files do not contain hardcoded API key patterns (19.434042ms)
+  ✔ 1. No API keys in source (20.129458ms)
+  ▶ 2. No database files in source
+    ✔ no .db, .sqlite, .sqlite3 files exist in src/ or test/ (3.128708ms)
+  ✔ 2. No database files in source (3.287708ms)
+  ▶ 3. No log files in source
+    ✔ no .log files exist in src/ or test/ (1.268959ms)
+  ✔ 3. No log files in source (1.422167ms)
+  ▶ 4. No .git references in source
+    ✔ src/ files do not contain .git references (except .gitignore) (5.013875ms)
+  ✔ 4. No .git references in source (5.115458ms)
+  ▶ 5. package.json and package-lock.json consistency
+    ✔ package name and version match between package.json and package-lock.json (0.7275ms)
+  ✔ 5. package.json and package-lock.json consistency (0.903375ms)
+  ▶ 6. All 24 core modules exist
+    ✔ exactly 24 modules are defined (0.125416ms)
+    ✔ all 24 required module files exist on disk (0.178083ms)
+    ✔ all core modules are non-empty .js files (1.380292ms)
+  ✔ 6. All 24 core modules exist (1.830334ms)
+  ▶ 7. No prompt injection in source
+    ✔ no "You are" role-injection strings in source code (5.872708ms)
+    ✔ no "你是" role-injection strings in source code (5.437417ms)
+    ✔ no "think step by step" or "请逐步思考" injection (6.643709ms)
+    ✔ no code that adds system messages with hardcoded content to user requests (7.589542ms)
+  ✔ 7. No prompt injection in source (25.704875ms)
+  ▶ 8. No user prompt rewriting
+    ✔ no src/ file modifies user message content with string manipulation (9.323333ms)
+    ✔ no code explicitly targets user role messages for content modification (6.920125ms)
+  ✔ 8. No user prompt rewriting (16.354375ms)
+  ▶ 9. No model switching after first byte
+    ✔ execution.js contains firstByteReceived / firstByteSentToClient logic (0.274583ms)
+    ✔ execution.js prevents fallback after first byte is received (0.477625ms)
+    ✔ fallback.js respects firstByteReceived to prevent candidate advancement (0.116167ms)
+  ✔ 9. No model switching after first byte (0.95775ms)
+  ▶ 10. No budget violations
+    ✔ cost/tracker.js contains checkBudget method (0.202541ms)
+    ✔ checkBudget returns an allowed/blocked decision (0.183458ms)
+    ✔ execution.js calls checkBudget before each attempt (0.131791ms)
+  ✔ 10. No budget violations (0.601083ms)
+  ▶ 11. No duplicate finalize
+    ✔ finalization.js contains idempotency protection (0.187167ms)
+    ✔ finalize returns early if requestId was already finalized (0.123709ms)
+  ✔ 11. No duplicate finalize (0.36825ms)
+  ▶ 12. No duplicate cost
+    ✔ cost/tracker.js contains cost deduplication by requestId (0.239333ms)
+    ✔ recordCost skips duplicate requestId (0.1925ms)
+  ✔ 12. No duplicate cost (0.481083ms)
+  ▶ 13. Test directories are not empty
+    ✔ test/unit/ contains at least one .test.js file (0.189292ms)
+    ✔ test/integration/ contains at least one .test.js file (0.182083ms)
+    ✔ test/audit/ contains at least one .test.js file (0.080833ms)
+  ✔ 13. Test directories are not empty (0.511541ms)
+  ▶ 14. Payload Preservation (compatibility module)
+    ✔ compatibility.js exists (0.078875ms)
+    ✔ compatibility.js does NOT modify user message content (0.304416ms)
+    ✔ compatibility.js does NOT modify system prompt or developer messages (0.795667ms)
+    ✔ compatibility.js uses deepClone to avoid mutating input (0.194708ms)
+    ✔ compatibility.js only cleans incompatible fields and converts protocol structure (0.143291ms)
+    ✔ compatibility.js response-side cleaning only targets response content, not user content (0.219375ms)
+  ✔ 14. Payload Preservation (compatibility module) (1.848708ms)
+✔ Release Gate Audit (80.941708ms)
+ℹ tests 33
+ℹ suites 15
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 253.160958

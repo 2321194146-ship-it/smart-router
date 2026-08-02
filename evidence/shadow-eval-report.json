@@ -1,0 +1,1003 @@
+{
+  "mode": "shadow",
+  "runtime": "deterministic local mock providers (no real keys, no external network)",
+  "honesty": "验证 Shadow 决策/持久化/对照的真实代码路径（分阶段 main/nopaid/strict）；外部真实 Pilot 见 evidence/pilot-*.json",
+  "tasks_total": 33,
+  "shadow_records": 33,
+  "comparison_summary": {
+    "exact_match": 19,
+    "model_match_provider_diff": 0,
+    "policy_agreement": 6,
+    "different": 6,
+    "not_comparable": 2,
+    "acceptanceRate": 76
+  },
+  "classification": {
+    "correct": 32,
+    "wrong": 1,
+    "accuracy": "97%",
+    "details": [
+      {
+        "taskId": "chat-01",
+        "category": "chat",
+        "expected": "chat",
+        "actual": "chat",
+        "ok": true
+      },
+      {
+        "taskId": "chat-02",
+        "category": "chat",
+        "expected": "chat",
+        "actual": "chat",
+        "ok": true
+      },
+      {
+        "taskId": "chat-03",
+        "category": "chat",
+        "expected": "chat",
+        "actual": "chat",
+        "ok": true
+      },
+      {
+        "taskId": "coding-01",
+        "category": "coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "coding-02",
+        "category": "coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "coding-03",
+        "category": "coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "analysis-01",
+        "category": "analysis",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "analysis-02",
+        "category": "analysis",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "summ-01",
+        "category": "summarization",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "summ-02",
+        "category": "summarization",
+        "expected": "extraction",
+        "actual": "chat",
+        "ok": false
+      },
+      {
+        "taskId": "trans-01",
+        "category": "translation",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "trans-02",
+        "category": "translation",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "extract-01",
+        "category": "extraction",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "extract-02",
+        "category": "extraction",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "tool-01",
+        "category": "tool_use",
+        "expected": "tool_orchestration",
+        "actual": "tool_orchestration",
+        "ok": true
+      },
+      {
+        "taskId": "tool-02",
+        "category": "tool_use",
+        "expected": "tool_orchestration",
+        "actual": "tool_orchestration",
+        "ok": true
+      },
+      {
+        "taskId": "tool-03",
+        "category": "tool_use",
+        "expected": "tool_orchestration",
+        "actual": "tool_orchestration",
+        "ok": true
+      },
+      {
+        "taskId": "vision-01",
+        "category": "vision",
+        "expected": "vision",
+        "actual": "vision",
+        "ok": true
+      },
+      {
+        "taskId": "vision-02",
+        "category": "vision",
+        "expected": "vision",
+        "actual": "vision",
+        "ok": true
+      },
+      {
+        "taskId": "longctx-01",
+        "category": "long_context",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "longctx-02",
+        "category": "long_context",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "strict-01",
+        "category": "strict",
+        "expected": "chat",
+        "actual": "chat",
+        "ok": true
+      },
+      {
+        "taskId": "strict-02",
+        "category": "strict",
+        "expected": "chat",
+        "actual": "chat",
+        "ok": true
+      },
+      {
+        "taskId": "nopaid-01",
+        "category": "no_paid",
+        "expected": "chat",
+        "actual": "chat",
+        "ok": true
+      },
+      {
+        "taskId": "nopaid-02",
+        "category": "no_paid",
+        "expected": "chat",
+        "actual": "chat",
+        "ok": true
+      },
+      {
+        "taskId": "nc-01",
+        "category": "no_candidate",
+        "expected": "chat",
+        "actual": "chat",
+        "ok": true
+      },
+      {
+        "taskId": "nc-02",
+        "category": "no_candidate",
+        "expected": "chat",
+        "actual": "chat",
+        "ok": true
+      },
+      {
+        "taskId": "fallback-01",
+        "category": "fallback",
+        "expected": "chat",
+        "actual": "chat",
+        "ok": true
+      },
+      {
+        "taskId": "fallback-02",
+        "category": "fallback",
+        "expected": "chat",
+        "actual": "chat",
+        "ok": true
+      },
+      {
+        "taskId": "abort-01",
+        "category": "client_aborted",
+        "expected": "chat",
+        "actual": "chat",
+        "ok": true
+      },
+      {
+        "taskId": "abort-02",
+        "category": "client_aborted",
+        "expected": "chat",
+        "actual": "chat",
+        "ok": true
+      },
+      {
+        "taskId": "eof-01",
+        "category": "incomplete",
+        "expected": "chat",
+        "actual": "chat",
+        "ok": true
+      },
+      {
+        "taskId": "eof-02",
+        "category": "incomplete",
+        "expected": "chat",
+        "actual": "chat",
+        "ok": true
+      }
+    ]
+  },
+  "outcome": {
+    "correct": 33,
+    "wrong": 0,
+    "accuracy": "100%",
+    "details": [
+      {
+        "taskId": "chat-01",
+        "category": "chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "chat-02",
+        "category": "chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "chat-03",
+        "category": "chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "coding-01",
+        "category": "coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "coding-02",
+        "category": "coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "coding-03",
+        "category": "coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "analysis-01",
+        "category": "analysis",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "analysis-02",
+        "category": "analysis",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "summ-01",
+        "category": "summarization",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "summ-02",
+        "category": "summarization",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "trans-01",
+        "category": "translation",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "trans-02",
+        "category": "translation",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "extract-01",
+        "category": "extraction",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "extract-02",
+        "category": "extraction",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "tool-01",
+        "category": "tool_use",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "tool-02",
+        "category": "tool_use",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "tool-03",
+        "category": "tool_use",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "vision-01",
+        "category": "vision",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "vision-02",
+        "category": "vision",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "longctx-01",
+        "category": "long_context",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "longctx-02",
+        "category": "long_context",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "strict-01",
+        "category": "strict",
+        "expected": "no_candidate",
+        "actual": "no_candidate",
+        "ok": true
+      },
+      {
+        "taskId": "strict-02",
+        "category": "strict",
+        "expected": "no_candidate",
+        "actual": "no_candidate",
+        "ok": true
+      },
+      {
+        "taskId": "nopaid-01",
+        "category": "no_paid",
+        "expected": "budget_exceeded",
+        "actual": "budget_exceeded",
+        "ok": true
+      },
+      {
+        "taskId": "nopaid-02",
+        "category": "no_paid",
+        "expected": "budget_exceeded",
+        "actual": "budget_exceeded",
+        "ok": true
+      },
+      {
+        "taskId": "nc-01",
+        "category": "no_candidate",
+        "expected": "no_candidate",
+        "actual": "no_candidate",
+        "ok": true
+      },
+      {
+        "taskId": "nc-02",
+        "category": "no_candidate",
+        "expected": "no_candidate",
+        "actual": "no_candidate",
+        "ok": true
+      },
+      {
+        "taskId": "fallback-01",
+        "category": "fallback",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "fallback-02",
+        "category": "fallback",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "abort-01",
+        "category": "client_aborted",
+        "expected": "client_aborted",
+        "actual": "client_aborted",
+        "ok": true
+      },
+      {
+        "taskId": "abort-02",
+        "category": "client_aborted",
+        "expected": "client_aborted",
+        "actual": "client_aborted",
+        "ok": true
+      },
+      {
+        "taskId": "eof-01",
+        "category": "incomplete",
+        "expected": "incomplete",
+        "actual": "incomplete",
+        "ok": true
+      },
+      {
+        "taskId": "eof-02",
+        "category": "incomplete",
+        "expected": "incomplete",
+        "actual": "incomplete",
+        "ok": true
+      }
+    ]
+  },
+  "rows": [
+    {
+      "taskId": "chat-01",
+      "category": "chat",
+      "httpStatus": 200,
+      "taskType": "chat",
+      "suggested": "mock/eval-chat",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "chat-02",
+      "category": "chat",
+      "httpStatus": 200,
+      "taskType": "chat",
+      "suggested": "mock/eval-chat",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "chat-03",
+      "category": "chat",
+      "httpStatus": 200,
+      "taskType": "chat",
+      "suggested": "mock/eval-chat",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "coding-01",
+      "category": "coding",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "suggested": "mock/eval-chat",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "coding-02",
+      "category": "coding",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "suggested": "mock/eval-chat",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "coding-03",
+      "category": "coding",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "suggested": "mock/eval-chat",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "analysis-01",
+      "category": "analysis",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "suggested": "mock/eval-chat",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "analysis-02",
+      "category": "analysis",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "suggested": "mock/eval-chat",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "summ-01",
+      "category": "summarization",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "suggested": "mock/eval-chat",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "summ-02",
+      "category": "summarization",
+      "httpStatus": 200,
+      "taskType": "chat",
+      "suggested": "mock/eval-chat",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "trans-01",
+      "category": "translation",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "suggested": "mock/eval-chat",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "trans-02",
+      "category": "translation",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "suggested": "mock/eval-chat",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "extract-01",
+      "category": "extraction",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "suggested": "mock/eval-chat",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "extract-02",
+      "category": "extraction",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "suggested": "mock/eval-chat",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "tool-01",
+      "category": "tool_use",
+      "httpStatus": 200,
+      "taskType": "tool_orchestration",
+      "suggested": "mock/eval-tool",
+      "suggestedScore": 0.875,
+      "hardBlocks": [
+        {
+          "modelId": "eval-chat",
+          "reason": "missing tool_use (required)"
+        },
+        {
+          "modelId": "eval-fail",
+          "reason": "missing tool_use (required)"
+        },
+        {
+          "modelId": "eval-eof",
+          "reason": "missing tool_use (required)"
+        },
+        {
+          "modelId": "eval-vision",
+          "reason": "missing tool_use (required)"
+        },
+        {
+          "modelId": "eval-small-ctx",
+          "reason": "missing tool_use (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "different"
+    },
+    {
+      "taskId": "tool-02",
+      "category": "tool_use",
+      "httpStatus": 200,
+      "taskType": "tool_orchestration",
+      "suggested": "mock/eval-tool",
+      "suggestedScore": 0.875,
+      "hardBlocks": [
+        {
+          "modelId": "eval-chat",
+          "reason": "missing tool_use (required)"
+        },
+        {
+          "modelId": "eval-fail",
+          "reason": "missing tool_use (required)"
+        },
+        {
+          "modelId": "eval-eof",
+          "reason": "missing tool_use (required)"
+        },
+        {
+          "modelId": "eval-vision",
+          "reason": "missing tool_use (required)"
+        },
+        {
+          "modelId": "eval-small-ctx",
+          "reason": "missing tool_use (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "different"
+    },
+    {
+      "taskId": "tool-03",
+      "category": "tool_use",
+      "httpStatus": 200,
+      "taskType": "tool_orchestration",
+      "suggested": "mock/eval-tool",
+      "suggestedScore": 0.875,
+      "hardBlocks": [
+        {
+          "modelId": "eval-chat",
+          "reason": "missing tool_use (required)"
+        },
+        {
+          "modelId": "eval-fail",
+          "reason": "missing tool_use (required)"
+        },
+        {
+          "modelId": "eval-eof",
+          "reason": "missing tool_use (required)"
+        },
+        {
+          "modelId": "eval-vision",
+          "reason": "missing tool_use (required)"
+        },
+        {
+          "modelId": "eval-small-ctx",
+          "reason": "missing tool_use (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "different"
+    },
+    {
+      "taskId": "vision-01",
+      "category": "vision",
+      "httpStatus": 200,
+      "taskType": "vision",
+      "suggested": "mock/eval-vision",
+      "suggestedScore": 0.65,
+      "hardBlocks": [],
+      "predictedCost": 0.00536,
+      "realOutcome": "completed",
+      "real": "mock/eval-vision",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "vision-02",
+      "category": "vision",
+      "httpStatus": 200,
+      "taskType": "vision",
+      "suggested": "mock/eval-vision",
+      "suggestedScore": 0.65,
+      "hardBlocks": [],
+      "predictedCost": 0.005365,
+      "realOutcome": "completed",
+      "real": "mock/eval-vision",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "longctx-01",
+      "category": "long_context",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "suggested": "mock/eval-chat",
+      "suggestedScore": 0.7,
+      "hardBlocks": [
+        {
+          "modelId": "eval-small-ctx",
+          "reason": "input tokens 4300 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "longctx-02",
+      "category": "long_context",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "suggested": "mock/eval-chat",
+      "suggestedScore": 0.7,
+      "hardBlocks": [
+        {
+          "modelId": "eval-small-ctx",
+          "reason": "input tokens 3578 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "strict-01",
+      "category": "strict",
+      "taskType": "chat",
+      "suggested": null,
+      "suggestedScore": null,
+      "hardBlocks": [],
+      "predictedCost": null,
+      "realOutcome": "no_candidate",
+      "real": null,
+      "comparisonStatus": "policy_agreement"
+    },
+    {
+      "taskId": "strict-02",
+      "category": "strict",
+      "taskType": "chat",
+      "suggested": null,
+      "suggestedScore": null,
+      "hardBlocks": [],
+      "predictedCost": null,
+      "realOutcome": "no_candidate",
+      "real": null,
+      "comparisonStatus": "policy_agreement"
+    },
+    {
+      "taskId": "nopaid-01",
+      "category": "no_paid",
+      "httpStatus": 200,
+      "taskType": "chat",
+      "suggested": null,
+      "suggestedScore": null,
+      "hardBlocks": [
+        {
+          "modelId": "eval-vision",
+          "reason": "paid model blocked by allowPaid=false"
+        }
+      ],
+      "predictedCost": null,
+      "realOutcome": "budget_exceeded",
+      "real": null,
+      "comparisonStatus": "policy_agreement"
+    },
+    {
+      "taskId": "nopaid-02",
+      "category": "no_paid",
+      "httpStatus": 200,
+      "taskType": "chat",
+      "suggested": null,
+      "suggestedScore": null,
+      "hardBlocks": [
+        {
+          "modelId": "eval-vision",
+          "reason": "paid model blocked by allowPaid=false"
+        }
+      ],
+      "predictedCost": null,
+      "realOutcome": "budget_exceeded",
+      "real": null,
+      "comparisonStatus": "policy_agreement"
+    },
+    {
+      "taskId": "nc-01",
+      "category": "no_candidate",
+      "httpStatus": 200,
+      "taskType": "chat",
+      "suggested": null,
+      "suggestedScore": null,
+      "hardBlocks": [],
+      "predictedCost": null,
+      "realOutcome": "no_candidate",
+      "real": null,
+      "comparisonStatus": "policy_agreement"
+    },
+    {
+      "taskId": "nc-02",
+      "category": "no_candidate",
+      "httpStatus": 200,
+      "taskType": "chat",
+      "suggested": null,
+      "suggestedScore": null,
+      "hardBlocks": [],
+      "predictedCost": null,
+      "realOutcome": "no_candidate",
+      "real": null,
+      "comparisonStatus": "policy_agreement"
+    },
+    {
+      "taskId": "fallback-01",
+      "category": "fallback",
+      "httpStatus": 402,
+      "taskType": "chat",
+      "suggested": "mock-fail/eval-fail",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "different"
+    },
+    {
+      "taskId": "fallback-02",
+      "category": "fallback",
+      "httpStatus": 402,
+      "taskType": "chat",
+      "suggested": "mock/eval-chat",
+      "suggestedScore": 0.625,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "taskId": "abort-01",
+      "category": "client_aborted",
+      "httpStatus": 503,
+      "taskType": "chat",
+      "suggested": "mock/eval-chat",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "client_aborted",
+      "real": "mock/eval-chat",
+      "comparisonStatus": "not_comparable"
+    },
+    {
+      "taskId": "abort-02",
+      "category": "client_aborted",
+      "httpStatus": 503,
+      "taskType": "chat",
+      "suggested": "mock/eval-tool",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "client_aborted",
+      "real": "mock/eval-tool",
+      "comparisonStatus": "not_comparable"
+    },
+    {
+      "taskId": "eof-01",
+      "category": "incomplete",
+      "httpStatus": 503,
+      "taskType": "chat",
+      "suggested": "mock/eval-eof",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "incomplete",
+      "real": "mock/eval-eof",
+      "comparisonStatus": "different"
+    },
+    {
+      "taskId": "eof-02",
+      "category": "incomplete",
+      "httpStatus": 503,
+      "taskType": "chat",
+      "suggested": "mock/eval-eof",
+      "suggestedScore": 0.7,
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "incomplete",
+      "real": "mock/eval-eof",
+      "comparisonStatus": "different"
+    }
+  ]
+}

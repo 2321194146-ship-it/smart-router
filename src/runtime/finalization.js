@@ -70,6 +70,37 @@ export class Finalizer {
     // 模型质量反馈存储（内存版，未来迁移到 DB）
     // key = "provider:model", value = { success, failure, lastUpdated }
     this._qualityFeedback = new Map();
+
+    // 成功收尾观察者（仅在数据库事务成功提交后触发；失败不影响主流程）
+    this._observers = [];
+  }
+
+  // --------------------------------------------------------------------------
+  // 观察者（Shadow 层最终结果记录）
+  // --------------------------------------------------------------------------
+
+  /**
+   * 注册成功收尾观察者。观察者在数据库事务成功提交后才被触发，
+   * 且异常被吞掉，不影响用户请求与 Phase1 执行结果。
+   *
+   * @param {Function} fn async (auditRecord) => void
+   */
+  addObserver(fn) {
+    if (typeof fn === 'function') this._observers.push(fn);
+  }
+
+  /**
+   * 通知所有观察者（fire-and-forget with error isolation）。
+   * @param {object} auditRecord 最终 Audit 记录（事务已提交）
+   */
+  async _emitFinalized(auditRecord) {
+    for (const fn of this._observers) {
+      try {
+        await fn(auditRecord);
+      } catch (err) {
+        log(`[finalizer] observer error (ignored): ${err.message}`);
+      }
+    }
   }
 
   // --------------------------------------------------------------------------
@@ -176,6 +207,9 @@ export class Finalizer {
       `attempts=${attemptLog ? attemptLog.getCount() : 0}`
     );
 
+    // 事务/写入成功后触发观察者（Shadow 最终结果记录）
+    await this._emitFinalized(auditRecord);
+
     return { finalized: true, auditRecord };
   }
 
@@ -280,6 +314,10 @@ export class Finalizer {
         `[finalizer] transaction: finalized ${requestId} outcome=${finalOutcome} ` +
         `attempts=${allAttempts.length} (atomic)`
       );
+
+      // 事务成功提交后触发观察者（Shadow 最终结果记录）
+      await this._emitFinalized(auditRecord);
+
       return { finalized: true, auditRecord };
     }
 
@@ -361,6 +399,9 @@ export class Finalizer {
         `[finalizer] transaction: finalized ${requestId} outcome=${finalOutcome} ` +
         `attempts=${allAttempts.length}`
       );
+
+      // 事务成功提交后触发观察者（Shadow 最终结果记录）
+      await this._emitFinalized(auditRecord);
 
       return { finalized: true, auditRecord };
 

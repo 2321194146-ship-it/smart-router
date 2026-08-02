@@ -607,6 +607,22 @@ export async function handleChatCompletionStream(req, res, body, context) {
       keyPool: executionEngine.keyPool,
     });
 
+    // 3b. Shadow 智能建议（执行前生成；不改变任何行为；off 模式 no-op）
+    //     无候选/预算拦截也记录；真实结果由 Finalizer 事务成功后观察钩子回填
+    if (context.intelligence && typeof context.intelligence.suggest === 'function') {
+      try {
+        context.intelligence.suggest({
+          requestId,
+          body: patchedBody,
+          agentId,
+          budget,
+          candidates,
+          protocol: context.protocol || 'chat',
+        });
+      } catch (_e) {
+        // Shadow 层失败不影响主流程
+      }
+    }
     // 3. 无候选可用
     if (candidates.length === 0) {
       protocolLog(`[${requestId}] no candidates available`);
@@ -645,32 +661,6 @@ export async function handleChatCompletionStream(req, res, body, context) {
       timeoutMs: config?.server?.request_timeout_ms,
     });
 
-    // 4b. Shadow 观测：智能建议 + 传统路由真实结果（不改变任何行为；off 模式 no-op）
-    if (context.intelligence && typeof context.intelligence.suggest === 'function') {
-      try {
-        context.intelligence.suggest({
-          requestId,
-          body: patchedBody,
-          agentId,
-          budget,
-          candidates,
-          protocol: context.protocol || 'chat',
-        });
-        const _lastAtt = Array.isArray(executionResult?.attempts) && executionResult.attempts.length > 0
-          ? executionResult.attempts[executionResult.attempts.length - 1]
-          : null;
-        context.intelligence.recordTraditional(requestId, {
-          finalModel: executionResult?.finalCandidate?.modelId ?? null,
-          finalProvider: executionResult?.finalCandidate?.provider ?? null,
-          outcome: executionResult?.outcome ?? null,
-          latencyMs: _lastAtt?.latencyMs ?? null,
-          usage: _lastAtt?.usage ?? null,
-          cost: _lastAtt?.cost ?? null,
-        });
-      } catch (_e) {
-        // Shadow 层失败不影响主流程
-      }
-    }
 
     // 5. 构建 AttemptLog
     const attemptLog = buildAttemptLogFromResult(executionResult, requestId);

@@ -82,21 +82,28 @@ node scripts/pilot-sanitized.mjs --config "$SMARTROUTER_CONFIG" --out pilot-evid
 
 脚本只通过环境变量 / 外部配置文件读取 Key，自身不含任何密钥，输出 pilot-evidence.json（脱敏：content 截断、Key 字段不出现）。
 
-## Phase 2-A（Shadow 版，分支 phase2-shadow）
+## Phase 2-A（Shadow 版 Sealed，分支 phase2-shadow，版本 1.0.0-phase2-shadow）
 
 智能决策层 Shadow 版：只观察、只建议、只记录，不参与执行。
 
-- 模块：src/intelligence/（Agent Identity 复用 Phase1）
-  - Task Analyzer / Capability Registry / Policy / Budget / Decision Engine / Explainability / Shadow Recorder
-- 模式：intelligence.mode = "off" | "shadow"
-  - off：Phase1 行为完全一致（零开销）
-  - shadow：记录智能建议 + 传统路由真实选择（不增加上游调用、不修改候选顺序、不影响用户响应）
+- 正确运行顺序：候选生成 → Intelligence.suggest()（执行前）→ Phase1 Execution → 协议验证 → Finalize 原子提交 → Intelligence.recordFinalized()（Finalizer 观察者，事务成功后触发，真实结果来自最终 Audit）
+- 模块：src/intelligence/（Task Analyzer / Capability Registry / Policy / Budget / Decision Engine / Explainability / Shadow Recorder）
+- 持久化：SQLite `shadow_decisions` 表（requestId 唯一；建议执行前 upsert，Finalize 后更新真实结果；脱敏 task_profile，不含 lastUserText；retentionDays 保留天数）
+- 硬约束：tool_use / vision / contextWindow / protocol 缺失 → blocked（score=0，绝不推荐）
+- 预测：成本=推荐候选自身 price（有价格非 null）；延迟=确定性先验（无 Math.random）；质量=硬约束后计算（上限 0.95）
+- 对照状态：exact_match / model_match_provider_diff / policy_agreement / different / not_comparable（采纳率分母不含后两者）
+- 模式：intelligence.mode = "off" | "shadow"（off 零开销、无记录、Phase1 行为不变）
 - 三协议（chat/responses/anthropic）同一内部 sr_ requestId
 - 智能输出为机器可执行元数据，不附加任何 System Prompt
 
 ```json
-{ "intelligence": { "mode": "shadow", "shadow": { "policy": { "tierPreference": true, "preferFree": true } } } }
+{ "intelligence": { "mode": "shadow", "shadow": { "policy": { "tierPreference": true, "preferFree": true }, "retentionDays": 30 } } }
 ```
+
+可复跑评测：`node scripts/shadow-eval.mjs`（33 固定脱敏任务，确定性本地 mock；报告见 evidence/shadow-eval-report.md）。
+脱敏配置模板：`config/shadow-eval-config.template.json`。
+
+端点声明：ModelScope 直连真实 Provider；Anthropic/Responses 经 7878 网关转发（真实链路，非 28788 直连官方）。
 
 本阶段未实现：Active 全流量、Dashboard、网站、用户系统、商业化、Prompt 注入、
 用户消息改写、Tool 自动控制、多模型并行/拼接、自动学习修改生产权重。

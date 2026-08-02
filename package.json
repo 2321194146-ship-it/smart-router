@@ -1,7 +1,7 @@
 {
   "name": "smart-router-mainline",
-  "version": "1.0.0-phase1",
-  "description": "Smart Router Mainline - Phase 1 Production Core Base (intelligence.mode=off)",
+  "version": "1.0.0-phase2-shadow",
+  "description": "Smart Router Mainline - Phase 2-A Shadow (intelligence.mode=off|shadow)",
   "type": "module",
   "main": "src/index.js",
   "scripts": {
