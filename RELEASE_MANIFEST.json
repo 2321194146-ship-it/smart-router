@@ -3,9 +3,9 @@
   "version": "1.0.0-phase2c-active-canary",
   "branch": "phase2c-active-canary",
   "base_commit": "c5f182ad75104b325dfb1d631d6209a052cf2218",
-  "date": "2026-08-03T05:09:54.639Z",
-  "description": "Smart Router Mainline Phase 2-C Active Canary 安全控制与决策语义收口 + Safety Sealed（8 项安全收口） - binary vs graded capability split, toolsAvailable vs toolsRequired, protocol-level structured output detection, deterministic conservative token estimator, capability source unification, effective policy with deterministic tie-breaker, 208-task holdout eval (all gates PASS), Active Canary controller (SHA-256 sampling, Phase1-legal reorder, Fail Open, Kill Switch, auto-stop); Safety Sealed: blocked candidates never enter Canary fallback chain, metrics count Active requests only (activeRequests map, finalized cleanup), budget defense maxRequestCost/strictModel/estimatedCost + low-risk eligibility on full task (first 5% excludes tools/vision/structured-output/long-context/strict/high-risk/low-confidence/no-recommendation/hard-blocked/not-allowed protocol), local admin API status/kill/resume-shadow (127.0.0.1 + admin token, SQLite persisted kill switch across restart), allowedAgents=[claude-code], truly-consecutive error counters with reset, release version consistency 1.0.0-phase2c-active-canary, 592/592 tests + 10 proofs + AR/Holdout re-run all PASS",
-  "commit": "9b40953dcf198d2722daea474e53d901d3d276c2",
+  "date": "2026-08-03T06:15:52.631Z",
+  "description": "Smart Router Mainline Phase 2-C Active Canary 安全控制与决策语义收口 + Safety Sealed + 5% Canary Live Pilot - binary vs graded capability, toolsAvailable vs toolsRequired, protocol-level structured output detection, conservative token estimator, capability source unification, effective policy with deterministic tie-breaker, 208-task holdout eval (all gates PASS), Active Canary controller (SHA-256 sampling, Phase1-legal reorder, Fail Open, Kill Switch, auto-stop); Safety Sealed (blocked never in fallback, Active-only metrics, budget defense maxRequestCost/strictModel/estimatedCost + low-risk eligibility, local admin API with SQLite persisted kill, allowedAgents=[claude-code], truly-consecutive errors, version 1.0.0-phase2c-active-canary); 5% Live Pilot (Claude Code low-risk streaming allowed with anthropic-only + streaming-capable candidates, auto-stop immediate persistence on apply/finalize, 127.0.0.1:28788 internal pilot 456 requests -> 20 active all reordered, Kill Switch restart-persisted, resume-shadow only)",
+  "commit": "e0aa98e33840c81b4aff887b3903fbeb71bbe959",
   "pilot_summary": {
     "status": "passed",
     "total": 9,
@@ -91,11 +91,70 @@
       "legal_fallback_only": "Canary fallback chain contains ONLY decision.ranked blocked==null candidates; blocked candidates never enter orderedCandidates",
       "active_only_metrics": "activeRequests Map tracks sampled requests only; metrics/auto-stop count Active requests only; Finalize removes entry (no memory growth); Phase1 requests never trigger auto-stop",
       "budget_defense": "allowPaid/allowedModels/allowedProviders/maxRequestCost/strictModel checked on ranked full entry (paid + estimatedCost); full decision.task passed to CanaryController",
-      "low_risk_eligibility": "first 5% excludes toolsRequired/visionRequired/structuredOutputRequired/needsLongContext/streaming/strictModel/high-risk task type/complexity>=0.6/no recommendation/protocol not allowed/hard-capability blocked",
+      "low_risk_eligibility": "first 5% excludes toolsRequired/visionRequired/structuredOutputRequired/needsLongContext/streaming(non-anthropic)/strictModel/high-risk task type/complexity>=0.6/no recommendation/protocol not allowed/hard-capability blocked",
       "kill_switch": "local admin API GET status | POST kill | POST resume-shadow; loopback 127.0.0.1 only + Bearer admin token (env SMART_ROUTER_ADMIN_TOKEN); state persisted to SQLite app_state; restart keeps killed; resume-shadow only restores shadow, never auto-resumes Active",
       "first_config": "allowedAgents=[\"claude-code\"] (test-agent-1 removed)",
       "metric_semantics": "truly-consecutive error counters (provider_error/no_candidate/incomplete) reset on success; auto-stop conditions only from Active requests",
       "release_consistency": "package.json/package-lock.json/README/RELEASE_MANIFEST all 1.0.0-phase2c-active-canary; git evidence unified"
+    },
+    "live_pilot": {
+      "port": "127.0.0.1:28788 (internal only)",
+      "streaming_eligibility": "Claude Code low-risk streaming allowed: needsStreaming no longer excluded; requires protocol=anthropic + agentId=claude-code + low-risk task type + all execution candidates support streaming; streaming hard capability kept (stream=true + model without streaming -> blocked, never in fallback)",
+      "auto_stop_persistence": "auto-stop immediately persisted: apply phase (budget_violation) via suggest() await; finalize phase (budget_exceeded/first_byte_switch/repeated_tool/incomplete_rise/consecutive_provider_errors/consecutive_no_candidate) via recordFinalized() await; persist failure logs but in-process stop stays effective",
+      "first_batch_restriction": "allowedProtocols=[\"anthropic\"] only; Responses/Chat excluded from real Active Canary this round (Responses text.format issue -> maintenance list, not blocking)",
+      "traffic": {
+        "sent": 456,
+        "activeTarget": 20
+      },
+      "canary_metrics": {
+        "eligible": 456,
+        "sampled": 20,
+        "active": 20,
+        "activeVsPhase1": {
+          "same": 0,
+          "diff": 20
+        },
+        "actuallyReordered": 20,
+        "incomplete": 0,
+        "failed": 0,
+        "aborted": 0,
+        "attempts": 20,
+        "fallbackCount": 0,
+        "totalCost": 0,
+        "autoStop": null,
+        "stopped": false
+      },
+      "outcome_distribution": {
+        "completed": 456
+      },
+      "final_model_distribution": {
+        "canary-best@mock": 20,
+        "phase1-first@mock": 436
+      },
+      "phase1_primary": [
+        "phase1-first@mock"
+      ],
+      "canary_primary": [
+        "canary-best@mock"
+      ],
+      "cost": {
+        "estimatedTotal": 0,
+        "actualTotal": 0
+      },
+      "kill_switch": {
+        "kill_status": 200,
+        "killed": true,
+        "restart_status": 200,
+        "restart_stopped": true,
+        "restart_autoStop_reason": "admin_kill_switch",
+        "restart_restored": true,
+        "resume_shadow_status": 200,
+        "resume_shadow_mode": "shadow",
+        "resume_shadow_canary_enabled": false
+      },
+      "active_target_met": true,
+      "script": "scripts/canary-live-pilot.mjs",
+      "provider": "local mock (HTTP + SSE + SQLite full chain); no external key; no cloud billing"
     },
     "cloud_billing_blocker": "ExecutionEngine._recordCost() still writes before Finalize; NOT claimed fixed; ledger reconciliation is separate design task",
     "not_implemented": [
@@ -109,13 +168,13 @@
   },
   "test_summary": {
     "unit": {
-      "tests": 474,
-      "suites": 95,
+      "tests": 478,
+      "suites": 96,
       "failures": 0
     },
     "integration": {
-      "tests": 85,
-      "suites": 22,
+      "tests": 89,
+      "suites": 23,
       "failures": 0
     },
     "audit": {
@@ -124,8 +183,8 @@
       "failures": 0
     },
     "total": {
-      "tests": 592,
-      "suites": 132,
+      "tests": 600,
+      "suites": 134,
       "failures": 0
     }
   },
@@ -192,18 +251,20 @@
   },
   "source_files": {
     ".gitignore": "d8f539b3be74ba11ea4a3da48686e4f879560f358f883e95eba8331d2a242579",
-    "README.md": "49d06092a080a9be2ccdb5375ab29af9378804d437226136187a49c204726102",
-    "config/config.example.json": "f7eef449b7d5aa1b6c2d079966a7a2ce513f300e16eb891a26ad5a2537b1a6a7",
+    "README.md": "7908b572cc33e82d7ebe4efa78737879864b227461c73e34f4832f6961777272",
+    "config/config.example.json": "8b41fb39d80fb47e51041ea281f0d36d82e7fc565f7e5320823ec61c927a997a",
     "config/shadow-eval-config.template.json": "273f578711c371689759b51de54057c4fb948b15dc04fffa45c1363e7b87b983",
     "evidence/active-readiness-eval-report.json": "94638b72d516a0e5d16d57c8444926fea754f107a88b37910a0aef5d5e4477bd",
     "evidence/active-readiness-eval-report.md": "672d0aa400117c2d23ab21e33ccc25fd83ca2af20389f934ce9fa0005c72508a",
-    "evidence/audit-test-output.txt": "713138625f4551506c3bc8c39784a095e736db6f5dea3f1e98bc7572a7f16b1f",
-    "evidence/git-commit-sha.txt": "b2c6791d4c56c042dc5d6ef75f1e1ac7afcd217239fe60ad1c6a55a591c5d649",
+    "evidence/audit-test-output.txt": "9245628c455610df29ce4e9c785cd419f30ac20947fddbe47a1298240043ce0f",
+    "evidence/canary-live-pilot-config.sanitized.json": "c189152e45940b3f34492d76ecbb876d629807e6d02948f04b94bb24cde4870d",
+    "evidence/canary-live-pilot-evidence.json": "17ab9bbb6dc4c394af0d55edbcabf9e01ee9bb2b708382836fe46e72521ca1ff",
+    "evidence/git-commit-sha.txt": "6dde440f3f4e4b1e64a8c631516fade8f9e4243b09203a395a6ee657be6c2e08",
     "evidence/holdout-eval-report.json": "03f598f1a3d6752c12e8a47bde0be993c31a7124cbca7df4a0b56fe2d62b9a5a",
     "evidence/holdout-eval-report.md": "700a48f94f6a6a76192c1f8505a35f63494a5559557aa9873ce403af06bafe9d",
-    "evidence/integration-test-output.txt": "ac64e7bf366b693ca4307fcda12c0e2627a8b1eb9f0fbdbd18da198f312ed030",
+    "evidence/integration-test-output.txt": "9720280ae19da2869f94f3c8b378fd27289a1b114cf4388febd2ded32ff792cd",
     "evidence/node-version.txt": "3dcfac47702a14c367f0cce2a49ef565a2985278864fd981add283be89322181",
-    "evidence/npm-test-output.txt": "3a99e4dc5b3eb520673166e450c1eb315b6a2e98c6607674c17f7ac4e445abe2",
+    "evidence/npm-test-output.txt": "eba4174e8524a7ff71914a2fd86164e20aac8ee4e79bf61ca2bf41e84a7fa118",
     "evidence/pilot-db-evidence.json": "8de97825fe0c4b2ede60f9d914c95d9ec2f9c131bc914b713afb3ee99e8d57ff",
     "evidence/pilot-evidence.json": "4fdd0f250938ad806d4076702bbdc2b18c90df899472d161791f60bb5de35a28",
     "evidence/pilot-server-log.txt": "279307686a15f1361871953c0419222851f09bff26b2cccfc1455033cec4310c",
@@ -213,8 +274,8 @@
     "evidence/shadow-eval-report.json": "357c9854c1ba296651a391c6424321767588604dd47eb5ec61e450764e54b5b7",
     "evidence/shadow-eval-report.md": "b8d1c9c1cf348c301014fcbaf932c2055394b13e82b1050da07665e840b69a7d",
     "evidence/shadow-run-report.json": "9ac0e3608a0b53d7a705986ba9600dbdf11272c7be7a2e83077119a880471f75",
-    "evidence/syntax-check-output.txt": "db0f5037f00a3bcfb6b2e7c4db6c47d510bdb603522af47fb7ce2cf8fedd218d",
-    "evidence/unit-test-output.txt": "d1841b5148b7dd3cb187248243b011e6a63ba982d717bf3739d5530118aaf9dc",
+    "evidence/syntax-check-output.txt": "f02e32ef81d0945f95dee2482072d3ca280df4255b260a45f12c3caa2e50c265",
+    "evidence/unit-test-output.txt": "3b0888e678c163fbd7c1cc6978bb34f11b60bbb10f669efd8940811f3c3d9e62",
     "package-lock.json": "d416d84dbc586d9278b4a4d1138af5b97b48eaf0c24dfc8c253a656fbcc23742",
     "package.json": "d9fc8aac3be04f320b5232bb367916f4a4e620e41ee284de54f1217cce619012",
     "phase2-docs/ACTIVE_CANARY_DESIGN.md": "23e3aa6da2f19bb1a771c4d711a45d90a75016ecd4db8a4e9b9731fcbd03fe37",
@@ -223,6 +284,7 @@
     "phase2-docs/ACTIVE_READINESS_EVALUATION.md": "13da0fe4abbb12ca39ab2c4ae2f2baf29250dc04514d7dc84f79d95ab7bea44c",
     "phase2-docs/ASYNC_FAILURE_ISOLATION_REPORT.md": "46c035ac8537e44eecfa9b0c15216c9129e148b162dafab41213c24471aacb69",
     "phase2-docs/BUDGET_DECISION_REPORT.md": "571febb380ef8bc4f02fcaa5cc0fc891a4ca904f20b2a8937ea329e1f2c2ec6f",
+    "phase2-docs/CANARY_LIVE_PILOT_REPORT.md": "5bbb83cff9bc6e96317f996631a371b647c0af0abc5cee6b90090a9116a0c3d6",
     "phase2-docs/CANARY_SAFETY_SEALED_REPORT.md": "fd665175c2e4fb0d2dc554c578e500c7c8068918591687a95ce66f5b66891db8",
     "phase2-docs/CAPABILITY_REGISTRY.md": "0d3cadde90026bb79dd53aa70477433e6aca6385d1a635944bddf7cf22a2a5bd",
     "phase2-docs/CAPABILITY_UNIFICATION_REPORT.md": "86229cf8339e02ca3c09e3fac763f9de39cbcc0abfc83c0776900d62094a226c",
@@ -230,7 +292,7 @@
     "phase2-docs/DECISION_SEMANTICS_FIX_REPORT.md": "7d11acaeca965f8172a9458a274917aa93e9026780195fe4f4d6e39f043ad80a",
     "phase2-docs/EXPLAINABILITY_SAMPLES.md": "08e52f60bc6ee7d5b97e2f471f5ecc1cb6f3c91c2c758b6db92e04bbb64e795d",
     "phase2-docs/HOLDOUT_EVALUATION.md": "0ea73ca1f22a711cc0afe29934cc2846bc00d85c3c7b08084dcf8c16bf1d8688",
-    "phase2-docs/KNOWN_ISSUES.md": "c56eda7e1130c9ebefed93971ffae6605bcdee3a8022e51fe1d098ef8cb0ed98",
+    "phase2-docs/KNOWN_ISSUES.md": "ee9c9708e401088c89ca5a49377b6ac6d14a6a48673e684b9bed14aab767f01f",
     "phase2-docs/MODEL_CAPABILITY_PROFILE.md": "6bef826bbdd062e25236da3bdd905bd7b3b3f3835ed3ce2b8d7b918c5df45513",
     "phase2-docs/OFF_SHADOW_COMPARISON.md": "0623ae42ef54bcf7ad0d6865f5d4f295abbe8d8ec11c99334932b9e41e3d5628",
     "phase2-docs/PHASE2_ARCHITECTURE.md": "e33e813bcaa5b7b38cf0e1988939fbe20a67d221ff28fdde338a6922ce52c471",
@@ -246,6 +308,7 @@
     "phase2-docs/TOKEN_ESTIMATION_REPORT.md": "d4e31f500846f0c1b296e6fc106369a0013486ff08bf17a9ddff35081ce05e52",
     "phase2-docs/TOOL_AVAILABLE_VS_REQUIRED_REPORT.md": "74dccf7970e517d39f18bb9a7df902e6404ad9a7746b8f0b25541dc57eb841f7",
     "scripts/active-readiness-eval.mjs": "8f2caf0d96936f1d3316e65db735ffdd9b005e3d6eda07e09ee828b15df29dc5",
+    "scripts/canary-live-pilot.mjs": "6225b971bc16c7ccf6f8392914f3fb825159250322bdaa0d49a02e932f308985",
     "scripts/holdout-eval.mjs": "d34f2aedb081ee74c29b2cec55a74d9b2d8281373352e03ff7c1ea29743df7fb",
     "scripts/holdout-tasks.mjs": "93bc502296682e33d87add673cae034f4c2587680561973de8344d92a98d4f66",
     "scripts/pilot-sanitized.mjs": "1699a261e416d885abe60e26f65039745d527397eeb6cecbae997dcf12380042",
@@ -258,11 +321,11 @@
     "src/cost/tracker.js": "d123673201b9244c38a517eaf1ba39771fb7eab93ed977f7823aaf05bdec99d6",
     "src/index.js": "9e58f767ca1719379879dd82411c3aaf8be60da9530b9d80945922cc0aaf904f",
     "src/intelligence/budget.js": "7fca1a7ac2ddd2dc758ab5725a6d56c6cd26e50c9f5c9258a4e29d2ebe07d4bf",
-    "src/intelligence/canary-controller.js": "1e18eed38e5e442610b6261897a9c3f9111c383224d0068c9e5fb149f41cbc1d",
+    "src/intelligence/canary-controller.js": "f91c763514563560a9e3461f95e89d92832caf4961f45b46da711608f70d270f",
     "src/intelligence/capability-registry.js": "878437d165a8f8d048edc52f0d57e610296c0dc8b0871ba7a1206efe7a5dce6d",
     "src/intelligence/decision-engine.js": "c80355352e83de1a7080526f6289c643369df9fb468a0222da4687a729c7fd04",
     "src/intelligence/explainability.js": "f09aab56bd64b64345a94d57bd82e0d922f18221f4012cf0cb9aeca5e80c7408",
-    "src/intelligence/index.js": "3694fdb8a905972d15f76597af8c843372aa3239767b77f80464dc2cfd282e9d",
+    "src/intelligence/index.js": "391a269ff6128b8080a0c56e4382c66ee20d8ba3f9a459fb2c2dc225ceb4dad2",
     "src/intelligence/policy.js": "805a91c7a234ef139e6c6f56c3cc8f69bb68df7eee5049d297a89b713546298a",
     "src/intelligence/shadow-recorder.js": "a605e4ec17bf4f43e57f7d8387355a65fb6b8f5355c3c552fb251b10dea24510",
     "src/intelligence/task-analyzer.js": "b5f6ea28dcc1927797701e473b73e3277c6548159e6989524b1e494652057c95",
@@ -293,6 +356,7 @@
     "test/integration/anthropic-integration.test.js": "3bc27cf622f6a822beed7e02ba0b0eb3a38541bee0b34ac881d0859876006a10",
     "test/integration/canary-active.test.js": "afebb2788bcdbd8a9d0a14a1abe8551baffbfb096e39a7160d291af283557e37",
     "test/integration/canary-admin.test.js": "1b057c70cf135407ede17102c0d4262930f3919cc10bdf0344f55fa9b8a712fd",
+    "test/integration/canary-auto-stop-persist.test.js": "177f070b12115b78b5a68714481e43ef23730fe2c13b0d87c41141e736fde1d8",
     "test/integration/chat-integration.test.js": "45cb205e9ece24ce984bb50f06c6151d410c4c3a0500ef2c5d1a1381b6eadd54",
     "test/integration/concurrent-transaction.test.js": "70736e755009c272acb97eef0529f7eed28f2b401efca7a8a9323d4080bd4c9a",
     "test/integration/helpers.js": "525c4d39c28314a6ad99337a966532b6e2658a4e5947987bf2308e588d27c57e",
@@ -308,7 +372,7 @@
     "test/integration/transaction-rollback.test.js": "c4000bd04eae76fb8518e4b9da148f51746be67d86d12385e9dbeaca7000ca8c",
     "test/integration/verified-closure.test.js": "b195170bec93e2eb5eb433c011248d450e9eb9f5d1662e38b60596d55c1da3f0",
     "test/unit/audit.test.js": "a9f1af07ad0675eb1c0c4f89288450a6943bde1f105c3d7230cb3551e17d6189",
-    "test/unit/canary-controller.test.js": "38f1500606b34b3a97b4ac433aac2d0fe5b6963169bbcaa6ee89815d4d3cfb99",
+    "test/unit/canary-controller.test.js": "01810a218a9a85de3af99eb1aba8ad385ae62a9088be11606c5adf9334bae3c5",
     "test/unit/cancellation.test.js": "957fe1e75c0602c1b322c86f25611e4dc9a135d7cdd30dfcba6cc7f2417191e4",
     "test/unit/claude-code-compat.test.js": "54798d7aa7d5108bd506735f91f4d6d90fd34e16a196aaa93f61ad84b220d689",
     "test/unit/intelligence.test.js": "8dbd0e1322106e5ccece1d597f5a4ce6239aa6a6735eb53961794b625f8fe3df",
@@ -332,6 +396,7 @@
     "phase2-docs/ACTIVE_CANARY_DESIGN.md",
     "phase2-docs/ACTIVE_CANARY_FAILSAFE_REPORT.md",
     "phase2-docs/CANARY_SAFETY_SEALED_REPORT.md",
+    "phase2-docs/CANARY_LIVE_PILOT_REPORT.md",
     "phase2-docs/KNOWN_ISSUES.md",
     "phase2-docs/ACTIVE_READINESS_EVALUATION.md",
     "phase2-docs/PHASE2_ARCHITECTURE.md",
