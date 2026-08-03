@@ -4,67 +4,67 @@
 
 ▶ Release Gate Audit
   ▶ 1. No API keys in source
-    ✔ src/ .js files do not contain hardcoded API key patterns (20.28575ms)
-  ✔ 1. No API keys in source (20.957625ms)
+    ✔ src/ .js files do not contain hardcoded API key patterns (22.921666ms)
+  ✔ 1. No API keys in source (23.578125ms)
   ▶ 2. No database files in source
-    ✔ no .db, .sqlite, .sqlite3 files exist in src/ or test/ (2.863416ms)
-  ✔ 2. No database files in source (2.975375ms)
+    ✔ no .db, .sqlite, .sqlite3 files exist in src/ or test/ (2.790833ms)
+  ✔ 2. No database files in source (2.8995ms)
   ▶ 3. No log files in source
-    ✔ no .log files exist in src/ or test/ (0.967708ms)
-  ✔ 3. No log files in source (1.086459ms)
+    ✔ no .log files exist in src/ or test/ (0.952ms)
+  ✔ 3. No log files in source (1.062375ms)
   ▶ 4. No .git references in source
-    ✔ src/ files do not contain .git references (except .gitignore) (6.010375ms)
-  ✔ 4. No .git references in source (6.154ms)
+    ✔ src/ files do not contain .git references (except .gitignore) (5.221708ms)
+  ✔ 4. No .git references in source (5.345375ms)
   ▶ 5. package.json and package-lock.json consistency
-    ✔ package name and version match between package.json and package-lock.json (0.80525ms)
-  ✔ 5. package.json and package-lock.json consistency (0.990041ms)
+    ✔ package name and version match between package.json and package-lock.json (0.820167ms)
+  ✔ 5. package.json and package-lock.json consistency (0.988708ms)
   ▶ 6. All 24 core modules exist
-    ✔ exactly 24 modules are defined (0.133041ms)
-    ✔ all 24 required module files exist on disk (0.198583ms)
-    ✔ all core modules are non-empty .js files (1.529459ms)
-  ✔ 6. All 24 core modules exist (2.011542ms)
+    ✔ exactly 24 modules are defined (0.130375ms)
+    ✔ all 24 required module files exist on disk (0.195208ms)
+    ✔ all core modules are non-empty .js files (1.405416ms)
+  ✔ 6. All 24 core modules exist (1.878417ms)
   ▶ 7. No prompt injection in source
-    ✔ no "You are" role-injection strings in source code (7.546542ms)
-    ✔ no "你是" role-injection strings in source code (6.161166ms)
-    ✔ no "think step by step" or "请逐步思考" injection (7.511541ms)
-    ✔ no code that adds system messages with hardcoded content to user requests (6.002167ms)
-  ✔ 7. No prompt injection in source (27.41825ms)
+    ✔ no "You are" role-injection strings in source code (5.921ms)
+    ✔ no "你是" role-injection strings in source code (5.845416ms)
+    ✔ no "think step by step" or "请逐步思考" injection (7.062292ms)
+    ✔ no code that adds system messages with hardcoded content to user requests (5.709959ms)
+  ✔ 7. No prompt injection in source (24.72ms)
   ▶ 8. No user prompt rewriting
-    ✔ no src/ file modifies user message content with string manipulation (9.814458ms)
-    ✔ no code explicitly targets user role messages for content modification (6.752375ms)
-  ✔ 8. No user prompt rewriting (16.684875ms)
+    ✔ no src/ file modifies user message content with string manipulation (10.348708ms)
+    ✔ no code explicitly targets user role messages for content modification (6.68325ms)
+  ✔ 8. No user prompt rewriting (17.148916ms)
   ▶ 9. No model switching after first byte
-    ✔ execution.js contains firstByteReceived / firstByteSentToClient logic (0.409334ms)
-    ✔ execution.js prevents fallback after first byte is received (0.543458ms)
-    ✔ fallback.js respects firstByteReceived to prevent candidate advancement (0.13ms)
-  ✔ 9. No model switching after first byte (1.187542ms)
+    ✔ execution.js contains firstByteReceived / firstByteSentToClient logic (0.271667ms)
+    ✔ execution.js prevents fallback after first byte is received (0.50725ms)
+    ✔ fallback.js respects firstByteReceived to prevent candidate advancement (0.124875ms)
+  ✔ 9. No model switching after first byte (0.993167ms)
   ▶ 10. No budget violations
-    ✔ cost/tracker.js contains checkBudget method (0.234417ms)
-    ✔ checkBudget returns an allowed/blocked decision (0.197041ms)
-    ✔ execution.js calls checkBudget before each attempt (0.141083ms)
-  ✔ 10. No budget violations (0.691708ms)
+    ✔ cost/tracker.js contains checkBudget method (0.222292ms)
+    ✔ checkBudget returns an allowed/blocked decision (0.203417ms)
+    ✔ execution.js calls checkBudget before each attempt (0.133417ms)
+  ✔ 10. No budget violations (0.651541ms)
   ▶ 11. No duplicate finalize
-    ✔ finalization.js contains idempotency protection (0.196917ms)
-    ✔ finalize returns early if requestId was already finalized (0.130625ms)
-  ✔ 11. No duplicate finalize (0.3825ms)
+    ✔ finalization.js contains idempotency protection (0.177666ms)
+    ✔ finalize returns early if requestId was already finalized (0.136791ms)
+  ✔ 11. No duplicate finalize (0.392166ms)
   ▶ 12. No duplicate cost
-    ✔ cost/tracker.js contains cost deduplication by requestId (0.258667ms)
-    ✔ recordCost skips duplicate requestId (0.21525ms)
-  ✔ 12. No duplicate cost (0.528291ms)
+    ✔ cost/tracker.js contains cost deduplication by requestId (0.248333ms)
+    ✔ recordCost skips duplicate requestId (0.19575ms)
+  ✔ 12. No duplicate cost (0.494625ms)
   ▶ 13. Test directories are not empty
-    ✔ test/unit/ contains at least one .test.js file (0.202375ms)
-    ✔ test/integration/ contains at least one .test.js file (0.19675ms)
-    ✔ test/audit/ contains at least one .test.js file (0.089292ms)
-  ✔ 13. Test directories are not empty (0.557084ms)
+    ✔ test/unit/ contains at least one .test.js file (0.210541ms)
+    ✔ test/integration/ contains at least one .test.js file (0.21025ms)
+    ✔ test/audit/ contains at least one .test.js file (0.086292ms)
+  ✔ 13. Test directories are not empty (0.576333ms)
   ▶ 14. Payload Preservation (compatibility module)
-    ✔ compatibility.js exists (0.108167ms)
-    ✔ compatibility.js does NOT modify user message content (0.469083ms)
-    ✔ compatibility.js does NOT modify system prompt or developer messages (1.183958ms)
-    ✔ compatibility.js uses deepClone to avoid mutating input (0.286834ms)
-    ✔ compatibility.js only cleans incompatible fields and converts protocol structure (0.184833ms)
-    ✔ compatibility.js response-side cleaning only targets response content, not user content (0.241416ms)
-  ✔ 14. Payload Preservation (compatibility module) (2.656041ms)
-✔ Release Gate Audit (85.724417ms)
+    ✔ compatibility.js exists (0.0885ms)
+    ✔ compatibility.js does NOT modify user message content (0.353959ms)
+    ✔ compatibility.js does NOT modify system prompt or developer messages (0.993125ms)
+    ✔ compatibility.js uses deepClone to avoid mutating input (0.252083ms)
+    ✔ compatibility.js only cleans incompatible fields and converts protocol structure (0.195084ms)
+    ✔ compatibility.js response-side cleaning only targets response content, not user content (0.241083ms)
+  ✔ 14. Payload Preservation (compatibility module) (2.351875ms)
+✔ Release Gate Audit (84.386167ms)
 ℹ tests 33
 ℹ suites 15
 ℹ pass 33
@@ -72,4 +72,4 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 261.980459
+ℹ duration_ms 256.4535
