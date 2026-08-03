@@ -1,0 +1,169 @@
+// test/integration/canary-admin.test.js
+// Smart Router Mainline - Phase 2-C (Safety Sealed)
+// 本地管理接口端到端：status / kill / resume-shadow + SQLite 重启持久化。
+//   - 仅 127.0.0.1 + Admin Token（env SMART_ROUTER_ADMIN_TOKEN）
+//   - kill 后重启仍保持 killed（Kill Switch 可操作且持久）
+//   - resume-shadow 只恢复 Shadow，不自动恢复 Active
+
+import { test, describe } from 'node:test';
+import assert from 'node:assert';
+import http from 'node:http';
+import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
+import { createServer } from '../../src/server.js';
+
+const ADMIN_TOKEN = 'test-admin-token-123';
+
+function httpJson(port, path, payload, method = 'POST', extraHeaders = {}) {
+  return new Promise((resolve) => {
+    const body = payload === undefined ? '' : JSON.stringify(payload);
+    const headers = { 'Content-Type': 'application/json', ...extraHeaders };
+    if (body) headers['Content-Length'] = Buffer.byteLength(body);
+    const req = http.request({ hostname: '127.0.0.1', port, path, method, headers, timeout: 15000 }, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => { let parsed = null; try { parsed = JSON.parse(data); } catch { parsed = data; } resolve({ status: res.statusCode, body: parsed }); });
+    });
+    req.on('error', () => resolve({ status: 0, body: null }));
+    if (body) req.write(body);
+    req.end();
+  });
+}
+
+function baseConfig(tmp, mockPort) {
+  return {
+    server: { host: '127.0.0.1', port: 28796, data_dir: tmp, request_timeout_ms: 20000 },
+    data_dir: tmp,
+    intelligence: {
+      mode: 'active_canary',
+      activeCanary: { percentage: 100, allowedAgents: ['claude-code'], allowedTaskTypes: ['general_chat'] },
+      shadow: { retentionDays: 30 },
+    },
+    routing: { strategy: 'tier_weighted', tier_weights: { tier1: 10, tier2: 5, tier3: 1 }, max_concurrent: 4, max_retries: 1, retry_backoff_ms: 20, cooldown_default_sec: 60, health_check_interval_sec: 999999, failover_on_error: true },
+    budget: { allowPaid: true, maxRequestCost: 100, allowedModels: [], allowedProviders: [], strictModel: false },
+    providers: [
+      { name: 'mock', base_url: `http://127.0.0.1:${mockPort}/v1`, api_key: 'k', auth_header: 'Authorization', auth_prefix: 'Bearer ' },
+    ],
+    models: [
+      { id: 'phase1-first', provider: 'mock', apiModel: 'phase1-first', tier: 'tier1', paid: false, enabled: true, capabilities: { chat: 100 }, capability: ['chat'], context_window: 32000, reliability: 0.5 },
+      { id: 'canary-best', provider: 'mock', apiModel: 'canary-best', tier: 'tier1', paid: false, enabled: true, capabilities: { chat: 100, reasoning: 100 }, capability: ['chat', 'reasoning'], context_window: 64000, reliability: 0.95 },
+    ],
+    agent_bindings: { 'claude-code': { model_ids: ['phase1-first', 'canary-best'] } },
+    circuit_breaker: { enabled: false, failure_threshold: 100, failure_window_sec: 60, open_state_sec: 120, half_open_max_calls: 2, key_disable_on_auth_invalid: true },
+  };
+}
+
+describe('Phase2-C 本地管理接口（Safety Sealed）', () => {
+  test('S4 status requires admin token; 401 on wrong token; 503 when disabled', async () => {
+    process.env.SMART_ROUTER_ADMIN_TOKEN = ADMIN_TOKEN;
+    const tmp = join(process.cwd(), 'test', '.tmp-admin1');
+    rmSync(tmp, { recursive: true, force: true });
+    mkdirSync(tmp, { recursive: true });
+    const config = baseConfig(tmp, 1);
+    const configPath = join(tmp, 'config.json');
+    writeFileSync(configPath, JSON.stringify(config, null, 2));
+    const server = await createServer(configPath);
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve()));
+    const port = server.address().port;
+    try {
+      // 无 Token → 401
+      const noAuth = await httpJson(port, '/_smart-router/intelligence/status', undefined, 'GET');
+      assert.strictEqual(noAuth.status, 401, 'missing token must be 401');
+      // 错误 Token → 401
+      const badAuth = await httpJson(port, '/_smart-router/intelligence/status', undefined, 'GET', { Authorization: 'Bearer wrong-token' });
+      assert.strictEqual(badAuth.status, 401);
+      // 正确 Token → 200
+      const ok = await httpJson(port, '/_smart-router/intelligence/status', undefined, 'GET', { Authorization: `Bearer ${ADMIN_TOKEN}` });
+      assert.strictEqual(ok.status, 200);
+      assert.strictEqual(ok.body.ok, true);
+      assert.strictEqual(ok.body.mode, 'active_canary');
+      assert.ok(ok.body.canary, 'status must include canary snapshot');
+    } finally {
+      await new Promise((resolve) => server.close(() => resolve()));
+      delete process.env.SMART_ROUTER_ADMIN_TOKEN;
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  test('S4 kill endpoint stops sampling and persists; restart keeps killed', async () => {
+    process.env.SMART_ROUTER_ADMIN_TOKEN = ADMIN_TOKEN;
+    const tmp = join(process.cwd(), 'test', '.tmp-admin2');
+    rmSync(tmp, { recursive: true, force: true });
+    mkdirSync(tmp, { recursive: true });
+    const config = baseConfig(tmp, 1);
+    const configPath = join(tmp, 'config.json');
+    writeFileSync(configPath, JSON.stringify(config, null, 2));
+    const auth = { Authorization: `Bearer ${ADMIN_TOKEN}` };
+
+    // 第一次启动：kill
+    let server = await createServer(configPath);
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve()));
+    let port = server.address().port;
+    try {
+      const kill = await httpJson(port, '/_smart-router/intelligence/kill', {}, 'POST', auth);
+      assert.strictEqual(kill.status, 200);
+      assert.strictEqual(kill.body.killed, true);
+      assert.strictEqual(kill.body.canary.stopped, true);
+      assert.strictEqual(kill.body.canary.autoStop.reason, 'admin_kill_switch');
+      const st = await httpJson(port, '/_smart-router/intelligence/status', undefined, 'GET', auth);
+      assert.strictEqual(st.body.canary.stopped, true);
+    } finally {
+      await new Promise((resolve) => server.close(() => resolve()));
+    }
+
+    // 模拟重启：同一 data_dir 重新启动
+    server = await createServer(configPath);
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve()));
+    port = server.address().port;
+    try {
+      const st = await httpJson(port, '/_smart-router/intelligence/status', undefined, 'GET', auth);
+      assert.strictEqual(st.status, 200);
+      assert.strictEqual(st.body.canary.stopped, true, 'restart must keep Kill Switch active');
+      assert.strictEqual(st.body.canary.autoStop.reason, 'admin_kill_switch');
+      assert.strictEqual(st.body.canary.autoStop.restored, true, 'restored flag set');
+    } finally {
+      await new Promise((resolve) => server.close(() => resolve()));
+      delete process.env.SMART_ROUTER_ADMIN_TOKEN;
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  test('S4 resume-shadow only restores Shadow, never auto-resumes Active (persisted across restart)', async () => {
+    process.env.SMART_ROUTER_ADMIN_TOKEN = ADMIN_TOKEN;
+    const tmp = join(process.cwd(), 'test', '.tmp-admin3');
+    rmSync(tmp, { recursive: true, force: true });
+    mkdirSync(tmp, { recursive: true });
+    const config = baseConfig(tmp, 1);
+    const configPath = join(tmp, 'config.json');
+    writeFileSync(configPath, JSON.stringify(config, null, 2));
+    const auth = { Authorization: `Bearer ${ADMIN_TOKEN}` };
+
+    let server = await createServer(configPath);
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve()));
+    let port = server.address().port;
+    try {
+      await httpJson(port, '/_smart-router/intelligence/kill', {}, 'POST', auth);
+      const resume = await httpJson(port, '/_smart-router/intelligence/resume-shadow', {}, 'POST', auth);
+      assert.strictEqual(resume.status, 200);
+      assert.strictEqual(resume.body.resumedShadow, true);
+      assert.strictEqual(resume.body.mode, 'shadow', 'resume-shadow downgrades mode to shadow');
+      assert.strictEqual(resume.body.canary.enabled ?? false, false, 'canary disabled in shadow');
+    } finally {
+      await new Promise((resolve) => server.close(() => resolve()));
+    }
+
+    // 重启：即使配置仍为 active_canary，也必须保持 shadow（绝不自动恢复 Active）
+    server = await createServer(configPath);
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve()));
+    port = server.address().port;
+    try {
+      const st = await httpJson(port, '/_smart-router/intelligence/status', undefined, 'GET', auth);
+      assert.strictEqual(st.body.mode, 'shadow', 'restart must keep shadow mode');
+      assert.strictEqual(st.body.canary.enabled ?? false, false);
+    } finally {
+      await new Promise((resolve) => server.close(() => resolve()));
+      delete process.env.SMART_ROUTER_ADMIN_TOKEN;
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+});

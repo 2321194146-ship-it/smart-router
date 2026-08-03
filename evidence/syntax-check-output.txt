@@ -1,1 +1,1 @@
-syntax:check 0 errors
+syntax check OK (all files)

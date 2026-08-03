@@ -144,6 +144,12 @@ export class SQLiteStore extends StorageInterface {
         finalized_at TEXT
       );
       CREATE INDEX IF NOT EXISTS idx_shadow_created_at ON shadow_decisions(created_at);
+
+      CREATE TABLE IF NOT EXISTS app_state (
+        key TEXT PRIMARY KEY,
+        value TEXT,
+        updated_at TEXT NOT NULL
+      );
     `);
 
     // --- Schema migrations for existing databases ---
@@ -793,6 +799,22 @@ export class SQLiteStore extends StorageInterface {
       'DELETE FROM shadow_decisions WHERE created_at < ?'
     ).run(cutoff);
     return result.changes || 0;
+  }
+
+  // --- app_state (Phase2-C: Canary Kill Switch 持久化) ---
+
+  async getAppState(key) {
+    const row = this._db.prepare(
+      'SELECT value FROM app_state WHERE key = ?'
+    ).get(key);
+    return row ? row.value : null;
+  }
+
+  async setAppState(key, value) {
+    this._db.prepare(
+      'INSERT INTO app_state (key, value, updated_at) VALUES (?, ?, ?) ' +
+      'ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at'
+    ).run(key, String(value), new Date().toISOString());
   }
 }
 

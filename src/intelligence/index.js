@@ -35,6 +35,8 @@ export class IntelligenceLayer {
     this.enabled = this.mode !== 'off';
 
     const store = deps?.store || null;
+    // Phase2-C Safety Sealed：保存 store 引用，用于 Kill Switch 状态持久化/恢复
+    this._store = store;
     const health = deps?.health || null;
     const shadowCfg = intel.shadow || {};
     // Active Canary 控制器（仅 active_canary 模式启用；其余模式 disabled）
@@ -78,8 +80,11 @@ export class IntelligenceLayer {
         requestId: params.requestId || null,
         agentId: params.agentId || 'generic',
         taskType: decision.task?.taskType || null,
+        // Phase2-C Safety Sealed：完整任务画像必须传给 CanaryController（低风险资格全量判断）
+        task: decision.task,
         protocol: params.protocol,
         budget: params.budget,
+        requestedModel: params.body?.model || null,
       });
     }
     if (params.requestId) {
@@ -149,10 +154,70 @@ export class IntelligenceLayer {
     };
   }
 
-  /** Kill Switch：无需改代码即可停止 Active Canary（回退 shadow 行为）。 */
+  /** Kill Switch：无需改代码即可停止 Active Canary（回退 shadow 行为）。
+   *  同步停止（进程内立即生效）+ 异步持久化 killed 状态（重启后仍保持）。
+   */
   killCanary(reason = 'kill_switch') {
     if (this.canary) this.canary.stop(reason);
+    this.persistCanaryState().catch(() => {});
     return this.status();
+  }
+
+  /**
+   * resume-shadow：只恢复 Shadow，绝不自动恢复 Active。
+   * 将模式降级为 shadow（Canary 禁用采样），并持久化 intelligence.mode=shadow，
+   * 重启后仍保持 shadow，不会因配置 active_canary 而自动恢复。
+   */
+  resumeShadow() {
+    if (this.mode === 'active_canary') {
+      this.mode = 'shadow';
+      if (this.canary) this.canary.enabled = false;
+    }
+    this.persistCanaryState().catch(() => {});
+    return this.status();
+  }
+
+  /**
+   * 将当前 Canary 状态持久化到 app_state（canary.killed / intelligence.mode）。
+   * 管理接口可 await 以确保落库后再响应。
+   */
+  async persistCanaryState() {
+    if (!this._store) return;
+    try {
+      if (this.canary?.killed) {
+        await this._store.setAppState('canary.killed', JSON.stringify({
+          reason: this.canary.metrics.autoStop?.reason || 'kill_switch',
+          at: this.canary.metrics.autoStop?.at || new Date().toISOString(),
+        }));
+      }
+      if (this.mode !== 'active_canary') {
+        await this._store.setAppState('intelligence.mode', this.mode);
+      }
+    } catch { /* 持久化失败不影响进程内状态 */ }
+  }
+
+  /**
+   * 启动时恢复持久化状态（server 初始化后调用一次）：
+   *   - canary.killed → 恢复 killed（重启后仍保持 Kill Switch）
+   *   - intelligence.mode=shadow 且配置为 active_canary → 降级为 shadow
+   */
+  async restoreCanaryState() {
+    if (!this._store) return;
+    try {
+      const killedRaw = await this._store.getAppState('canary.killed');
+      if (killedRaw && this.canary) {
+        try {
+          this.canary.restoreKilled(JSON.parse(killedRaw));
+        } catch {
+          this.canary.restoreKilled({ reason: 'kill_switch' });
+        }
+      }
+      const modeRaw = await this._store.getAppState('intelligence.mode');
+      if (modeRaw === 'shadow' && this.mode === 'active_canary') {
+        this.mode = 'shadow';
+        if (this.canary) this.canary.enabled = false;
+      }
+    } catch { /* 恢复失败不影响启动 */ }
   }
 }
 

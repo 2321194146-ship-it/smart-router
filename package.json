@@ -1,6 +1,6 @@
 {
   "name": "smart-router-mainline",
-  "version": "1.0.0-phase2-shadow",
+  "version": "1.0.0-phase2c-active-canary",
   "description": "Smart Router Mainline - Phase 2-A Shadow (intelligence.mode=off|shadow)",
   "type": "module",
   "main": "src/index.js",

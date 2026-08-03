@@ -270,6 +270,27 @@ export class StorageInterface {
   async getAllAuditRecords() {
     throw new Error('StorageInterface.getAllAuditRecords() not implemented');
   }
+
+  // --- app_state (Phase2-C: Canary Kill Switch 持久化) ---
+
+  /**
+   * 读取应用状态（key/value）。
+   * @param {string} key
+   * @returns {Promise<string|null>} 存储的原始字符串值；不存在返回 null
+   */
+  async getAppState(key) {
+    throw new Error('StorageInterface.getAppState() not implemented');
+  }
+
+  /**
+   * 写入应用状态（key/value，upsert）。
+   * @param {string} key
+   * @param {string} value 原始字符串值
+   * @returns {Promise<void>}
+   */
+  async setAppState(key, value) {
+    throw new Error('StorageInterface.setAppState() not implemented');
+  }
 }
 
 export default { StorageInterface };

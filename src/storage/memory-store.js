@@ -23,6 +23,7 @@ export class MemoryStore extends StorageInterface {
     this._finalized = new Map();
     this._auditRecords = [];
     this._shadowDecisions = new Map();
+    this._appState = new Map();
   }
 
   async init() { /* no-op for memory store */ }
@@ -356,6 +357,17 @@ export class MemoryStore extends StorageInterface {
     return 0; // 内存版由上层负责清空
   }
 
+  // --- app_state (Phase2-C: Canary Kill Switch 持久化；内存版) ---
+
+  async getAppState(key) {
+    const v = this._appState.get(key);
+    return v === undefined ? null : v;
+  }
+
+  async setAppState(key, value) {
+    this._appState.set(key, String(value));
+  }
+
   // --- test helpers ---
 
   _reset() {
@@ -367,6 +379,7 @@ export class MemoryStore extends StorageInterface {
     this._finalized.clear();
     this._auditRecords = [];
     this._shadowDecisions.clear();
+    this._appState.clear();
   }
 
   snapshot() {

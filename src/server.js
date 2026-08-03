@@ -135,6 +135,8 @@ export async function createServer(configPath) {
   intelligence.attachTo(finalizer);
   // 启动时按保留天数清理过期 Shadow 记录（intelligence.shadow.retentionDays，默认 30）
   intelligence.prune().catch(() => {});
+  // Phase2-C Safety Sealed：恢复持久化的 Canary Kill Switch / shadow 模式（重启后仍保持）
+  await intelligence.restoreCanaryState();
   log(`server: intelligence layer initialized (mode=${intelligence.mode})`);
 
   log('server: all components initialized');
@@ -220,6 +222,12 @@ async function handleRequest(req, res, components) {
 
     // 2. 路径归一化（/v1/v1/ → /v1/，Claude Code 2.1.206+ 兼容）
     pathname = normalizePath(pathname);
+
+    // 2b. 本地管理接口（Phase2-C Safety Sealed）：仅 127.0.0.1 + Admin Token
+    if (pathname.startsWith('/_smart-router/intelligence/')) {
+      await handleIntelligenceAdmin(req, res, components, pathname);
+      return;
+    }
 
     // 3. HEAD /v1 探活（Claude Code 兼容）
     if (req.method === 'HEAD') {
@@ -433,6 +441,93 @@ async function parseBody(req, config) {
       }
     });
   });
+}
+
+// ----------------------------------------------------------------------------
+// 本地管理接口（Phase2-C Safety Sealed）
+// ----------------------------------------------------------------------------
+
+const ADMIN_STATUS = '/_smart-router/intelligence/status';
+const ADMIN_KILL = '/_smart-router/intelligence/kill';
+const ADMIN_RESUME = '/_smart-router/intelligence/resume-shadow';
+
+/**
+ * 判断是否为回环地址（仅本机可访问管理接口）。
+ */
+function isLoopback(addr) {
+  return addr === '127.0.0.1' || addr === '::1' || addr === '::ffff:127.0.0.1';
+}
+
+/**
+ * 读取管理 Token：优先环境变量 SMART_ROUTER_ADMIN_TOKEN，其次配置
+ * intelligence.adminToken（实际值不得入 Git）。未配置 → 管理接口禁用（503）。
+ */
+function resolveAdminToken(config) {
+  if (process.env.SMART_ROUTER_ADMIN_TOKEN) return process.env.SMART_ROUTER_ADMIN_TOKEN;
+  const t = config?.intelligence?.adminToken;
+  return typeof t === 'string' && t.length > 0 ? t : null;
+}
+
+/**
+ * 本地管理接口处理：
+ *   - GET  status         返回智能层状态（mode / canary / metrics）
+ *   - POST kill           立即停止 Active Canary 并持久化（重启后仍保持）
+ *   - POST resume-shadow  只恢复 Shadow（Canary 禁用），绝不自动恢复 Active
+ * 安全约束：仅回环地址 + Bearer Token；未配置 Token 时返回 503。
+ */
+async function handleIntelligenceAdmin(req, res, components, pathname) {
+  const { config, intelligence } = components;
+  const token = resolveAdminToken(config);
+  const auth = req.headers['authorization'] || '';
+  const provided = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+  const ip = req.socket?.remoteAddress || '';
+
+  if (!isLoopback(ip)) {
+    res.writeHead(403, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: false, error: 'forbidden' }));
+    return;
+  }
+  if (!token) {
+    res.writeHead(503, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      ok: false, error: 'admin_disabled',
+      hint: 'set SMART_ROUTER_ADMIN_TOKEN to enable admin endpoints',
+    }));
+    return;
+  }
+  if (provided !== token) {
+    res.writeHead(401, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: false, error: 'unauthorized' }));
+    return;
+  }
+
+  try {
+    if (req.method === 'GET' && pathname === ADMIN_STATUS) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, ...intelligence.status() }));
+      return;
+    }
+    if (req.method === 'POST' && pathname === ADMIN_KILL) {
+      intelligence.killCanary('admin_kill_switch');
+      await intelligence.persistCanaryState();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, killed: true, ...intelligence.status() }));
+      return;
+    }
+    if (req.method === 'POST' && pathname === ADMIN_RESUME) {
+      intelligence.resumeShadow();
+      await intelligence.persistCanaryState();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, resumedShadow: true, ...intelligence.status() }));
+      return;
+    }
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: false, error: 'not_found' }));
+  } catch (err) {
+    log(`server: admin route error: ${err.message}`);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: false, error: 'internal' }));
+  }
 }
 
 // ----------------------------------------------------------------------------

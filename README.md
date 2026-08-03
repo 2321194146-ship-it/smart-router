@@ -82,7 +82,7 @@ node scripts/pilot-sanitized.mjs --config "$SMARTROUTER_CONFIG" --out pilot-evid
 
 脚本只通过环境变量 / 外部配置文件读取 Key，自身不含任何密钥，输出 pilot-evidence.json（脱敏：content 截断、Key 字段不出现）。
 
-## Phase 2-B（Active Readiness，分支 phase2-shadow，版本 1.0.0-phase2-shadow）
+## Phase 2-B（Active Readiness，分支 phase2-shadow，版本 1.0.0-phase2c-active-canary）
 
 Decision Engine Active Readiness：把 Shadow 观测升级为具备真实任务能力匹配和预算控制能力的决策系统。系统继续运行 `intelligence.mode = shadow`，不开启 Active。
 
@@ -106,6 +106,23 @@ Active Readiness 评测：`node scripts/active-readiness-eval.mjs`（105 固定�
 
 本阶段未实现：Active 全流量、Dashboard、网站、用户系统、商业化、Prompt 注入、
 用户消息改写、Tool 自动控制、多模型并行/拼接、自动学习修改生产权重。5% 低风险 Active 须经独立验收。
+
+## Phase 2-C Safety Sealed（版本 1.0.0-phase2c-active-canary）
+
+Active Canary 控制器 8 项安全收口（独立验收后，仅修以下内容，未重建 Phase1/Shadow）：
+
+- Fallback 链只保留 Decision 合法候选：decision.ranked 中 blocked==null 的候选才进入 orderedCandidates，blocked 候选绝不进入 Canary Fallback 链
+- 指标只统计实际 Active 请求：activeRequests: Map<requestId, metadata>，Finalize 后清理；普通 Phase1 请求不进入指标、不触发自动停止
+- 预算防御补齐：maxRequestCost / strictModel / estimatedCost（使用 ranked 完整条目）；完整 decision.task 传给 CanaryController
+- 低风险资格（第一批 5% 排除）：toolsRequired / visionRequired / structuredOutputRequired / needsLongContext / strictModel / high风险 / 低置信度 / recommendation=null / 硬能力 blocked / 非允许协议
+- 真正可操作的 Kill Switch（方案A 本地管理接口）：GET /_smart-router/intelligence/status、POST /_smart-router/intelligence/kill、POST /_smart-router/intelligence/resume-shadow；仅 127.0.0.1 + Admin Token（SMART_ROUTER_ADMIN_TOKEN，不入 Git）；状态写入 SQLite app_state，重启后仍保持；resume-shadow 只恢复 Shadow，不自动恢复 Active
+- 首批 Canary 配置修正：allowedAgents: ["claude-code"]
+- 指标语义修正：连续错误真连续计数（成功即清零）；停止条件仅基于 Active 请求
+- 发布一致性：package.json / package-lock.json / README / RELEASE_MANIFEST 统一 1.0.0-phase2c-active-canary；Git 证据三处统一
+
+验证：592/592 测试全绿；Active Readiness 105 回归 gates PASS；Holdout 208 任务 gates PASS；scripts/safety-proof.mjs 10 项证明 11/11 PASS；scripts/run-safety-proofs.sh 5 个命令全部退出 0。报告见 phase2-docs/CANARY_SAFETY_SEALED_REPORT.md。
+
+最终提交：见 evidence/git-commit-sha.txt 与 RELEASE_MANIFEST.json 的 commit 字段。
 
 ## 关于交付包（ZIP）内容说明
 

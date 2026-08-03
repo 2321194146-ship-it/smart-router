@@ -1,0 +1,15 @@
+
+===== Safety Sealed 10 项证明 =====
+PASS  P1  blocked 候选绝不进入 Canary Fallback 链  [ordered=[c,a]]
+PASS  P2  未采样请求不进指标（不触发自动停止）  [failed=0 attempts=0 stopped=false]
+PASS  P3  0% 采样永不停止  [reason=not_sampled stopped=false]
+PASS  P4  maxRequestCost 预算防御（Primary 超限 → 自动停止）  [reason=budget_violation autoStop=budget_violation]
+PASS  P5  非低风险任务不参与（第一批 5% 排除）  [reason=excluded:high_risk_task]
+PASS  P6  Kill Switch 可操作（kill → 立即停止采样）  [stopped=true autoStop=admin_kill_switch]
+PASS  P6b  Kill 后不再采样  [reason=killed]
+PASS  P7  重启后 Kill Switch 仍保持（SQLite 持久化）  [stopped=true autoStop=admin_kill_switch restored=true]
+PASS  P8  allowedAgents=["claude-code"] 命中（其余 Agent 排除）  [claude-code=true other=agent_not_allowed]
+PASS  P9  Shadow/Off 模式行为不变（Canary 禁用，不重排）  [shadowCanaryEnabled=false offSuggest=null]
+PASS  P10  7878/17878 未受影响（本服务仍绑定 28788）  [DEFAULT_PORT=28788:true no7878:true no17878:true]
+
+结果: 11/11 PASS
