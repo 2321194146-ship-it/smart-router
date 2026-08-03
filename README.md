@@ -82,31 +82,30 @@ node scripts/pilot-sanitized.mjs --config "$SMARTROUTER_CONFIG" --out pilot-evid
 
 脚本只通过环境变量 / 外部配置文件读取 Key，自身不含任何密钥，输出 pilot-evidence.json（脱敏：content 截断、Key 字段不出现）。
 
-## Phase 2-A（Shadow 版 Sealed，分支 phase2-shadow，版本 1.0.0-phase2-shadow）
+## Phase 2-B（Active Readiness，分支 phase2-shadow，版本 1.0.0-phase2-shadow）
 
-智能决策层 Shadow 版：只观察、只建议、只记录，不参与执行。
+Decision Engine Active Readiness：把 Shadow 观测升级为具备真实任务能力匹配和预算控制能力的决策系统。系统继续运行 `intelligence.mode = shadow`，不开启 Active。
 
-- 正确运行顺序：候选生成 → Intelligence.suggest()（执行前）→ Phase1 Execution → 协议验证 → Finalize 原子提交 → Intelligence.recordFinalized()（Finalizer 观察者，事务成功后触发，真实结果来自最终 Audit）
-- 模块：src/intelligence/（Task Analyzer / Capability Registry / Policy / Budget / Decision Engine / Explainability / Shadow Recorder）
-- 持久化：SQLite `shadow_decisions` 表（requestId 唯一；建议执行前 upsert，Finalize 后更新真实结果；脱敏 task_profile，不含 lastUserText；retentionDays 保留天数）
-- 硬约束：tool_use / vision / contextWindow / protocol 缺失 → blocked（score=0，绝不推荐）
-- 预测：成本=推荐候选自身 price（有价格非 null）；延迟=确定性先验（无 Math.random）；质量=硬约束后计算（上限 0.95）
-- 对照状态：exact_match / model_match_provider_diff / policy_agreement / different / not_comparable（采纳率分母不含后两者）
-- 模式：intelligence.mode = "off" | "shadow"（off 零开销、无记录、Phase1 行为不变）
-- 三协议（chat/responses/anthropic）同一内部 sr_ requestId
-- 智能输出为机器可执行元数据，不附加任何 System Prompt
+- 统一任务能力需求画像：Task Analyzer 输出 requiredCapabilities（8 能力 0-1）+ 13 任务类型（general_chat/coding/debugging/architecture/analysis/research/writing/summarization/translation/extraction/tool_orchestration/vision/structured_output）+ streaming 硬性要求
+- 扩展 Model Capability Profile：capabilities 对象（0-1/0-100 规范化）+ reliability + latencyPriorMs + contextWindow + protocols；兼容旧字符串数组；同 modelId 不同 Provider 独立画像
+- Streaming 硬约束：stream=true + 无 streaming → blocked（三协议流式全覆盖；非流式不阻止）
+- 能力参与评分：能力匹配主导（权重 0.55）+ 强需求缺失惩罚 + 复杂任务降成本权重/简单任务成本优先；不把 tier 当作唯一质量替代品
+- Budget 彻底修复：request_cost_exceeded 硬约束 + 标准化 price + wouldBlockAll + recommendation 成本（有价格配置非 null）
+- Provider 健康只读：不稳定降分；样本 <5 静态先验；不扩大合法候选；不修改 Provider 状态
+- Shadow 异步异常隔离（方案A）：await suggest() + try/catch + shadow_error 日志；建议落库后才 Finalize
+- 对照状态：exact_match / model_match_provider_diff / policy_agreement / different / not_comparable
 
 ```json
 { "intelligence": { "mode": "shadow", "shadow": { "policy": { "tierPreference": true, "preferFree": true }, "retentionDays": 30 } } }
 ```
 
-可复跑评测：`node scripts/shadow-eval.mjs`（33 固定脱敏任务，确定性本地 mock；报告见 evidence/shadow-eval-report.md）。
-脱敏配置模板：`config/shadow-eval-config.template.json`。
+Active Readiness 评测：`node scripts/active-readiness-eval.mjs`（105 固定脱敏任务，22 类场景；
+分类 100%、硬违规 0、可接受推荐 100%、终态 100%，门禁全 PASS）。报告见 evidence/active-readiness-eval-report.md。
 
-端点声明：ModelScope 直连真实 Provider；Anthropic/Responses 经 7878 网关转发（真实链路，非 28788 直连官方）。
+端点声明：ModelScope 直连真实 Provider；Anthropic/Responses 经 7878 网关转发（真实链路，非 28788 直连官方）；评测使用确定性本地 Mock。
 
 本阶段未实现：Active 全流量、Dashboard、网站、用户系统、商业化、Prompt 注入、
-用户消息改写、Tool 自动控制、多模型并行/拼接、自动学习修改生产权重。
+用户消息改写、Tool 自动控制、多模型并行/拼接、自动学习修改生产权重。5% 低风险 Active 须经独立验收。
 
 ## 关于交付包（ZIP）内容说明
 

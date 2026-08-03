@@ -17,8 +17,9 @@
 
 /** 持久化任务画像白名单（排除 lastUserText 等敏感内容） */
 const TASK_PROFILE_WHITELIST = [
-  'taskType', 'complexity', 'estimatedInputTokens', 'needsToolUse',
-  'needsVision', 'codeRelated', 'hasLongContext', 'messageCount', 'signals',
+  'taskType', 'requiredCapabilities', 'hardCapabilities', 'complexity',
+  'estimatedInputTokens', 'needsToolUse', 'needsVision', 'needsStreaming',
+  'needsStructuredOutput', 'codeRelated', 'hasLongContext', 'messageCount', 'signals',
 ];
 
 /**

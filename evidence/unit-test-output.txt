@@ -2,737 +2,748 @@
 > smart-router-mainline@1.0.0-phase2-shadow test:unit
 > node --test test/unit/*.test.js
 
-[config-loader][2026-08-02T23:26:51.742Z] [finalizer] finalize completed: req-nc outcome=no_candidate attempts=0
-[config-loader][2026-08-02T23:26:51.743Z] [finalizer] finalize completed: req-nc outcome=no_candidate attempts=0
-[config-loader][2026-08-02T23:26:51.743Z] [finalizer] finalize completed: req-nc outcome=no_candidate attempts=0
-[config-loader][2026-08-02T23:26:51.745Z] [finalizer] cost recorded: openai/gpt-4 0.006 USD
-[config-loader][2026-08-02T23:26:51.745Z] [finalizer] quality feedback: openai:gpt-4 success=1 failure=0 (completed)
-[config-loader][2026-08-02T23:26:51.745Z] [finalizer] finalize completed: req-1 outcome=completed attempts=1
-[config-loader][2026-08-02T23:26:51.745Z] [finalizer] finalize already executed, skipping: req-1
-[config-loader][2026-08-02T23:26:51.746Z] [finalizer] finalize completed: req-1 outcome=no_candidate attempts=0
-[config-loader][2026-08-02T23:26:51.746Z] [finalizer] cost recorded: openai/gpt-4 0.006 USD
-[config-loader][2026-08-02T23:26:51.746Z] [finalizer] quality feedback: openai:gpt-4 success=1 failure=0 (completed)
-[config-loader][2026-08-02T23:26:51.746Z] [finalizer] finalize completed: req-cost outcome=completed attempts=1
-[config-loader][2026-08-02T23:26:51.746Z] [finalizer] finalize already executed, skipping: req-cost
-[config-loader][2026-08-02T23:26:51.748Z] [finalizer] finalize completed: req-aborted outcome=client_aborted attempts=1
-[config-loader][2026-08-02T23:26:51.748Z] [finalizer] finalize completed: req-err outcome=provider_error attempts=1
-[config-loader][2026-08-02T23:26:51.749Z] [finalizer] cost recorded: openai/gpt-4 0.006 USD
-[config-loader][2026-08-02T23:26:51.749Z] [finalizer] quality feedback: openai:gpt-4 success=1 failure=0 (completed)
-[config-loader][2026-08-02T23:26:51.749Z] [finalizer] finalize completed: req-ok outcome=completed attempts=1
-[config-loader][2026-08-02T23:26:51.750Z] [finalizer] cost recorded: openai/gpt-4 0.006 USD
-[config-loader][2026-08-02T23:26:51.750Z] [finalizer] quality feedback: openai:gpt-4 success=0 failure=1 (incomplete)
-[config-loader][2026-08-02T23:26:51.750Z] [finalizer] finalize completed: req-inc outcome=incomplete attempts=1
-[config-loader][2026-08-02T23:26:51.750Z] [finalizer] cost recorded: anthropic/claude-3 0.006 USD
-[config-loader][2026-08-02T23:26:51.750Z] [finalizer] quality feedback: anthropic:claude-3 success=1 failure=0 (completed)
-[config-loader][2026-08-02T23:26:51.750Z] [finalizer] finalize completed: req-audit outcome=completed attempts=2
-[config-loader][2026-08-02T23:26:51.750Z] [finalizer] finalize completed: req-1 outcome=no_candidate attempts=0
-[config-loader][2026-08-02T23:26:51.751Z] [finalizer] finalize completed: req-2 outcome=no_candidate attempts=0
-[config-loader][2026-08-02T23:26:51.751Z] [finalizer] finalize completed: req-no-success outcome=provider_error attempts=1
-[config-loader][2026-08-02T23:26:51.752Z] [finalizer] quality feedback: openai:gpt-4 success=1 failure=0 (completed)
-[config-loader][2026-08-02T23:26:51.752Z] [finalizer] finalize completed: req-no-ct outcome=completed attempts=1
+[config-loader][2026-08-03T01:09:48.592Z] [finalizer] finalize completed: req-nc outcome=no_candidate attempts=0
+[config-loader][2026-08-03T01:09:48.593Z] [finalizer] finalize completed: req-nc outcome=no_candidate attempts=0
+[config-loader][2026-08-03T01:09:48.593Z] [finalizer] finalize completed: req-nc outcome=no_candidate attempts=0
+[config-loader][2026-08-03T01:09:48.594Z] [finalizer] cost recorded: openai/gpt-4 0.006 USD
+[config-loader][2026-08-03T01:09:48.594Z] [finalizer] quality feedback: openai:gpt-4 success=1 failure=0 (completed)
+[config-loader][2026-08-03T01:09:48.594Z] [finalizer] finalize completed: req-1 outcome=completed attempts=1
+[config-loader][2026-08-03T01:09:48.594Z] [finalizer] finalize already executed, skipping: req-1
+[config-loader][2026-08-03T01:09:48.594Z] [finalizer] finalize completed: req-1 outcome=no_candidate attempts=0
+[config-loader][2026-08-03T01:09:48.594Z] [finalizer] cost recorded: openai/gpt-4 0.006 USD
+[config-loader][2026-08-03T01:09:48.594Z] [finalizer] quality feedback: openai:gpt-4 success=1 failure=0 (completed)
+[config-loader][2026-08-03T01:09:48.595Z] [finalizer] finalize completed: req-cost outcome=completed attempts=1
+[config-loader][2026-08-03T01:09:48.595Z] [finalizer] finalize already executed, skipping: req-cost
+[config-loader][2026-08-03T01:09:48.597Z] [finalizer] finalize completed: req-aborted outcome=client_aborted attempts=1
+[config-loader][2026-08-03T01:09:48.598Z] [finalizer] finalize completed: req-err outcome=provider_error attempts=1
+[config-loader][2026-08-03T01:09:48.598Z] [finalizer] cost recorded: openai/gpt-4 0.006 USD
+[config-loader][2026-08-03T01:09:48.598Z] [finalizer] quality feedback: openai:gpt-4 success=1 failure=0 (completed)
+[config-loader][2026-08-03T01:09:48.598Z] [finalizer] finalize completed: req-ok outcome=completed attempts=1
+[config-loader][2026-08-03T01:09:48.598Z] [finalizer] cost recorded: openai/gpt-4 0.006 USD
+[config-loader][2026-08-03T01:09:48.598Z] [finalizer] quality feedback: openai:gpt-4 success=0 failure=1 (incomplete)
+[config-loader][2026-08-03T01:09:48.598Z] [finalizer] finalize completed: req-inc outcome=incomplete attempts=1
+[config-loader][2026-08-03T01:09:48.598Z] [finalizer] cost recorded: anthropic/claude-3 0.006 USD
+[config-loader][2026-08-03T01:09:48.598Z] [finalizer] quality feedback: anthropic:claude-3 success=1 failure=0 (completed)
+[config-loader][2026-08-03T01:09:48.598Z] [finalizer] finalize completed: req-audit outcome=completed attempts=2
+[config-loader][2026-08-03T01:09:48.598Z] [finalizer] finalize completed: req-1 outcome=no_candidate attempts=0
+[config-loader][2026-08-03T01:09:48.598Z] [finalizer] finalize completed: req-2 outcome=no_candidate attempts=0
+[config-loader][2026-08-03T01:09:48.599Z] [finalizer] finalize completed: req-no-success outcome=provider_error attempts=1
+[config-loader][2026-08-03T01:09:48.599Z] [finalizer] quality feedback: openai:gpt-4 success=1 failure=0 (completed)
+[config-loader][2026-08-03T01:09:48.599Z] [finalizer] finalize completed: req-no-ct outcome=completed attempts=1
 ▶ AttemptLog
-  ✔ records each attempt independently (2.557209ms)
-  ✔ getLast returns the most recent attempt (0.439209ms)
-  ✔ getLast returns null for empty log (0.192541ms)
-  ✔ getSuccessful returns the actual successful attempt (1.5135ms)
-  ✔ getSuccessful returns null when no success (0.19975ms)
-  ✔ hasSuccess returns correct boolean (0.240541ms)
-  ✔ hasAborted detects aborted attempts (0.354125ms)
-  ✔ toJSON serializes all attempts (24.753875ms)
-✔ AttemptLog (33.057209ms)
+  ✔ records each attempt independently (1.072ms)
+  ✔ getLast returns the most recent attempt (0.149958ms)
+  ✔ getLast returns null for empty log (0.113ms)
+  ✔ getSuccessful returns the actual successful attempt (0.18975ms)
+  ✔ getSuccessful returns null when no success (0.087709ms)
+  ✔ hasSuccess returns correct boolean (0.133375ms)
+  ✔ hasAborted detects aborted attempts (0.097708ms)
+  ✔ toJSON serializes all attempts (10.766041ms)
+✔ AttemptLog (14.085917ms)
 ▶ AttemptRecord outcome separation
-  ✔ transport_outcome and validated_outcome are separate fields (0.434416ms)
-  ✔ transport success + validated null for error responses (0.279875ms)
-  ✔ aborted transport sets no validated outcome (0.227166ms)
-  ✔ isCompleted requires both transport success and validated completed (0.1835ms)
-  ✔ budgetBlocked attempts have null outcomes (0.1345ms)
-  ✔ toJSON includes both outcome fields (1.218375ms)
-✔ AttemptRecord outcome separation (3.034875ms)
+  ✔ transport_outcome and validated_outcome are separate fields (0.273208ms)
+  ✔ transport success + validated null for error responses (0.131291ms)
+  ✔ aborted transport sets no validated outcome (0.10825ms)
+  ✔ isCompleted requires both transport success and validated completed (0.091166ms)
+  ✔ budgetBlocked attempts have null outcomes (0.280333ms)
+  ✔ toJSON includes both outcome fields (0.246625ms)
+✔ AttemptRecord outcome separation (1.514917ms)
 ▶ shouldRecordQualityFeedback
-  ✔ only completed/incomplete record quality feedback (0.243125ms)
-  ✔ non-quality outcomes do not record feedback (0.212208ms)
-✔ shouldRecordQualityFeedback (0.8435ms)
+  ✔ only completed/incomplete record quality feedback (0.216708ms)
+  ✔ non-quality outcomes do not record feedback (0.135834ms)
+✔ shouldRecordQualityFeedback (0.497625ms)
 ▶ deriveValidatedOutcome
-  ✔ returns incomplete for finish_reason=length (0.528958ms)
-  ✔ returns incomplete for finish_reason=content_filter (2.216459ms)
-  ✔ returns completed for finish_reason=stop (0.169292ms)
-  ✔ returns incomplete for empty choices array (0.102458ms)
-  ✔ returns incomplete for body with error field (0.098416ms)
-  ✔ returns null for transport failure (0.219458ms)
-  ✔ returns incomplete for empty response body string (0.106833ms)
-  ✔ returns incomplete for Anthropic max_tokens stop_reason (0.279041ms)
-  ✔ returns completed for Anthropic normal response (0.127833ms)
-  ✔ returns incomplete for null executionResult (0.093875ms)
-✔ deriveValidatedOutcome (4.569209ms)
+  ✔ returns incomplete for finish_reason=length (0.444167ms)
+  ✔ returns incomplete for finish_reason=content_filter (0.26675ms)
+  ✔ returns completed for finish_reason=stop (0.090292ms)
+  ✔ returns incomplete for empty choices array (0.216875ms)
+  ✔ returns incomplete for body with error field (0.365541ms)
+  ✔ returns null for transport failure (0.087833ms)
+  ✔ returns incomplete for empty response body string (0.058917ms)
+  ✔ returns incomplete for Anthropic max_tokens stop_reason (0.060917ms)
+  ✔ returns completed for Anthropic normal response (0.049084ms)
+  ✔ returns incomplete for null executionResult (0.041208ms)
+✔ deriveValidatedOutcome (4.109959ms)
 ▶ deriveTransportOutcome
-  ✔ returns success for 200 (0.259083ms)
-  ✔ returns success for 201 (0.083917ms)
-  ✔ returns error for 4xx (0.090333ms)
-  ✔ returns error for 5xx (0.079083ms)
-  ✔ returns aborted for AbortError (0.127958ms)
-  ✔ returns aborted for ABORT_ERR code (0.11325ms)
-  ✔ returns timeout for TimeoutError (0.13475ms)
-  ✔ returns error for network failure without httpStatus (0.152208ms)
-  ✔ returns error for null inputs (unknown failure) (0.097459ms)
-✔ deriveTransportOutcome (1.459125ms)
+  ✔ returns success for 200 (0.185667ms)
+  ✔ returns success for 201 (0.076541ms)
+  ✔ returns error for 4xx (0.425125ms)
+  ✔ returns error for 5xx (0.04825ms)
+  ✔ returns aborted for AbortError (0.061334ms)
+  ✔ returns aborted for ABORT_ERR code (0.052ms)
+  ✔ returns timeout for TimeoutError (1.6025ms)
+  ✔ returns error for network failure without httpStatus (0.264917ms)
+  ✔ returns error for null inputs (unknown failure) (0.100375ms)
+✔ deriveTransportOutcome (3.181333ms)
 ▶ Finalizer
-  ✔ finalizeNoCandidate writes audit record (3.52325ms)
-  ✔ finalizeNoCandidate does not record cost (0.326208ms)
-  ✔ finalizeNoCandidate does not record quality feedback (0.368375ms)
-  ✔ finalize is idempotent - second call returns already_finalized (1.786208ms)
-  ✔ isFinalized tracks finalized requestIds (0.486792ms)
-  ✔ cost is recorded only once per requestId (0.651375ms)
-  ✔ CostTracker recordCost deduplicates by requestId (0.886583ms)
-  ✔ client_aborted does not record quality feedback (0.416458ms)
-  ✔ provider_error does not record quality feedback (0.62375ms)
-  ✔ completed outcome records quality feedback as success (0.710083ms)
-  ✔ incomplete outcome records quality feedback as failure (0.433708ms)
-  ✔ finalize writes complete audit record with attempts (0.410209ms)
-  ✔ getAuditRecords returns all records (0.244084ms)
-  ✔ finalize without successful attempt uses options model/provider (1.057875ms)
-  ✔ finalize without costTracker does not throw (0.337959ms)
-✔ Finalizer (13.052792ms)
+  ✔ finalizeNoCandidate writes audit record (1.9925ms)
+  ✔ finalizeNoCandidate does not record cost (0.192875ms)
+  ✔ finalizeNoCandidate does not record quality feedback (0.184292ms)
+  ✔ finalize is idempotent - second call returns already_finalized (0.712209ms)
+  ✔ isFinalized tracks finalized requestIds (0.152625ms)
+  ✔ cost is recorded only once per requestId (0.246583ms)
+  ✔ CostTracker recordCost deduplicates by requestId (1.105375ms)
+  ✔ client_aborted does not record quality feedback (1.611334ms)
+  ✔ provider_error does not record quality feedback (0.190625ms)
+  ✔ completed outcome records quality feedback as success (0.292667ms)
+  ✔ incomplete outcome records quality feedback as failure (0.19375ms)
+  ✔ finalize writes complete audit record with attempts (0.217041ms)
+  ✔ getAuditRecords returns all records (0.126083ms)
+  ✔ finalize without successful attempt uses options model/provider (0.107167ms)
+  ✔ finalize without costTracker does not throw (0.110917ms)
+✔ Finalizer (7.840167ms)
 ▶ Cancellation
-  ✔ CancelToken starts not aborted (1.503167ms)
-  ✔ abort sets aborted flag (1.967958ms)
-  ✔ abort triggers signal (0.167083ms)
-  ✔ abort calls onCancel listeners (0.179167ms)
-  ✔ abort is idempotent (second call does nothing) (0.147458ms)
-  ✔ onCancel fires immediately if already aborted (0.172125ms)
-  ✔ signal can be passed to fetch (0.212ms)
-  ✔ isAbortError detects AbortError (0.133708ms)
-  ✔ isAbortError detects TimeoutError (0.17175ms)
-  ✔ isAbortError detects cause chain (0.169666ms)
-  ✔ isAbortError detects ABORT_ERR code (0.121666ms)
-  ✔ isAbortError returns false for regular errors (0.0985ms)
-  ✔ isAbortError returns false for null/undefined (0.078584ms)
-  ✔ fromHttp creates token from req/res (0.181583ms)
-  ✔ fromHttp aborts on req aborted event (0.274041ms)
-  ✔ fromHttp aborts on res close event (when not writableEnded) (0.123958ms)
-  ✔ fromHttp does not abort on res close when writableEnded (0.087834ms)
-  ✔ fromHttp handles null req/res (0.107583ms)
-  ✔ fromHttp cleanup removes listeners after abort (0.13275ms)
-  ✔ dispose removes listeners without triggering abort (0.123667ms)
-  ✔ onCancel unsubscribe prevents future callback (0.109875ms)
-  ✔ multiple onCancel listeners all fire (0.113875ms)
-  ✔ listener exception does not block other listeners (0.147292ms)
-✔ Cancellation (8.900208ms)
-[config-loader][2026-08-02T23:26:51.733Z] [compat] patch=handleThinkingParam field=thinking action=converted: thinking 参数已转换为 reasoning_effort="high"
-[config-loader][2026-08-02T23:26:51.737Z] [compat] patch=stripAnthropicFields field=thinking action=removed: Anthropic 专有字段 "thinking" 已移除（目标上游为非 Anthropic）
-[config-loader][2026-08-02T23:26:51.737Z] [compat] patch=stripAnthropicFields field=anthropic_version action=removed: Anthropic 专有字段 "anthropic_version" 已移除（目标上游为非 Anthropic）
-[config-loader][2026-08-02T23:26:51.737Z] [compat] patch=handleContextManagement field=context_management action=removed: 上游不支持 context_management 字段，已移除（Claude Code 新字段，默认按不支持处理）
-[config-loader][2026-08-02T23:26:51.737Z] [compat] patch=handleOutputConfig field=output_config action=removed: 上游不支持 output_config 字段，已移除（Claude Code 新字段，默认按不支持处理）
-[config-loader][2026-08-02T23:26:51.738Z] [compat] patch=handleThinkingParam field=thinking action=converted: thinking 参数已转换为 reasoning_effort="high"
-[config-loader][2026-08-02T23:26:51.738Z] [compat] patch=stripAnthropicFields field=thinking action=removed: Anthropic 专有字段 "thinking" 已移除（目标上游为非 Anthropic）
-[config-loader][2026-08-02T23:26:51.738Z] [compat] patch=stripAnthropicFields field=anthropic_version action=removed: Anthropic 专有字段 "anthropic_version" 已移除（目标上游为非 Anthropic）
-[config-loader][2026-08-02T23:26:51.738Z] [compat] patch=handleThinkingParam field=thinking action=converted: thinking 参数已转换为 reasoning_effort="high"
-[config-loader][2026-08-02T23:26:51.738Z] [compat] patch=stripAnthropicFields field=thinking action=removed: Anthropic 专有字段 "thinking" 已移除（目标上游为非 Anthropic）
-[config-loader][2026-08-02T23:26:51.739Z] [compat] patch=stripAnthropicFields field=anthropic_version action=removed: Anthropic 专有字段 "anthropic_version" 已移除（目标上游为非 Anthropic）
+  ✔ CancelToken starts not aborted (3.378375ms)
+  ✔ abort sets aborted flag (4.952875ms)
+  ✔ abort triggers signal (0.191041ms)
+  ✔ abort calls onCancel listeners (0.165542ms)
+  ✔ abort is idempotent (second call does nothing) (0.258125ms)
+  ✔ onCancel fires immediately if already aborted (0.181667ms)
+  ✔ signal can be passed to fetch (0.163166ms)
+  ✔ isAbortError detects AbortError (0.119708ms)
+  ✔ isAbortError detects TimeoutError (0.131583ms)
+  ✔ isAbortError detects cause chain (0.21925ms)
+  ✔ isAbortError detects ABORT_ERR code (0.103167ms)
+  ✔ isAbortError returns false for regular errors (0.083084ms)
+  ✔ isAbortError returns false for null/undefined (0.062833ms)
+  ✔ fromHttp creates token from req/res (0.208375ms)
+  ✔ fromHttp aborts on req aborted event (0.2845ms)
+  ✔ fromHttp aborts on res close event (when not writableEnded) (0.122083ms)
+  ✔ fromHttp does not abort on res close when writableEnded (0.075166ms)
+  ✔ fromHttp handles null req/res (0.056125ms)
+  ✔ fromHttp cleanup removes listeners after abort (0.078ms)
+  ✔ dispose removes listeners without triggering abort (0.10025ms)
+  ✔ onCancel unsubscribe prevents future callback (0.076834ms)
+  ✔ multiple onCancel listeners all fire (0.077791ms)
+  ✔ listener exception does not block other listeners (0.090792ms)
+✔ Cancellation (15.465833ms)
+[config-loader][2026-08-03T01:09:48.579Z] [compat] patch=handleThinkingParam field=thinking action=converted: thinking 参数已转换为 reasoning_effort="high"
+[config-loader][2026-08-03T01:09:48.587Z] [compat] patch=stripAnthropicFields field=thinking action=removed: Anthropic 专有字段 "thinking" 已移除（目标上游为非 Anthropic）
+[config-loader][2026-08-03T01:09:48.587Z] [compat] patch=stripAnthropicFields field=anthropic_version action=removed: Anthropic 专有字段 "anthropic_version" 已移除（目标上游为非 Anthropic）
+[config-loader][2026-08-03T01:09:48.587Z] [compat] patch=handleContextManagement field=context_management action=removed: 上游不支持 context_management 字段，已移除（Claude Code 新字段，默认按不支持处理）
+[config-loader][2026-08-03T01:09:48.587Z] [compat] patch=handleOutputConfig field=output_config action=removed: 上游不支持 output_config 字段，已移除（Claude Code 新字段，默认按不支持处理）
+[config-loader][2026-08-03T01:09:48.588Z] [compat] patch=handleThinkingParam field=thinking action=converted: thinking 参数已转换为 reasoning_effort="high"
+[config-loader][2026-08-03T01:09:48.588Z] [compat] patch=stripAnthropicFields field=thinking action=removed: Anthropic 专有字段 "thinking" 已移除（目标上游为非 Anthropic）
+[config-loader][2026-08-03T01:09:48.588Z] [compat] patch=stripAnthropicFields field=anthropic_version action=removed: Anthropic 专有字段 "anthropic_version" 已移除（目标上游为非 Anthropic）
+[config-loader][2026-08-03T01:09:48.588Z] [compat] patch=handleThinkingParam field=thinking action=converted: thinking 参数已转换为 reasoning_effort="high"
+[config-loader][2026-08-03T01:09:48.589Z] [compat] patch=stripAnthropicFields field=thinking action=removed: Anthropic 专有字段 "thinking" 已移除（目标上游为非 Anthropic）
+[config-loader][2026-08-03T01:09:48.589Z] [compat] patch=stripAnthropicFields field=anthropic_version action=removed: Anthropic 专有字段 "anthropic_version" 已移除（目标上游为非 Anthropic）
 ▶ Claude Code Compatibility Patches
   ▶ handleHeadRequest
-    ✔ returns 200 for /v1 (1.682042ms)
-    ✔ returns 200 for /v1/ (0.280709ms)
-    ✔ returns handled=false for unknown paths (0.582125ms)
-    ✔ handles /v1/v1/ via normalization (0.214375ms)
-  ✔ handleHeadRequest (4.413ms)
+    ✔ returns 200 for /v1 (1.734833ms)
+    ✔ returns 200 for /v1/ (0.180333ms)
+    ✔ returns handled=false for unknown paths (0.094958ms)
+    ✔ handles /v1/v1/ via normalization (0.252542ms)
+  ✔ handleHeadRequest (3.353875ms)
   ▶ normalizePath
-    ✔ converts /v1/v1/messages to /v1/messages (0.452ms)
-    ✔ does not affect /v1/messages (0.223666ms)
-    ✔ preserves query string (0.182333ms)
-    ✔ handles /v1/v1 at end of string (0.1595ms)
-    ✔ does not affect paths without double /v1 (0.162166ms)
-    ✔ returns non-string as-is (0.929333ms)
-    ✔ returns empty string as-is (0.217584ms)
-  ✔ normalizePath (2.992375ms)
+    ✔ converts /v1/v1/messages to /v1/messages (0.297166ms)
+    ✔ does not affect /v1/messages (0.185792ms)
+    ✔ preserves query string (0.2035ms)
+    ✔ handles /v1/v1 at end of string (0.169084ms)
+    ✔ does not affect paths without double /v1 (0.17625ms)
+    ✔ returns non-string as-is (0.212834ms)
+    ✔ returns empty string as-is (2.814458ms)
+  ✔ normalizePath (5.259959ms)
   ▶ handleCountTokens
-    ✔ returns estimated tokens (0.4355ms)
-    ✔ returns handled=false for non-count_tokens paths (0.202625ms)
-    ✔ returns non-zero for empty body (0.481583ms)
-    ✔ handles body without messages array (0.147167ms)
-  ✔ handleCountTokens (1.633166ms)
+    ✔ returns estimated tokens (2.207292ms)
+    ✔ returns handled=false for non-count_tokens paths (1.187417ms)
+    ✔ returns non-zero for empty body (0.249625ms)
+    ✔ handles body without messages array (0.074625ms)
+  ✔ handleCountTokens (3.941542ms)
   ▶ handleThinkingParam
-    ✔ converts thinking to reasoning_effort high (>4000) (0.464541ms)
-    ✔ converts thinking to reasoning_effort medium (<=4000) (0.136125ms)
-    ✔ returns undefined when no thinking (0.10275ms)
-    ✔ returns undefined when thinking type is not enabled (0.0945ms)
-    ✔ does not modify original body (2.555375ms)
-  ✔ handleThinkingParam (3.759ms)
+    ✔ converts thinking to reasoning_effort high (>4000) (0.189916ms)
+    ✔ converts thinking to reasoning_effort medium (<=4000) (0.065584ms)
+    ✔ returns undefined when no thinking (0.058ms)
+    ✔ returns undefined when thinking type is not enabled (0.062542ms)
+    ✔ does not modify original body (1.406208ms)
+  ✔ handleThinkingParam (1.916333ms)
   ▶ cleanThinkingBlocks
-    ✔ replaces thinking blocks with [thinking] (0.515042ms)
-    ✔ preserves text blocks (0.197292ms)
-    ✔ handles string content (4.864167ms)
-    ✔ does not modify original messages (0.229541ms)
-    ✔ returns non-array as-is (0.101208ms)
-  ✔ cleanThinkingBlocks (6.234583ms)
+    ✔ replaces thinking blocks with [thinking] (3.252625ms)
+    ✔ preserves text blocks (0.526708ms)
+    ✔ handles string content (0.131541ms)
+    ✔ does not modify original messages (0.382333ms)
+    ✔ returns non-array as-is (0.117542ms)
+  ✔ cleanThinkingBlocks (4.704333ms)
   ▶ cleanReasoningContent
-    ✔ removes from message (0.321167ms)
-    ✔ removes from delta (0.122792ms)
-    ✔ removes top-level reasoning_content (0.1215ms)
-    ✔ handles nested objects (0.121583ms)
-    ✔ does not modify original body (0.1415ms)
-  ✔ cleanReasoningContent (1.04475ms)
+    ✔ removes from message (0.62125ms)
+    ✔ removes from delta (0.096042ms)
+    ✔ removes top-level reasoning_content (0.060708ms)
+    ✔ handles nested objects (0.070209ms)
+    ✔ does not modify original body (0.106041ms)
+  ✔ cleanReasoningContent (1.122833ms)
   ▶ cleanThinkingProcessLeak
-    ✔ removes "Thinking Process:" prefix (1.209584ms)
-    ✔ handles "Let me think" pattern (0.350417ms)
-    ✔ preserves normal content (0.111791ms)
-    ✔ handles "Let's analyze" pattern (0.108208ms)
-    ✔ preserves content before the leak marker (0.110125ms)
-    ✔ removes all content when no paragraph separator (0.967625ms)
-    ✔ returns non-string as-is (0.11375ms)
-    ✔ returns empty string as-is (0.17725ms)
-  ✔ cleanThinkingProcessLeak (3.480666ms)
+    ✔ removes "Thinking Process:" prefix (0.276791ms)
+    ✔ handles "Let me think" pattern (0.379875ms)
+    ✔ preserves normal content (0.19175ms)
+    ✔ handles "Let's analyze" pattern (0.1755ms)
+    ✔ preserves content before the leak marker (0.119291ms)
+    ✔ removes all content when no paragraph separator (0.209625ms)
+    ✔ returns non-string as-is (0.562917ms)
+    ✔ returns empty string as-is (0.118625ms)
+  ✔ cleanThinkingProcessLeak (2.397167ms)
   ▶ stripAnthropicFields
-    ✔ removes thinking, anthropic_beta, anthropic_version (0.361708ms)
-    ✔ returns warnings for removed fields (0.174167ms)
-    ✔ does not modify original body (0.170375ms)
-    ✔ returns no warnings when no fields to remove (0.112959ms)
-    ✔ handles null body (0.086417ms)
-  ✔ stripAnthropicFields (1.200875ms)
+    ✔ removes thinking, anthropic_beta, anthropic_version (0.445458ms)
+    ✔ returns warnings for removed fields (0.1325ms)
+    ✔ does not modify original body (0.126542ms)
+    ✔ returns no warnings when no fields to remove (0.32225ms)
+    ✔ handles null body (0.080833ms)
+  ✔ stripAnthropicFields (1.242ms)
   ▶ identifyAgentByUA
-    ✔ identifies claude-cli (0.546ms)
-    ✔ identifies Codex (0.468583ms)
-    ✔ identifies OpenAI SDK (0.414666ms)
-    ✔ extracts version from claude-cli (0.440292ms)
-    ✔ extracts version from codex (0.34875ms)
-    ✔ extracts version from OpenAI SDK (0.250292ms)
-    ✔ returns generic for unknown UA (0.207292ms)
-    ✔ handles empty/null UA (0.167375ms)
-  ✔ identifyAgentByUA (3.435667ms)
+    ✔ identifies claude-cli (0.505958ms)
+    ✔ identifies Codex (1.152417ms)
+    ✔ identifies OpenAI SDK (0.279708ms)
+    ✔ extracts version from claude-cli (0.089625ms)
+    ✔ extracts version from codex (0.095125ms)
+    ✔ extracts version from OpenAI SDK (0.110208ms)
+    ✔ returns generic for unknown UA (0.109ms)
+    ✔ handles empty/null UA (0.106666ms)
+  ✔ identifyAgentByUA (2.659875ms)
   ▶ handleContextManagement
-    ✔ removes field by default (1.594583ms)
-    ✔ passes through when upstream supports (0.816542ms)
-    ✔ generates warning when removed (0.190042ms)
-    ✔ does nothing when field is absent (0.103875ms)
-  ✔ handleContextManagement (2.99225ms)
+    ✔ removes field by default (0.165875ms)
+    ✔ passes through when upstream supports (0.06425ms)
+    ✔ generates warning when removed (0.07625ms)
+    ✔ does nothing when field is absent (0.048833ms)
+  ✔ handleContextManagement (0.462333ms)
   ▶ handleOutputConfig
-    ✔ removes field by default (0.383ms)
-    ✔ passes through when upstream supports (0.1785ms)
-    ✔ generates warning when removed (0.132167ms)
-    ✔ does nothing when field is absent (0.092209ms)
-  ✔ handleOutputConfig (0.998ms)
+    ✔ removes field by default (0.115208ms)
+    ✔ passes through when upstream supports (0.073959ms)
+    ✔ generates warning when removed (0.060084ms)
+    ✔ does nothing when field is absent (0.056458ms)
+  ✔ handleOutputConfig (0.392333ms)
   ▶ applyClaudeCodePatches
-    ✔ applies all patches for Claude Code (5.009417ms)
-    ✔ does nothing for non-Claude Code (0.290417ms)
-    ✔ returns patches list and warnings (0.311042ms)
-    ✔ does not modify original input body (0.3645ms)
-    ✔ detects Claude Code by path /v1/messages (0.249708ms)
-  ✔ applyClaudeCodePatches (6.426459ms)
-✔ Claude Code Compatibility Patches (40.65775ms)
-[config-loader][2026-08-02T23:26:51.756Z] [finalizer] quality feedback: p1:m1 success=1 failure=0 (completed)
-[config-loader][2026-08-02T23:26:51.758Z] [finalizer] transaction: finalized r2 outcome=completed attempts=1 (atomic)
-[config-loader][2026-08-02T23:26:51.779Z] [finalizer] quality feedback: p1:m1 success=1 failure=0 (completed)
-[config-loader][2026-08-02T23:26:51.779Z] [finalizer] transaction: finalized r3 outcome=completed attempts=1 (atomic)
-[config-loader][2026-08-02T23:26:51.780Z] [finalizer] observer error (ignored): observer boom
-▶ Phase2-A Task Analyzer
-  ✔ coding / tool / vision / analysis detection (3.006792ms)
-  ✔ complexity bounded 0-1 (0.212125ms)
-✔ Phase2-A Task Analyzer (5.06725ms)
-▶ Phase2-A Capability Registry (modelId + provider)
-  ✔ getProfile distinguishes same modelId across providers (1.009291ms)
-  ✔ contextWindow from max_tokens / context_window (0.212666ms)
-  ✔ deriveProtocols: chat-capable is adapter-compatible with all protocols (0.215ms)
-  ✔ supports with provider (0.245ms)
-✔ Phase2-A Capability Registry (modelId + provider) (3.77075ms)
-▶ Phase2-A Policy 硬约束
-  ✔ missing tool_use → blocked, score 0 (0.772625ms)
-  ✔ missing vision → blocked (0.200125ms)
-  ✔ context overflow → blocked (0.207083ms)
-  ✔ protocol not supported → blocked (0.189333ms)
-  ✔ hardConstraintBlock returns null when satisfied (0.136709ms)
-  ✔ paid blocked when allowPaid=false (0.124167ms)
-  ✔ deterministic latency (no Math.random) (0.12825ms)
-  ✔ quality capped at 0.95, never 1.0 (0.145041ms)
-  ✔ estimateCost per candidate price (0.190958ms)
-✔ Phase2-A Policy 硬约束 (3.629292ms)
-▶ Phase2-A Budget
-  ✔ wouldBlockAll for paid-only + allowPaid=false (0.38725ms)
-✔ Phase2-A Budget (0.519458ms)
-▶ Phase2-A Decision Engine（Registry 参与 + 硬约束）
-  ✔ only non-tool_use candidate → recommendation=null (19.496417ms)
-  ✔ vision task: only valid vision candidate recommended (paid ok when allowPaid) (2.51375ms)
-  ✔ same modelId different provider: per-provider recommendation & cost (0.712166ms)
-  ✔ cost prediction non-null when recommendation priced (0.404292ms)
-✔ Phase2-A Decision Engine（Registry 参与 + 硬约束） (23.850708ms)
-▶ Phase2-A Explainability
-  ✔ eliminated reasons include hard blocks (0.18575ms)
-✔ Phase2-A Explainability (0.29975ms)
-▶ Phase2-A Shadow Recorder（脱敏 + 对照状态 + 持久化）
-  ✔ sanitizeTaskProfile excludes lastUserText (0.316959ms)
-  ✔ comparison statuses (0.333916ms)
-  ✔ persists suggestion + final via MemoryStore mirror (1.348375ms)
-✔ Phase2-A Shadow Recorder（脱敏 + 对照状态 + 持久化） (5.000583ms)
-▶ Phase2-A IntelligenceLayer off/shadow
-  ✔ off mode: suggest null, no records (0.570541ms)
-  ✔ shadow mode: suggest + recordFinalized produce complete row (0.760042ms)
-  ✔ attachTo finalizer observer (post-commit) (18.540292ms)
-  ✔ observer failure does not affect finalize result (22.238708ms)
-✔ Phase2-A IntelligenceLayer off/shadow (42.395541ms)
+    ✔ applies all patches for Claude Code (9.315291ms)
+    ✔ does nothing for non-Claude Code (0.333833ms)
+    ✔ returns patches list and warnings (0.394625ms)
+    ✔ does not modify original input body (0.481167ms)
+    ✔ detects Claude Code by path /v1/messages (0.337792ms)
+  ✔ applyClaudeCodePatches (11.094375ms)
+✔ Claude Code Compatibility Patches (39.996292ms)
+[config-loader][2026-08-03T01:09:48.618Z] [finalizer] quality feedback: p1:m1 success=1 failure=0 (completed)
+[config-loader][2026-08-03T01:09:48.627Z] [finalizer] transaction: finalized r2 outcome=completed attempts=1 (atomic)
+▶ Phase2-B Task Analyzer（统一能力需求画像）
+  ✔ 13 task types produce distinct requiredCapabilities (2.062791ms)
+  ✔ requiredCapabilities structure (1.09575ms)
+  ✔ debugging: coding+reasoning high (0.295792ms)
+  ✔ summarization: reasoning low, cost-friendly (0.49675ms)
+  ✔ stream=true → streaming hard requirement (0.167625ms)
+  ✔ non-stream request does NOT require streaming (0.127791ms)
+  ✔ vision task requires vision; structured output requires structured_output (6.541167ms)
+✔ Phase2-B Task Analyzer（统一能力需求画像） (12.61425ms)
+▶ Phase2-B Capability Registry（Model Capability Profile）
+  ✔ capabilities object normalized from 0-100 (0.533666ms)
+  ✔ legacy string capability array compatible (0.177667ms)
+  ✔ normalizeCapabilityScore 0-1 and 0-100 (0.140959ms)
+  ✔ profile includes reliability, latencyPriorMs, protocols (0.122292ms)
+  ✔ same modelId different provider keep independent profiles (0.239583ms)
+✔ Phase2-B Capability Registry（Model Capability Profile） (1.516458ms)
+▶ Phase2-B Policy（能力评分 + 硬约束）
+  ✔ streaming hard constraint: stream=true + no streaming → blocked (1.287292ms)
+  ✔ non-stream request with no streaming → NOT blocked (0.240875ms)
+  ✔ missing tool_use → blocked (0.165167ms)
+  ✔ missing vision → blocked (0.160917ms)
+  ✔ context overflow → blocked (0.184ms)
+  ✔ hardConstraintBlock null when satisfied (1.746958ms)
+  ✔ request_cost_exceeded → blocked (0.191917ms)
+  ✔ budgetBlock allows within budget (0.14ms)
+  ✔ deterministic latency (no Math.random) (0.18575ms)
+  ✔ latency uses health avg only with enough samples (0.121375ms)
+  ✔ quality capped 0.95; reasoning model beats chat for reasoning task (0.288792ms)
+  ✔ estimateCost per candidate price (0.151ms)
+✔ Phase2-B Policy（能力评分 + 硬约束） (8.113542ms)
+▶ Phase2-B Budget（request_cost_exceeded / wouldBlockAll）
+  ✔ all over budget → wouldBlockAll true, estimatedCost null (2.050542ms)
+  ✔ mixed: blocked candidates listed, estimatedCost from allowed (0.2375ms)
+  ✔ allowPaid=false blocks paid (0.144292ms)
+✔ Phase2-B Budget（request_cost_exceeded / wouldBlockAll） (2.612583ms)
+▶ Phase2-B Decision Engine（能力评分 + 硬约束 + 健康）
+  ✔ complex reasoning: reasoning model beats high-tier chat-only model (7.578334ms)
+  ✔ debugging: coding+reasoning model preferred (0.358ms)
+  ✔ simple summarization: cheap model preferred when quality sufficient (0.258625ms)
+  ✔ streaming hard constraint: stream=true blocks non-streaming candidate (0.221333ms)
+  ✔ budget: maxRequestCost=0.000001 blocks priced recommendation → recommendation null (0.18575ms)
+  ✔ provider health: degraded provider scores lower (samples >= 5) (0.194833ms)
+  ✔ same modelId different provider: per-provider scoring (0.15875ms)
+✔ Phase2-B Decision Engine（能力评分 + 硬约束 + 健康） (9.148125ms)
+▶ Phase2-B Explainability
+  ✔ eliminated reasons include hard blocks (0.087167ms)
+✔ Phase2-B Explainability (0.1345ms)
+▶ Phase2-B Shadow Recorder（脱敏 + 对照状态）
+  ✔ sanitizeTaskProfile excludes lastUserText (0.130041ms)
+  ✔ comparison statuses (0.11225ms)
+  ✔ persists via MemoryStore mirror (0.665208ms)
+✔ Phase2-B Shadow Recorder（脱敏 + 对照状态） (0.978792ms)
+▶ Phase2-B IntelligenceLayer（off/shadow + await 隔离）
+  ✔ off mode: suggest null, no records (0.333917ms)
+  ✔ shadow mode: suggest + recordFinalized complete row (0.534375ms)
+  ✔ suggest DB failure: user flow unaffected, no half record, clear log (0.505958ms)
+  ✔ attachTo finalizer observer (post-commit) (23.792833ms)
+✔ Phase2-B IntelligenceLayer（off/shadow + await 隔离） (26.99575ms)
 ▶ Anthropic Protocol Conversion
   ▶ anthropicToOpenAI
-    ✔ converts system string to system message (3.280417ms)
-    ✔ converts system array to system message (0.364375ms)
-    ✔ converts user text content (0.415167ms)
-    ✔ converts user tool_result to tool message (0.384667ms)
-    ✔ converts assistant text content (0.31425ms)
-    ✔ converts assistant tool_use to tool_calls (78.533333ms)
-    ✔ converts tools with input_schema (12.694ms)
-    ✔ converts tool_choice auto (0.89875ms)
-    ✔ converts tool_choice any to required (1.622333ms)
-    ✔ converts tool_choice tool to function (1.445083ms)
-    ✔ removes anthropic-specific fields (1.478125ms)
-    ✔ preserves max_tokens and model (0.228541ms)
-    ✔ converts stop_sequences to stop (0.358417ms)
-  ✔ anthropicToOpenAI (105.941459ms)
+    ✔ converts system string to system message (2.063667ms)
+    ✔ converts system array to system message (0.200333ms)
+    ✔ converts user text content (0.177166ms)
+    ✔ converts user tool_result to tool message (0.172291ms)
+    ✔ converts assistant text content (0.124708ms)
+    ✔ converts assistant tool_use to tool_calls (1.4795ms)
+    ✔ converts tools with input_schema (0.224042ms)
+    ✔ converts tool_choice auto (1.671041ms)
+    ✔ converts tool_choice any to required (0.6815ms)
+    ✔ converts tool_choice tool to function (0.395208ms)
+    ✔ removes anthropic-specific fields (0.36675ms)
+    ✔ preserves max_tokens and model (1.527167ms)
+    ✔ converts stop_sequences to stop (0.1665ms)
+  ✔ anthropicToOpenAI (10.897333ms)
   ▶ openaiToAnthropic
-    ✔ converts text response to content array (0.538792ms)
-    ✔ converts tool_calls to tool_use (0.253959ms)
-    ✔ maps stop_reason: stop -> end_turn (0.292709ms)
-    ✔ maps stop_reason: length -> max_tokens (20.710667ms)
-    ✔ maps stop_reason: tool_calls -> tool_use (8.084416ms)
-    ✔ maps usage correctly (0.202375ms)
-    ✔ handles null chatResponse (0.137416ms)
-  ✔ openaiToAnthropic (30.848875ms)
+    ✔ converts text response to content array (0.320417ms)
+    ✔ converts tool_calls to tool_use (0.125ms)
+    ✔ maps stop_reason: stop -> end_turn (0.172ms)
+    ✔ maps stop_reason: length -> max_tokens (0.137125ms)
+    ✔ maps stop_reason: tool_calls -> tool_use (0.092416ms)
+    ✔ maps usage correctly (0.093375ms)
+    ✔ handles null chatResponse (0.069875ms)
+  ✔ openaiToAnthropic (2.00025ms)
   ▶ Stream Conversion
-    ✔ createStreamState initializes correctly (0.799416ms)
-    ✔ chatChunkToAnthropicEvents sends message_start on first chunk (9.780917ms)
-    ✔ chatChunkToAnthropicEvents sends content_block_delta for text (0.211958ms)
-    ✔ chatChunkToAnthropicEvents handles tool_call delta (0.509166ms)
-    ✔ chatChunkToAnthropicEvents sends message_stop on finish (2.933292ms)
-    ✔ isMessageStop detects message_stop event (0.211375ms)
-    ✔ isMessageStop handles JSON string (0.161791ms)
-  ✔ Stream Conversion (16.189667ms)
+    ✔ createStreamState initializes correctly (0.147916ms)
+    ✔ chatChunkToAnthropicEvents sends message_start on first chunk (0.331583ms)
+    ✔ chatChunkToAnthropicEvents sends content_block_delta for text (0.091666ms)
+    ✔ chatChunkToAnthropicEvents handles tool_call delta (0.1405ms)
+    ✔ chatChunkToAnthropicEvents sends message_stop on finish (0.12375ms)
+    ✔ isMessageStop detects message_stop event (0.077792ms)
+    ✔ isMessageStop handles JSON string (0.069833ms)
+  ✔ Stream Conversion (1.140292ms)
   ▶ buildAnthropicError
-    ✔ creates error response (0.472125ms)
-    ✔ maps rate_limit to rate_limit_error (0.310375ms)
-    ✔ maps auth to authentication_error (0.157834ms)
-    ✔ maps not_found to not_found_error (0.741833ms)
-    ✔ maps invalid_request_error (0.151083ms)
-    ✔ handles null error (0.124291ms)
-    ✔ defaults to api_error for unknown types (0.098666ms)
-  ✔ buildAnthropicError (2.414541ms)
-✔ Anthropic Protocol Conversion (157.78775ms)
+    ✔ creates error response (0.158625ms)
+    ✔ maps rate_limit to rate_limit_error (0.051458ms)
+    ✔ maps auth to authentication_error (0.05325ms)
+    ✔ maps not_found to not_found_error (0.051666ms)
+    ✔ maps invalid_request_error (0.046959ms)
+    ✔ handles null error (0.051708ms)
+    ✔ defaults to api_error for unknown types (0.27575ms)
+  ✔ buildAnthropicError (1.030084ms)
+✔ Anthropic Protocol Conversion (16.597375ms)
 ▶ Chat Protocol
   ▶ parseSSEChunk
-    ✔ parses single event (2.647417ms)
-    ✔ parses multiple events (0.440833ms)
-    ✔ handles multi-line data (0.251167ms)
-    ✔ handles event and id fields (0.237375ms)
-    ✔ skips comment lines (0.205792ms)
-    ✔ handles Buffer input (0.41475ms)
-    ✔ returns empty array for empty input (0.184875ms)
-    ✔ handles CRLF line endings (0.216584ms)
-  ✔ parseSSEChunk (8.38325ms)
+    ✔ parses single event (1.082209ms)
+    ✔ parses multiple events (0.1265ms)
+    ✔ handles multi-line data (0.106333ms)
+    ✔ handles event and id fields (0.121541ms)
+    ✔ skips comment lines (0.122625ms)
+    ✔ handles Buffer input (0.231208ms)
+    ✔ returns empty array for empty input (0.0885ms)
+    ✔ handles CRLF line endings (0.099334ms)
+  ✔ parseSSEChunk (2.926084ms)
   ▶ isDoneMarker
-    ✔ detects [DONE] (0.334709ms)
-    ✔ does not match non-DONE data (0.266709ms)
-    ✔ handles whitespace (0.191917ms)
-  ✔ isDoneMarker (1.156792ms)
+    ✔ detects [DONE] (0.158ms)
+    ✔ does not match non-DONE data (0.118458ms)
+    ✔ handles whitespace (0.089167ms)
+  ✔ isDoneMarker (0.546875ms)
   ▶ buildErrorResponse
-    ✔ creates OpenAI-compatible error (0.547042ms)
-    ✔ maps error types correctly (0.197625ms)
-    ✔ handles ProviderError (0.184042ms)
-    ✔ handles generic Error (0.348791ms)
-    ✔ handles null error (0.182458ms)
-    ✔ uses errorType alias (0.213959ms)
-    ✔ uses errorCode alias (0.278167ms)
-  ✔ buildErrorResponse (7.844958ms)
-✔ Chat Protocol (18.981834ms)
+    ✔ creates OpenAI-compatible error (0.260375ms)
+    ✔ maps error types correctly (0.0925ms)
+    ✔ handles ProviderError (0.08275ms)
+    ✔ handles generic Error (0.081958ms)
+    ✔ handles null error (0.127625ms)
+    ✔ uses errorType alias (0.074292ms)
+    ✔ uses errorCode alias (0.069959ms)
+  ✔ buildErrorResponse (0.95625ms)
+✔ Chat Protocol (5.283792ms)
 ▶ Responses Protocol Conversion
   ▶ responsesToChat
-    ✔ converts string input to user message (3.105125ms)
-    ✔ converts array input with message items (0.306083ms)
-    ✔ converts function_call_output to tool messages (0.245542ms)
-    ✔ converts instructions to system message (0.209875ms)
-    ✔ converts tools to chat format (0.378084ms)
-    ✔ converts max_output_tokens to max_tokens (0.202667ms)
-    ✔ forces stream to false (0.185709ms)
-    ✔ converts function_call to assistant tool_calls (0.290875ms)
-  ✔ responsesToChat (10.200583ms)
+    ✔ converts string input to user message (1.19175ms)
+    ✔ converts array input with message items (0.149291ms)
+    ✔ converts function_call_output to tool messages (0.124958ms)
+    ✔ converts instructions to system message (0.118625ms)
+    ✔ converts tools to chat format (0.16025ms)
+    ✔ converts max_output_tokens to max_tokens (0.093708ms)
+    ✔ forces stream to false (0.095542ms)
+    ✔ converts function_call to assistant tool_calls (0.150875ms)
+  ✔ responsesToChat (3.019459ms)
   ▶ chatToResponses
-    ✔ converts text response to output array (24.955417ms)
-    ✔ converts tool_calls to function_call items (0.636583ms)
-    ✔ sets status to completed (0.256667ms)
-    ✔ sets status to incomplete for finish_reason length (0.166208ms)
-    ✔ maps usage correctly (1.440166ms)
-    ✔ handles null chatResponse (7.043959ms)
-  ✔ chatToResponses (35.190959ms)
+    ✔ converts text response to output array (0.344ms)
+    ✔ converts tool_calls to function_call items (0.447792ms)
+    ✔ sets status to completed (0.128417ms)
+    ✔ sets status to incomplete for finish_reason length (0.087625ms)
+    ✔ maps usage correctly (0.083542ms)
+    ✔ handles null chatResponse (1.296667ms)
+  ✔ chatToResponses (5.796916ms)
   ▶ Stream Conversion
-    ✔ chatDeltaToResponsesEvents generates response.created on first chunk (2.193042ms)
-    ✔ chatDeltaToResponsesEvents generates output_text.delta for content (0.879208ms)
-    ✔ chatDeltaToResponsesEvents generates function_call_arguments.delta for tool calls (17.210417ms)
-    ✔ chatDeltaToResponsesEvents generates response.completed on finish (20.854875ms)
-    ✔ chatDeltaToResponsesEvents generates response.incomplete for finish_reason length (0.286084ms)
-  ✔ Stream Conversion (46.149875ms)
+    ✔ chatDeltaToResponsesEvents generates response.created on first chunk (0.474084ms)
+    ✔ chatDeltaToResponsesEvents generates output_text.delta for content (0.097083ms)
+    ✔ chatDeltaToResponsesEvents generates function_call_arguments.delta for tool calls (0.174125ms)
+    ✔ chatDeltaToResponsesEvents generates response.completed on finish (0.174875ms)
+    ✔ chatDeltaToResponsesEvents generates response.incomplete for finish_reason length (0.121666ms)
+  ✔ Stream Conversion (1.175417ms)
   ▶ Event Detection
-    ✔ isResponseCompleted detects response.completed (0.304958ms)
-    ✔ isResponseIncomplete detects response.incomplete (0.156875ms)
-  ✔ Event Detection (0.631667ms)
+    ✔ isResponseCompleted detects response.completed (0.081875ms)
+    ✔ isResponseIncomplete detects response.incomplete (0.08875ms)
+  ✔ Event Detection (0.237125ms)
   ▶ buildResponsesError
-    ✔ creates error response (0.377375ms)
-    ✔ maps auth_invalid to authentication_error (0.203458ms)
-    ✔ maps rate_limit to rate_limit_exceeded (0.114791ms)
-    ✔ handles null error (0.120167ms)
-    ✔ preserves error code (0.112417ms)
-  ✔ buildResponsesError (1.24075ms)
-✔ Responses Protocol Conversion (95.688375ms)
+    ✔ creates error response (0.158625ms)
+    ✔ maps auth_invalid to authentication_error (0.093792ms)
+    ✔ maps rate_limit to rate_limit_exceeded (0.055375ms)
+    ✔ handles null error (0.051625ms)
+    ✔ preserves error code (0.0495ms)
+  ✔ buildResponsesError (0.530958ms)
+✔ Responses Protocol Conversion (11.683167ms)
 ▶ Provider Error Classification
   ▶ 401 -> AUTH_INVALID
-    ✔ 401 classifies as AUTH_INVALID (1.24525ms)
-    ✔ 401 with body still classifies as AUTH_INVALID (0.1765ms)
-    ✔ shouldDisableKey returns true for AUTH_INVALID (0.151333ms)
-  ✔ 401 -> AUTH_INVALID (2.733209ms)
+    ✔ 401 classifies as AUTH_INVALID (1.025583ms)
+    ✔ 401 with body still classifies as AUTH_INVALID (0.143667ms)
+    ✔ shouldDisableKey returns true for AUTH_INVALID (0.116375ms)
+  ✔ 401 -> AUTH_INVALID (2.102625ms)
   ▶ 403 classification (order-sensitive)
-    ✔ 403 with model-level message -> FORBIDDEN_MODEL (0.609375ms)
-    ✔ 403 with "does not exist" -> FORBIDDEN_MODEL (0.1765ms)
-    ✔ 403 with key-level message -> FORBIDDEN_KEY (0.153542ms)
-    ✔ 403 with "authentication" keyword -> FORBIDDEN_KEY (0.161166ms)
-    ✔ 403 with provider-level message -> FORBIDDEN_PROVIDER (0.171292ms)
-    ✔ 403 with "subscription" keyword -> FORBIDDEN_PROVIDER (0.143042ms)
-    ✔ 403 with region-level message -> FORBIDDEN_REGION (0.179333ms)
-    ✔ 403 with "country" keyword -> FORBIDDEN_REGION (0.12225ms)
-    ✔ 403 with temp message -> FORBIDDEN_TEMP (0.153667ms)
-    ✔ 403 with no matching keywords -> FORBIDDEN_TEMP (conservative fallback) (0.1755ms)
-    ✔ 403 model takes priority over key (order sensitivity) (0.101208ms)
-  ✔ 403 classification (order-sensitive) (2.773875ms)
+    ✔ 403 with model-level message -> FORBIDDEN_MODEL (0.340625ms)
+    ✔ 403 with "does not exist" -> FORBIDDEN_MODEL (0.101334ms)
+    ✔ 403 with key-level message -> FORBIDDEN_KEY (0.102ms)
+    ✔ 403 with "authentication" keyword -> FORBIDDEN_KEY (0.115375ms)
+    ✔ 403 with provider-level message -> FORBIDDEN_PROVIDER (0.120792ms)
+    ✔ 403 with "subscription" keyword -> FORBIDDEN_PROVIDER (0.181625ms)
+    ✔ 403 with region-level message -> FORBIDDEN_REGION (0.255084ms)
+    ✔ 403 with "country" keyword -> FORBIDDEN_REGION (0.122708ms)
+    ✔ 403 with temp message -> FORBIDDEN_TEMP (0.09775ms)
+    ✔ 403 with no matching keywords -> FORBIDDEN_TEMP (conservative fallback) (0.124542ms)
+    ✔ 403 model takes priority over key (order sensitivity) (0.087708ms)
+  ✔ 403 classification (order-sensitive) (2.106458ms)
   ▶ 429 classification
-    ✔ 429 transient -> RATE_LIMIT_TRANSIENT (0.240292ms)
-    ✔ 429 with "too many requests" -> RATE_LIMIT_TRANSIENT (0.106375ms)
-    ✔ 429 quota via errorCode -> RATE_LIMIT_QUOTA (0.075583ms)
-    ✔ 429 quota via body keyword -> RATE_LIMIT_QUOTA (0.071875ms)
-    ✔ 429 quota via long retry-after (>=600s) -> RATE_LIMIT_QUOTA (0.102625ms)
-    ✔ 429 with short retry-after (<600s) -> RATE_LIMIT_TRANSIENT (0.084542ms)
-  ✔ 429 classification (0.93925ms)
+    ✔ 429 transient -> RATE_LIMIT_TRANSIENT (0.171792ms)
+    ✔ 429 with "too many requests" -> RATE_LIMIT_TRANSIENT (0.073959ms)
+    ✔ 429 quota via errorCode -> RATE_LIMIT_QUOTA (0.060666ms)
+    ✔ 429 quota via body keyword -> RATE_LIMIT_QUOTA (0.054916ms)
+    ✔ 429 quota via long retry-after (>=600s) -> RATE_LIMIT_QUOTA (0.081875ms)
+    ✔ 429 with short retry-after (<600s) -> RATE_LIMIT_TRANSIENT (0.059583ms)
+  ✔ 429 classification (0.647542ms)
   ▶ 5xx classification
-    ✔ 500 -> SERVER_ERROR (0.099917ms)
-    ✔ 502 -> SERVER_ERROR (0.075ms)
-    ✔ 503 -> SERVER_ERROR (0.058916ms)
-    ✔ 5xx isRetriable returns true (0.08725ms)
-  ✔ 5xx classification (0.45425ms)
+    ✔ 500 -> SERVER_ERROR (0.07775ms)
+    ✔ 502 -> SERVER_ERROR (0.071292ms)
+    ✔ 503 -> SERVER_ERROR (0.046083ms)
+    ✔ 5xx isRetriable returns true (0.068708ms)
+  ✔ 5xx classification (0.360041ms)
   ▶ Network error classification
-    ✔ fetch failure (no httpStatus + cause) -> NETWORK_ERROR (0.192667ms)
-    ✔ NETWORK_ERROR is retriable (0.059792ms)
-  ✔ Network error classification (0.360667ms)
+    ✔ fetch failure (no httpStatus + cause) -> NETWORK_ERROR (0.1415ms)
+    ✔ NETWORK_ERROR is retriable (0.048542ms)
+  ✔ Network error classification (0.249791ms)
   ▶ Client aborted classification
-    ✔ aborted flag -> CLIENT_ABORTED (0.09ms)
-    ✔ AbortError cause -> CLIENT_ABORTED (0.116584ms)
-    ✔ CLIENT_ABORTED is not retriable (0.058542ms)
-  ✔ Client aborted classification (0.353041ms)
+    ✔ aborted flag -> CLIENT_ABORTED (0.074125ms)
+    ✔ AbortError cause -> CLIENT_ABORTED (0.073208ms)
+    ✔ CLIENT_ABORTED is not retriable (0.047541ms)
+  ✔ Client aborted classification (0.27475ms)
   ▶ Other 4xx classification
-    ✔ 400 -> UNKNOWN (1.042167ms)
-    ✔ 404 -> UNKNOWN (0.060208ms)
-    ✔ 422 -> UNKNOWN (0.065125ms)
-    ✔ 408 -> NETWORK_ERROR (retriable transient) (0.052875ms)
-    ✔ UNKNOWN is not retriable (0.05225ms)
-  ✔ Other 4xx classification (1.387709ms)
+    ✔ 400 -> UNKNOWN (0.878833ms)
+    ✔ 404 -> UNKNOWN (0.052209ms)
+    ✔ 422 -> UNKNOWN (0.166125ms)
+    ✔ 408 -> NETWORK_ERROR (retriable transient) (0.124917ms)
+    ✔ UNKNOWN is not retriable (0.067958ms)
+  ✔ Other 4xx classification (1.517875ms)
   ▶ isRetriable
-    ✔ returns true for retriable error types (0.100375ms)
-    ✔ returns false for non-retriable error types (0.082458ms)
-  ✔ isRetriable (0.251333ms)
+    ✔ returns true for retriable error types (0.079292ms)
+    ✔ returns false for non-retriable error types (0.07725ms)
+  ✔ isRetriable (0.220958ms)
   ▶ getCooldownDuration
-    ✔ AUTH_INVALID -> 86400s (24h) (0.172333ms)
-    ✔ FORBIDDEN_KEY -> 3600s (1h) (0.071208ms)
-    ✔ FORBIDDEN_MODEL -> 1800s (30min) (0.058333ms)
-    ✔ FORBIDDEN_PROVIDER -> 1800s (30min) (0.068666ms)
-    ✔ FORBIDDEN_REGION -> 86400s (24h) (0.05075ms)
-    ✔ FORBIDDEN_TEMP -> 60s (1min) (0.050208ms)
-    ✔ RATE_LIMIT_TRANSIENT -> 30s (0.060583ms)
-    ✔ RATE_LIMIT_QUOTA -> 3600s (1h) (0.057875ms)
-    ✔ SERVER_ERROR -> 60s (1min) (0.057959ms)
-    ✔ NETWORK_ERROR -> 15s (0.048709ms)
-    ✔ CLIENT_ABORTED -> 0s (no cooldown) (0.050083ms)
-    ✔ UNKNOWN -> 0s (no cooldown) (0.062459ms)
-  ✔ getCooldownDuration (1.031125ms)
+    ✔ AUTH_INVALID -> 86400s (24h) (0.152333ms)
+    ✔ FORBIDDEN_KEY -> 3600s (1h) (0.054167ms)
+    ✔ FORBIDDEN_MODEL -> 1800s (30min) (0.044458ms)
+    ✔ FORBIDDEN_PROVIDER -> 1800s (30min) (0.056833ms)
+    ✔ FORBIDDEN_REGION -> 86400s (24h) (0.044ms)
+    ✔ FORBIDDEN_TEMP -> 60s (1min) (0.041583ms)
+    ✔ RATE_LIMIT_TRANSIENT -> 30s (0.040792ms)
+    ✔ RATE_LIMIT_QUOTA -> 3600s (1h) (0.044208ms)
+    ✔ SERVER_ERROR -> 60s (1min) (0.051458ms)
+    ✔ NETWORK_ERROR -> 15s (0.038958ms)
+    ✔ CLIENT_ABORTED -> 0s (no cooldown) (0.0395ms)
+    ✔ UNKNOWN -> 0s (no cooldown) (0.050875ms)
+  ✔ getCooldownDuration (0.875166ms)
   ▶ shouldDisableKey
-    ✔ returns true only for AUTH_INVALID and FORBIDDEN_KEY (0.077166ms)
-    ✔ returns false for all other error types (0.070125ms)
-  ✔ shouldDisableKey (0.224583ms)
+    ✔ returns true only for AUTH_INVALID and FORBIDDEN_KEY (0.0595ms)
+    ✔ returns false for all other error types (0.055666ms)
+  ✔ shouldDisableKey (0.178084ms)
   ▶ isQuotaExhausted
-    ✔ returns true for explicit quota error codes (0.09725ms)
-    ✔ returns true for quota keywords in body (0.065917ms)
-    ✔ returns true for long retry-after (>=600s) (0.057041ms)
-    ✔ returns false for transient signals (0.064333ms)
-  ✔ isQuotaExhausted (0.372583ms)
-✔ Provider Error Classification (12.431041ms)
-[health][2026-08-02T23:26:52.119Z] provider "openai" status: unknown → active
-[health][2026-08-02T23:26:52.121Z] provider "openai" status: unknown → active
-[health][2026-08-02T23:26:52.121Z] provider "openai" status: unknown → active
-[health][2026-08-02T23:26:52.122Z] provider "openai" status: unknown → degraded
-[health][2026-08-02T23:26:52.122Z] provider "openai" status: unknown → active
-[health][2026-08-02T23:26:52.122Z] provider "openai" status: active → degraded
-[health][2026-08-02T23:26:52.122Z] provider "openai" status: unknown → active
-[health][2026-08-02T23:26:52.122Z] provider "openai" status: active → degraded
-[health][2026-08-02T23:26:52.123Z] provider "openai" status: unknown → degraded
-[health][2026-08-02T23:26:52.123Z] provider "openai" status: degraded → down
-[health][2026-08-02T23:26:52.123Z] provider "openai" status: unknown → degraded
-[health][2026-08-02T23:26:52.123Z] provider "openai" status: unknown → degraded
-[health][2026-08-02T23:26:52.123Z] provider "openai" status: degraded → active
-[health][2026-08-02T23:26:52.124Z] provider "openai" status: unknown → active
-[health][2026-08-02T23:26:52.124Z] provider "openai" status: unknown → degraded
-[health][2026-08-02T23:26:52.124Z] provider "openai" status: unknown → degraded
-[health][2026-08-02T23:26:52.124Z] provider "openai" status: degraded → down
-[health][2026-08-02T23:26:52.126Z] provider "openai" status: unknown → active
-[health][2026-08-02T23:26:52.126Z] provider "openai" status: active → degraded
-[health][2026-08-02T23:26:52.127Z] provider "openai" status: unknown → active
-[health][2026-08-02T23:26:52.127Z] provider "gemini" status: unknown → active
-[health][2026-08-02T23:26:52.129Z] circuit "key" CLOSED → OPEN (consecutive failures=3)
-[health][2026-08-02T23:26:52.129Z] circuit "key" CLOSED → OPEN (consecutive failures=3)
-[health][2026-08-02T23:26:52.130Z] circuit "key" CLOSED → OPEN (consecutive failures=3)
-[health][2026-08-02T23:26:52.130Z] circuit "key" CLOSED → OPEN (consecutive failures=3)
-[health][2026-08-02T23:26:52.130Z] circuit "key" OPEN → HALF_OPEN (probing)
-[health][2026-08-02T23:26:52.131Z] circuit "key" CLOSED → OPEN (consecutive failures=3)
-[health][2026-08-02T23:26:52.131Z] circuit "key" OPEN → HALF_OPEN (probing)
-[health][2026-08-02T23:26:52.131Z] circuit "key" HALF_OPEN → CLOSED (probe succeeded)
-[health][2026-08-02T23:26:52.131Z] circuit "key" CLOSED → OPEN (consecutive failures=3)
-[health][2026-08-02T23:26:52.131Z] circuit "key" OPEN → HALF_OPEN (probing)
-[health][2026-08-02T23:26:52.131Z] circuit "key" HALF_OPEN → OPEN (probe failed)
-[health][2026-08-02T23:26:52.131Z] circuit "key" CLOSED → OPEN (slow call ratio exceeded)
-[health][2026-08-02T23:26:52.131Z] circuit "key" CLOSED → OPEN (consecutive failures=3)
-[health][2026-08-02T23:26:52.131Z] circuit "key" manually reset to CLOSED
-[health][2026-08-02T23:26:52.132Z] circuit "key1" CLOSED → OPEN (consecutive failures=3)
-[health][2026-08-02T23:26:52.132Z] circuit "key2" CLOSED → OPEN (consecutive failures=3)
-[health][2026-08-02T23:26:52.132Z] all circuits reset
+    ✔ returns true for explicit quota error codes (0.068084ms)
+    ✔ returns true for quota keywords in body (0.058792ms)
+    ✔ returns true for long retry-after (>=600s) (0.048958ms)
+    ✔ returns false for transient signals (0.044833ms)
+  ✔ isQuotaExhausted (0.302708ms)
+✔ Provider Error Classification (9.97825ms)
+[health][2026-08-03T01:09:48.761Z] provider "openai" status: unknown → active
+[health][2026-08-03T01:09:48.762Z] provider "openai" status: unknown → active
+[health][2026-08-03T01:09:48.763Z] provider "openai" status: unknown → active
+[health][2026-08-03T01:09:48.763Z] provider "openai" status: unknown → degraded
+[health][2026-08-03T01:09:48.763Z] provider "openai" status: unknown → active
+[health][2026-08-03T01:09:48.763Z] provider "openai" status: active → degraded
+[health][2026-08-03T01:09:48.763Z] provider "openai" status: unknown → active
+[health][2026-08-03T01:09:48.763Z] provider "openai" status: active → degraded
+[health][2026-08-03T01:09:48.764Z] provider "openai" status: unknown → degraded
+[health][2026-08-03T01:09:48.764Z] provider "openai" status: degraded → down
+[health][2026-08-03T01:09:48.764Z] provider "openai" status: unknown → degraded
+[health][2026-08-03T01:09:48.764Z] provider "openai" status: unknown → degraded
+[health][2026-08-03T01:09:48.764Z] provider "openai" status: degraded → active
+[health][2026-08-03T01:09:48.765Z] provider "openai" status: unknown → active
+[health][2026-08-03T01:09:48.765Z] provider "openai" status: unknown → degraded
+[health][2026-08-03T01:09:48.765Z] provider "openai" status: unknown → degraded
+[health][2026-08-03T01:09:48.765Z] provider "openai" status: degraded → down
+[health][2026-08-03T01:09:48.767Z] provider "openai" status: unknown → active
+[health][2026-08-03T01:09:48.767Z] provider "openai" status: active → degraded
+[health][2026-08-03T01:09:48.767Z] provider "openai" status: unknown → active
+[health][2026-08-03T01:09:48.767Z] provider "gemini" status: unknown → active
+[health][2026-08-03T01:09:48.769Z] circuit "key" CLOSED → OPEN (consecutive failures=3)
+[health][2026-08-03T01:09:48.770Z] circuit "key" CLOSED → OPEN (consecutive failures=3)
+[health][2026-08-03T01:09:48.770Z] circuit "key" CLOSED → OPEN (consecutive failures=3)
+[health][2026-08-03T01:09:48.771Z] circuit "key" CLOSED → OPEN (consecutive failures=3)
+[health][2026-08-03T01:09:48.771Z] circuit "key" OPEN → HALF_OPEN (probing)
+[health][2026-08-03T01:09:48.771Z] circuit "key" CLOSED → OPEN (consecutive failures=3)
+[health][2026-08-03T01:09:48.771Z] circuit "key" OPEN → HALF_OPEN (probing)
+[health][2026-08-03T01:09:48.771Z] circuit "key" HALF_OPEN → CLOSED (probe succeeded)
+[health][2026-08-03T01:09:48.771Z] circuit "key" CLOSED → OPEN (consecutive failures=3)
+[health][2026-08-03T01:09:48.771Z] circuit "key" OPEN → HALF_OPEN (probing)
+[health][2026-08-03T01:09:48.771Z] circuit "key" HALF_OPEN → OPEN (probe failed)
+[health][2026-08-03T01:09:48.771Z] circuit "key" CLOSED → OPEN (slow call ratio exceeded)
+[health][2026-08-03T01:09:48.772Z] circuit "key" CLOSED → OPEN (consecutive failures=3)
+[health][2026-08-03T01:09:48.772Z] circuit "key" manually reset to CLOSED
+[health][2026-08-03T01:09:48.772Z] circuit "key1" CLOSED → OPEN (consecutive failures=3)
+[health][2026-08-03T01:09:48.772Z] circuit "key2" CLOSED → OPEN (consecutive failures=3)
+[health][2026-08-03T01:09:48.772Z] all circuits reset
 ▶ ProviderHealth
   ▶ initialization
-    ✔ initializes with providers from config (1.565541ms)
-    ✔ initial status is UNKNOWN (0.313792ms)
-    ✔ initial totalRequests is 0 (0.201208ms)
-    ✔ empty config produces no providers (0.247209ms)
-  ✔ initialization (3.443292ms)
+    ✔ initializes with providers from config (1.365375ms)
+    ✔ initial status is UNKNOWN (0.313875ms)
+    ✔ initial totalRequests is 0 (0.339709ms)
+    ✔ empty config produces no providers (0.240416ms)
+  ✔ initialization (3.326625ms)
   ▶ recordResult success
-    ✔ success -> status ACTIVE (2.222917ms)
-    ✔ multiple successes keep status ACTIVE (0.283708ms)
-    ✔ avgLatency is updated (0.316083ms)
-  ✔ recordResult success (3.178209ms)
+    ✔ success -> status ACTIVE (1.926209ms)
+    ✔ multiple successes keep status ACTIVE (0.22225ms)
+    ✔ avgLatency is updated (0.172167ms)
+  ✔ recordResult success (2.550791ms)
   ▶ recordResult failure
-    ✔ single failure -> status DEGRADED (failRate > threshold) (0.221666ms)
-    ✔ success then failure -> DEGRADED (0.193459ms)
-    ✔ failure after successes resets consecutiveSuccesses (0.241375ms)
-  ✔ recordResult failure (0.850917ms)
+    ✔ single failure -> status DEGRADED (failRate > threshold) (0.15225ms)
+    ✔ success then failure -> DEGRADED (0.14625ms)
+    ✔ failure after successes resets consecutiveSuccesses (0.203292ms)
+  ✔ recordResult failure (0.64025ms)
   ▶ consecutive failures -> DOWN
-    ✔ 5 consecutive failures -> DOWN (0.303291ms)
-    ✔ 4 failures -> not DOWN yet (still DEGRADED) (0.215917ms)
-    ✔ success after failures resets to ACTIVE (0.177333ms)
-  ✔ consecutive failures -> DOWN (0.827ms)
+    ✔ 5 consecutive failures -> DOWN (0.273541ms)
+    ✔ 4 failures -> not DOWN yet (still DEGRADED) (0.209083ms)
+    ✔ success after failures resets to ACTIVE (0.142ms)
+  ✔ consecutive failures -> DOWN (0.756875ms)
   ▶ isAvailable
-    ✔ returns true for UNKNOWN provider (0.16425ms)
-    ✔ returns true for ACTIVE provider (0.119791ms)
-    ✔ returns true for DEGRADED provider (0.11075ms)
-    ✔ returns false for DOWN provider (0.144125ms)
-    ✔ returns false for unknown provider (1.660375ms)
-  ✔ isAvailable (2.37275ms)
+    ✔ returns true for UNKNOWN provider (0.132458ms)
+    ✔ returns true for ACTIVE provider (0.098459ms)
+    ✔ returns true for DEGRADED provider (0.086083ms)
+    ✔ returns false for DOWN provider (0.109625ms)
+    ✔ returns false for unknown provider (1.805125ms)
+  ✔ isAvailable (2.368333ms)
   ▶ getHealthSummary
-    ✔ returns all providers (0.218584ms)
-    ✔ includes failureRate calculation (0.288416ms)
-    ✔ includes avgLatency (0.226583ms)
-    ✔ dynamically registers unknown provider on recordResult (0.357542ms)
-  ✔ getHealthSummary (1.342583ms)
-✔ ProviderHealth (13.202709ms)
+    ✔ returns all providers (0.152375ms)
+    ✔ includes failureRate calculation (0.129416ms)
+    ✔ includes avgLatency (0.0945ms)
+    ✔ dynamically registers unknown provider on recordResult (0.1615ms)
+  ✔ getHealthSummary (0.638917ms)
+✔ ProviderHealth (11.283458ms)
 ▶ CircuitBreaker
   ▶ CLOSED state
-    ✔ CLOSED state allows calls (0.549084ms)
-    ✔ no record returns CLOSED by default (0.111792ms)
-    ✔ disabled breaker always allows calls (0.236708ms)
-  ✔ CLOSED state (1.035792ms)
+    ✔ CLOSED state allows calls (0.2715ms)
+    ✔ no record returns CLOSED by default (0.066417ms)
+    ✔ disabled breaker always allows calls (0.174208ms)
+  ✔ CLOSED state (0.592041ms)
   ▶ failures reach threshold -> OPEN
-    ✔ consecutive failures reach threshold -> OPEN (0.339209ms)
-    ✔ success resets consecutive failure count (0.171375ms)
-  ✔ failures reach threshold -> OPEN (0.589083ms)
+    ✔ consecutive failures reach threshold -> OPEN (0.925458ms)
+    ✔ success resets consecutive failure count (0.286875ms)
+  ✔ failures reach threshold -> OPEN (1.355334ms)
   ▶ OPEN state blocks calls
-    ✔ OPEN state returns false from allow() (0.299333ms)
-  ✔ OPEN state blocks calls (0.476791ms)
+    ✔ OPEN state returns false from allow() (0.296375ms)
+  ✔ OPEN state blocks calls (0.420958ms)
   ▶ after cooldown -> HALF_OPEN
-    ✔ OPEN transitions to HALF_OPEN after cooldown (0.178208ms)
-    ✔ allow() in expired OPEN transitions to HALF_OPEN and allows probe (0.134459ms)
-  ✔ after cooldown -> HALF_OPEN (0.402709ms)
+    ✔ OPEN transitions to HALF_OPEN after cooldown (0.267042ms)
+    ✔ allow() in expired OPEN transitions to HALF_OPEN and allows probe (0.240667ms)
+  ✔ after cooldown -> HALF_OPEN (0.659333ms)
   ▶ HALF_OPEN probe success -> CLOSED
-    ✔ successful probe in HALF_OPEN closes circuit (0.16125ms)
-  ✔ HALF_OPEN probe success -> CLOSED (0.203833ms)
+    ✔ successful probe in HALF_OPEN closes circuit (0.213875ms)
+  ✔ HALF_OPEN probe success -> CLOSED (0.271916ms)
   ▶ HALF_OPEN probe failure -> OPEN
-    ✔ failed probe in HALF_OPEN reopens circuit (0.134583ms)
-  ✔ HALF_OPEN probe failure -> OPEN (0.174834ms)
+    ✔ failed probe in HALF_OPEN reopens circuit (0.1335ms)
+  ✔ HALF_OPEN probe failure -> OPEN (0.238458ms)
   ▶ high slow call ratio -> OPEN
-    ✔ slow call ratio exceeds threshold -> OPEN (0.155042ms)
-    ✔ fast calls do not trigger slow call ratio (0.118458ms)
-  ✔ high slow call ratio -> OPEN (0.329792ms)
+    ✔ slow call ratio exceeds threshold -> OPEN (0.147625ms)
+    ✔ fast calls do not trigger slow call ratio (0.093958ms)
+  ✔ high slow call ratio -> OPEN (0.297917ms)
   ▶ reset
-    ✔ reset forces CLOSED state (0.161417ms)
-    ✔ resetAll clears all records (0.192333ms)
-  ✔ reset (0.4115ms)
+    ✔ reset forces CLOSED state (0.139958ms)
+    ✔ resetAll clears all records (0.12275ms)
+  ✔ reset (0.313583ms)
   ▶ getSummary
-    ✔ returns state and failure info for all keys (0.230875ms)
-  ✔ getSummary (0.26975ms)
-✔ CircuitBreaker (4.567334ms)
-[key-pool][2026-08-02T23:26:52.133Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.135Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.139Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.139Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.139Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.139Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.139Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.139Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.140Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.140Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.141Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.141Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.141Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.141Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.142Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.142Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.142Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.142Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.143Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.143Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.144Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.144Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.144Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.144Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.144Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.144Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.144Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.145Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.145Z] key "openai-0" permanently disabled (AUTH_INVALID / 401)
-[key-pool][2026-08-02T23:26:52.145Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.145Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.145Z] key "openai-0" permanently disabled (AUTH_INVALID / 401)
-[key-pool][2026-08-02T23:26:52.145Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.145Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.145Z] key "openai-0" cooling for 7200s (errorType=forbidden_key, failureCount=1)
-[key-pool][2026-08-02T23:26:52.146Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.146Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.146Z] key "anthropic-0" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
-[key-pool][2026-08-02T23:26:52.147Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.147Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.147Z] key "anthropic-0" cooling for 600s (errorType=rate_limit_quota, failureCount=1)
-[key-pool][2026-08-02T23:26:52.147Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.147Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.147Z] key "anthropic-0" cooling for 30s (errorType=server_error, failureCount=1)
-[key-pool][2026-08-02T23:26:52.147Z] key "anthropic-0" cooling for 60s (errorType=server_error, failureCount=2)
-[key-pool][2026-08-02T23:26:52.147Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.147Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.148Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.148Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.148Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.148Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.148Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.148Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.148Z] key "anthropic-0" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
-[key-pool][2026-08-02T23:26:52.148Z] key "anthropic-0" cooldown expired, recovered to ACTIVE
-[key-pool][2026-08-02T23:26:52.148Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.148Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.148Z] key "anthropic-0" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
-[key-pool][2026-08-02T23:26:52.149Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.149Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.149Z] key "anthropic-0" permanently disabled (AUTH_INVALID / 401)
-[key-pool][2026-08-02T23:26:52.149Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.149Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.149Z] key "anthropic-0" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
-[key-pool][2026-08-02T23:26:52.149Z] key "anthropic-1" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
-[key-pool][2026-08-02T23:26:52.149Z] key "anthropic-2" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
-[key-pool][2026-08-02T23:26:52.149Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.149Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.149Z] key "anthropic-0" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
-[key-pool][2026-08-02T23:26:52.149Z] key "anthropic-1" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
-[key-pool][2026-08-02T23:26:52.149Z] key "anthropic-2" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
-[key-pool][2026-08-02T23:26:52.149Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.149Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.150Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.150Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.150Z] key "anthropic-0" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
-[key-pool][2026-08-02T23:26:52.150Z] key "anthropic-0" recovered from COOLING after success
-[key-pool][2026-08-02T23:26:52.150Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.150Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.150Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.150Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.150Z] key "anthropic-0" manually disabled
-[key-pool][2026-08-02T23:26:52.150Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.150Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.150Z] key "anthropic-0" manually disabled
-[key-pool][2026-08-02T23:26:52.150Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.150Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.150Z] key "anthropic-0" manually disabled
-[key-pool][2026-08-02T23:26:52.150Z] key "anthropic-0" manually enabled
-[key-pool][2026-08-02T23:26:52.151Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.151Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.151Z] key "anthropic-0" permanently disabled (AUTH_INVALID / 401)
-[key-pool][2026-08-02T23:26:52.151Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.151Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.151Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.151Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.151Z] key "anthropic-0" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
-[key-pool][2026-08-02T23:26:52.151Z] key "anthropic-1" cooling for 600s (errorType=rate_limit_quota, failureCount=1)
-[key-pool][2026-08-02T23:26:52.151Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.151Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.151Z] key "anthropic-0" permanently disabled (AUTH_INVALID / 401)
-[key-pool][2026-08-02T23:26:52.152Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.152Z] warning: provider "empty" has no API keys configured
-[key-pool][2026-08-02T23:26:52.152Z] provider "anthropic" initialized with 3 keys
-[key-pool][2026-08-02T23:26:52.152Z] warning: provider "empty" has no API keys configured
+    ✔ returns state and failure info for all keys (0.174917ms)
+  ✔ getSummary (0.210584ms)
+✔ CircuitBreaker (4.7475ms)
+[key-pool][2026-08-03T01:09:48.758Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.760Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.763Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.763Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.763Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.763Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.763Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.763Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.764Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.764Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.764Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.764Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.765Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.765Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.765Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.765Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.765Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.765Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.766Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.766Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.766Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.766Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.766Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.766Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.767Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.767Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.767Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.767Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.767Z] key "openai-0" permanently disabled (AUTH_INVALID / 401)
+[key-pool][2026-08-03T01:09:48.767Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.767Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.767Z] key "openai-0" permanently disabled (AUTH_INVALID / 401)
+[key-pool][2026-08-03T01:09:48.767Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.767Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.767Z] key "openai-0" cooling for 7200s (errorType=forbidden_key, failureCount=1)
+[key-pool][2026-08-03T01:09:48.767Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.767Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.767Z] key "anthropic-0" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
+[key-pool][2026-08-03T01:09:48.768Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.768Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.768Z] key "anthropic-0" cooling for 600s (errorType=rate_limit_quota, failureCount=1)
+[key-pool][2026-08-03T01:09:48.769Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.769Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.769Z] key "anthropic-0" cooling for 30s (errorType=server_error, failureCount=1)
+[key-pool][2026-08-03T01:09:48.769Z] key "anthropic-0" cooling for 60s (errorType=server_error, failureCount=2)
+[key-pool][2026-08-03T01:09:48.769Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.769Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.769Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.769Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.769Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.769Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.769Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.769Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.769Z] key "anthropic-0" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
+[key-pool][2026-08-03T01:09:48.769Z] key "anthropic-0" cooldown expired, recovered to ACTIVE
+[key-pool][2026-08-03T01:09:48.769Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.769Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.769Z] key "anthropic-0" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
+[key-pool][2026-08-03T01:09:48.769Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.769Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.769Z] key "anthropic-0" permanently disabled (AUTH_INVALID / 401)
+[key-pool][2026-08-03T01:09:48.770Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.770Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.770Z] key "anthropic-0" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
+[key-pool][2026-08-03T01:09:48.770Z] key "anthropic-1" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
+[key-pool][2026-08-03T01:09:48.770Z] key "anthropic-2" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
+[key-pool][2026-08-03T01:09:48.770Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.770Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.770Z] key "anthropic-0" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
+[key-pool][2026-08-03T01:09:48.770Z] key "anthropic-1" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
+[key-pool][2026-08-03T01:09:48.770Z] key "anthropic-2" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
+[key-pool][2026-08-03T01:09:48.770Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.770Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.770Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.770Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.770Z] key "anthropic-0" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
+[key-pool][2026-08-03T01:09:48.770Z] key "anthropic-0" recovered from COOLING after success
+[key-pool][2026-08-03T01:09:48.770Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.770Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.770Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.770Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.770Z] key "anthropic-0" manually disabled
+[key-pool][2026-08-03T01:09:48.770Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.770Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.770Z] key "anthropic-0" manually disabled
+[key-pool][2026-08-03T01:09:48.771Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.771Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.771Z] key "anthropic-0" manually disabled
+[key-pool][2026-08-03T01:09:48.771Z] key "anthropic-0" manually enabled
+[key-pool][2026-08-03T01:09:48.771Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.771Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.771Z] key "anthropic-0" permanently disabled (AUTH_INVALID / 401)
+[key-pool][2026-08-03T01:09:48.771Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.771Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.771Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.771Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.771Z] key "anthropic-0" cooling for 30s (errorType=rate_limit_transient, failureCount=1)
+[key-pool][2026-08-03T01:09:48.771Z] key "anthropic-1" cooling for 600s (errorType=rate_limit_quota, failureCount=1)
+[key-pool][2026-08-03T01:09:48.771Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.771Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.771Z] key "anthropic-0" permanently disabled (AUTH_INVALID / 401)
+[key-pool][2026-08-03T01:09:48.772Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.772Z] warning: provider "empty" has no API keys configured
+[key-pool][2026-08-03T01:09:48.772Z] provider "anthropic" initialized with 3 keys
+[key-pool][2026-08-03T01:09:48.772Z] warning: provider "empty" has no API keys configured
 ▶ KeyPool
   ▶ initialization
-    ✔ initializes with multiple providers and keys (5.316917ms)
-    ✔ empty api_key produces no keys (0.358125ms)
-    ✔ unknown provider returns empty keyIds (0.30825ms)
-    ✔ all keys start as ACTIVE (0.434333ms)
-  ✔ initialization (7.728333ms)
+    ✔ initializes with multiple providers and keys (4.348792ms)
+    ✔ empty api_key produces no keys (0.4545ms)
+    ✔ unknown provider returns empty keyIds (0.255667ms)
+    ✔ all keys start as ACTIVE (0.327083ms)
+  ✔ initialization (6.226792ms)
   ▶ getKeys
-    ✔ returns active keys (0.604583ms)
-    ✔ returns empty for provider with no keys (0.260625ms)
-    ✔ returns empty for unknown provider (0.228875ms)
-  ✔ getKeys (1.417959ms)
+    ✔ returns active keys (0.425667ms)
+    ✔ returns empty for provider with no keys (0.189916ms)
+    ✔ returns empty for unknown provider (0.167542ms)
+  ✔ getKeys (1.120042ms)
   ▶ nextKey rotation
-    ✔ returns a key when keys are available (0.418292ms)
-    ✔ rotates to least recently used (0.511583ms)
-    ✔ updates lastUsed after selection (0.506667ms)
-  ✔ nextKey rotation (1.884375ms)
+    ✔ returns a key when keys are available (0.319375ms)
+    ✔ rotates to least recently used (0.253542ms)
+    ✔ updates lastUsed after selection (0.338209ms)
+  ✔ nextKey rotation (1.103458ms)
   ▶ nextKey with excludeKeys
-    ✔ skips excluded keys (0.268417ms)
-    ✔ returns null when all keys are excluded (0.236459ms)
-    ✔ ignore excludeKeys for unknown keyIds (0.156167ms)
-  ✔ nextKey with excludeKeys (0.816625ms)
+    ✔ skips excluded keys (0.191167ms)
+    ✔ returns null when all keys are excluded (0.144ms)
+    ✔ ignore excludeKeys for unknown keyIds (0.151916ms)
+  ✔ nextKey with excludeKeys (0.624208ms)
   ▶ markKeyFailed
-    ✔ AUTH_INVALID -> INVALID status (permanent) (0.496542ms)
-    ✔ AUTH_INVALID key is no longer available (0.210542ms)
-    ✔ FORBIDDEN_KEY -> COOLING (key-level cooldown) (0.269125ms)
-    ✔ RATE_LIMIT_TRANSIENT -> COOLING with ~30s cooldown (1.370958ms)
-    ✔ RATE_LIMIT_QUOTA -> COOLING with ~600s cooldown (0.232167ms)
-    ✔ SERVER_ERROR -> COOLING with exponential backoff (0.211167ms)
-    ✔ CLIENT_ABORTED -> no cooldown (status stays ACTIVE) (0.135583ms)
-    ✔ UNKNOWN -> no cooldown (status stays ACTIVE) (0.136291ms)
-    ✔ incrementing failureCount on each failure (0.1465ms)
-  ✔ markKeyFailed (3.510167ms)
+    ✔ AUTH_INVALID -> INVALID status (permanent) (0.296833ms)
+    ✔ AUTH_INVALID key is no longer available (0.118916ms)
+    ✔ FORBIDDEN_KEY -> COOLING (key-level cooldown) (0.168125ms)
+    ✔ RATE_LIMIT_TRANSIENT -> COOLING with ~30s cooldown (0.963792ms)
+    ✔ RATE_LIMIT_QUOTA -> COOLING with ~600s cooldown (0.149084ms)
+    ✔ SERVER_ERROR -> COOLING with exponential backoff (0.129125ms)
+    ✔ CLIENT_ABORTED -> no cooldown (status stays ACTIVE) (0.090209ms)
+    ✔ UNKNOWN -> no cooldown (status stays ACTIVE) (0.099416ms)
+    ✔ incrementing failureCount on each failure (0.08875ms)
+  ✔ markKeyFailed (2.301375ms)
   ▶ cooldown recovery
-    ✔ cooling key becomes active after cooldown expires (0.263375ms)
-    ✔ cooling key is excluded from nextKey until recovered (0.227292ms)
-    ✔ INVALID key does not recover (0.15825ms)
-  ✔ cooldown recovery (0.759666ms)
+    ✔ cooling key becomes active after cooldown expires (0.151625ms)
+    ✔ cooling key is excluded from nextKey until recovered (0.135292ms)
+    ✔ INVALID key does not recover (0.095541ms)
+  ✔ cooldown recovery (0.452084ms)
   ▶ all keys cooling
-    ✔ nextKey returns null when all keys are cooling (0.200542ms)
-    ✔ getKeys returns empty when all keys are cooling (0.176042ms)
-  ✔ all keys cooling (0.4545ms)
+    ✔ nextKey returns null when all keys are cooling (0.139958ms)
+    ✔ getKeys returns empty when all keys are cooling (0.123541ms)
+  ✔ all keys cooling (0.319125ms)
   ▶ markKeySucceeded
-    ✔ updates successCount and resets failureCount (0.231167ms)
-    ✔ recovers from COOLING after success (0.168166ms)
-    ✔ updates lastSuccess timestamp (0.117333ms)
-  ✔ markKeySucceeded (0.63225ms)
+    ✔ updates successCount and resets failureCount (0.16525ms)
+    ✔ recovers from COOLING after success (0.115042ms)
+    ✔ updates lastSuccess timestamp (0.076416ms)
+  ✔ markKeySucceeded (0.419084ms)
   ▶ manual disable/enable
-    ✔ disableKey sets DISABLED status (0.193209ms)
-    ✔ disabled key is excluded from nextKey (0.132458ms)
-    ✔ enableKey restores DISABLED key to ACTIVE (0.164083ms)
-    ✔ enableKey does not restore INVALID key (0.129125ms)
-  ✔ manual disable/enable (0.748958ms)
+    ✔ disableKey sets DISABLED status (0.142583ms)
+    ✔ disabled key is excluded from nextKey (0.087834ms)
+    ✔ enableKey restores DISABLED key to ACTIVE (0.108458ms)
+    ✔ enableKey does not restore INVALID key (0.087916ms)
+  ✔ manual disable/enable (0.509292ms)
   ▶ getKeyHealthSummary
-    ✔ returns correct status counts for healthy pool (0.449583ms)
-    ✔ reflects cooling keys in summary (0.172625ms)
-    ✔ reflects invalid keys in summary (0.174584ms)
-    ✔ includes per-key details (0.123333ms)
-    ✔ includes all providers (0.112792ms)
-  ✔ getKeyHealthSummary (1.174916ms)
-✔ KeyPool (21.926292ms)
-ℹ tests 373
+    ✔ returns correct status counts for healthy pool (0.317833ms)
+    ✔ reflects cooling keys in summary (0.179ms)
+    ✔ reflects invalid keys in summary (0.205541ms)
+    ✔ includes per-key details (0.12675ms)
+    ✔ includes all providers (0.105833ms)
+  ✔ getKeyHealthSummary (1.066958ms)
+✔ KeyPool (15.212583ms)
+ℹ tests 387
 ℹ suites 83
-ℹ pass 373
+ℹ pass 387
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 691.815334
+ℹ duration_ms 462.257959

@@ -42,7 +42,7 @@ function buildConfig(mockPort, dataDir, overrides = {}) {
       { name: 'mock-a', base_url: `http://127.0.0.1:${mockPort}/v1`, api_key: 'k-a', auth_header: 'Authorization', auth_prefix: 'Bearer ' },
     ],
     models: [
-      { id: 'test-model-a', tier: 'tier1', provider: 'mock-a', apiModel: 'test-model-a', enabled: true, paid: false, capability: ['chat', 'tool_use', 'streaming'], max_tokens: 64000, price: { input_cost_per_1k: 0, output_cost_per_1k: 0, currency: 'USD' } },
+      { id: 'test-model-a', tier: 'tier1', provider: 'mock-a', apiModel: 'test-model-a', enabled: true, paid: false, capabilities: { chat: 100, coding: 100, reasoning: 100, tool_use: 100, vision: 0, structured_output: 50, long_context: 100, streaming: 100 }, context_window: 64000, reliability: 0.9, price: { input_cost_per_1k: 0, output_cost_per_1k: 0, currency: 'USD' } },
       { id: 'test-model-paid', tier: 'tier2', provider: 'mock-a', apiModel: 'test-model-paid', enabled: true, paid: true, capability: ['chat'], price: { input_cost_per_1k: 0.01, output_cost_per_1k: 0.02, currency: 'USD' } },
     ],
     agent_bindings: {},

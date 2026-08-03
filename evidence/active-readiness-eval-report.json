@@ -1,0 +1,5042 @@
+{
+  "mode": "shadow",
+  "runtime": "deterministic local mock providers (reproducible, offline, no real keys)",
+  "honesty": "验证 Shadow 决策真实代码路径；外部真实 Pilot 见 evidence/pilot-*.json；未开启 Active",
+  "tasks_total": 105,
+  "categories": {
+    "simple_chat": 6,
+    "writing": 5,
+    "summarization": 5,
+    "translation": 5,
+    "extraction": 5,
+    "analysis": 5,
+    "complex_reasoning": 5,
+    "coding": 6,
+    "debugging": 5,
+    "architecture": 4,
+    "tool_use": 5,
+    "vision": 4,
+    "structured_output": 5,
+    "streaming": 6,
+    "long_context": 4,
+    "strict": 4,
+    "allowPaid_false": 4,
+    "maxRequestCost": 4,
+    "no_candidate": 4,
+    "fallback": 4,
+    "client_aborted": 3,
+    "incomplete": 3,
+    "provider_health": 4
+  },
+  "classification": {
+    "correct": 105,
+    "wrong": 0,
+    "accuracy": "100%",
+    "details": [
+      {
+        "taskId": "t001",
+        "category": "simple_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t002",
+        "category": "simple_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t003",
+        "category": "simple_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t004",
+        "category": "simple_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t005",
+        "category": "simple_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t006",
+        "category": "simple_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t007",
+        "category": "writing",
+        "expected": "writing",
+        "actual": "writing",
+        "ok": true
+      },
+      {
+        "taskId": "t008",
+        "category": "writing",
+        "expected": "writing",
+        "actual": "writing",
+        "ok": true
+      },
+      {
+        "taskId": "t009",
+        "category": "writing",
+        "expected": "writing",
+        "actual": "writing",
+        "ok": true
+      },
+      {
+        "taskId": "t010",
+        "category": "writing",
+        "expected": "writing",
+        "actual": "writing",
+        "ok": true
+      },
+      {
+        "taskId": "t011",
+        "category": "writing",
+        "expected": "writing",
+        "actual": "writing",
+        "ok": true
+      },
+      {
+        "taskId": "t012",
+        "category": "summarization",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "t013",
+        "category": "summarization",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "t014",
+        "category": "summarization",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "t015",
+        "category": "summarization",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "t016",
+        "category": "summarization",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "t017",
+        "category": "translation",
+        "expected": "translation",
+        "actual": "translation",
+        "ok": true
+      },
+      {
+        "taskId": "t018",
+        "category": "translation",
+        "expected": "translation",
+        "actual": "translation",
+        "ok": true
+      },
+      {
+        "taskId": "t019",
+        "category": "translation",
+        "expected": "translation",
+        "actual": "translation",
+        "ok": true
+      },
+      {
+        "taskId": "t020",
+        "category": "translation",
+        "expected": "translation",
+        "actual": "translation",
+        "ok": true
+      },
+      {
+        "taskId": "t021",
+        "category": "translation",
+        "expected": "translation",
+        "actual": "translation",
+        "ok": true
+      },
+      {
+        "taskId": "t022",
+        "category": "extraction",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "t023",
+        "category": "extraction",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "t024",
+        "category": "extraction",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "t025",
+        "category": "extraction",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "t026",
+        "category": "extraction",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "t027",
+        "category": "analysis",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "t028",
+        "category": "analysis",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "t029",
+        "category": "analysis",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "t030",
+        "category": "analysis",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "t031",
+        "category": "analysis",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "t032",
+        "category": "complex_reasoning",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "t033",
+        "category": "complex_reasoning",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "t034",
+        "category": "complex_reasoning",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "t035",
+        "category": "complex_reasoning",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "t036",
+        "category": "complex_reasoning",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "t037",
+        "category": "coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "t038",
+        "category": "coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "t039",
+        "category": "coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "t040",
+        "category": "coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "t041",
+        "category": "coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "t042",
+        "category": "coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "t043",
+        "category": "debugging",
+        "expected": "debugging",
+        "actual": "debugging",
+        "ok": true
+      },
+      {
+        "taskId": "t044",
+        "category": "debugging",
+        "expected": "debugging",
+        "actual": "debugging",
+        "ok": true
+      },
+      {
+        "taskId": "t045",
+        "category": "debugging",
+        "expected": "debugging",
+        "actual": "debugging",
+        "ok": true
+      },
+      {
+        "taskId": "t046",
+        "category": "debugging",
+        "expected": "debugging",
+        "actual": "debugging",
+        "ok": true
+      },
+      {
+        "taskId": "t047",
+        "category": "debugging",
+        "expected": "debugging",
+        "actual": "debugging",
+        "ok": true
+      },
+      {
+        "taskId": "t048",
+        "category": "architecture",
+        "expected": "architecture",
+        "actual": "architecture",
+        "ok": true
+      },
+      {
+        "taskId": "t049",
+        "category": "architecture",
+        "expected": "architecture",
+        "actual": "architecture",
+        "ok": true
+      },
+      {
+        "taskId": "t050",
+        "category": "architecture",
+        "expected": "architecture",
+        "actual": "architecture",
+        "ok": true
+      },
+      {
+        "taskId": "t051",
+        "category": "architecture",
+        "expected": "architecture",
+        "actual": "architecture",
+        "ok": true
+      },
+      {
+        "taskId": "t052",
+        "category": "tool_use",
+        "expected": "tool_orchestration",
+        "actual": "tool_orchestration",
+        "ok": true
+      },
+      {
+        "taskId": "t053",
+        "category": "tool_use",
+        "expected": "tool_orchestration",
+        "actual": "tool_orchestration",
+        "ok": true
+      },
+      {
+        "taskId": "t054",
+        "category": "tool_use",
+        "expected": "tool_orchestration",
+        "actual": "tool_orchestration",
+        "ok": true
+      },
+      {
+        "taskId": "t055",
+        "category": "tool_use",
+        "expected": "tool_orchestration",
+        "actual": "tool_orchestration",
+        "ok": true
+      },
+      {
+        "taskId": "t056",
+        "category": "tool_use",
+        "expected": "tool_orchestration",
+        "actual": "tool_orchestration",
+        "ok": true
+      },
+      {
+        "taskId": "t057",
+        "category": "vision",
+        "expected": "vision",
+        "actual": "vision",
+        "ok": true
+      },
+      {
+        "taskId": "t058",
+        "category": "vision",
+        "expected": "vision",
+        "actual": "vision",
+        "ok": true
+      },
+      {
+        "taskId": "t059",
+        "category": "vision",
+        "expected": "vision",
+        "actual": "vision",
+        "ok": true
+      },
+      {
+        "taskId": "t060",
+        "category": "vision",
+        "expected": "vision",
+        "actual": "vision",
+        "ok": true
+      },
+      {
+        "taskId": "t061",
+        "category": "structured_output",
+        "expected": "structured_output",
+        "actual": "structured_output",
+        "ok": true
+      },
+      {
+        "taskId": "t062",
+        "category": "structured_output",
+        "expected": "structured_output",
+        "actual": "structured_output",
+        "ok": true
+      },
+      {
+        "taskId": "t063",
+        "category": "structured_output",
+        "expected": "structured_output",
+        "actual": "structured_output",
+        "ok": true
+      },
+      {
+        "taskId": "t064",
+        "category": "structured_output",
+        "expected": "structured_output",
+        "actual": "structured_output",
+        "ok": true
+      },
+      {
+        "taskId": "t065",
+        "category": "structured_output",
+        "expected": "structured_output",
+        "actual": "structured_output",
+        "ok": true
+      },
+      {
+        "taskId": "t066",
+        "category": "streaming",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t067",
+        "category": "streaming",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t068",
+        "category": "streaming",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t069",
+        "category": "streaming",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t070",
+        "category": "streaming",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t071",
+        "category": "streaming",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t072",
+        "category": "long_context",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "t073",
+        "category": "long_context",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "t074",
+        "category": "long_context",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "t075",
+        "category": "long_context",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "t076",
+        "category": "strict",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t077",
+        "category": "strict",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t078",
+        "category": "strict",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t079",
+        "category": "strict",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t080",
+        "category": "allowPaid_false",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t081",
+        "category": "allowPaid_false",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t082",
+        "category": "allowPaid_false",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t083",
+        "category": "allowPaid_false",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "t084",
+        "category": "maxRequestCost",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "t085",
+        "category": "maxRequestCost",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "t086",
+        "category": "maxRequestCost",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "t087",
+        "category": "maxRequestCost",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "t088",
+        "category": "no_candidate",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t089",
+        "category": "no_candidate",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t090",
+        "category": "no_candidate",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t091",
+        "category": "no_candidate",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t092",
+        "category": "fallback",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t093",
+        "category": "fallback",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t094",
+        "category": "fallback",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t095",
+        "category": "fallback",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t096",
+        "category": "client_aborted",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t097",
+        "category": "client_aborted",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t098",
+        "category": "client_aborted",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t099",
+        "category": "incomplete",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t100",
+        "category": "incomplete",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t101",
+        "category": "incomplete",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t102",
+        "category": "provider_health",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t103",
+        "category": "provider_health",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t104",
+        "category": "provider_health",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "t105",
+        "category": "provider_health",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      }
+    ]
+  },
+  "hard_violations": {
+    "streaming": 0,
+    "vision": 0,
+    "tool_use": 0,
+    "context_window": 0,
+    "budget": 0,
+    "no_paid": 0,
+    "strict": 0,
+    "total": 0,
+    "details": []
+  },
+  "acceptable_recommendation": {
+    "total": 86,
+    "in_acceptable": 86,
+    "rate": "100%",
+    "null_allowed": 1,
+    "details": []
+  },
+  "outcome": {
+    "correct": 105,
+    "wrong": 0,
+    "accuracy": "100%",
+    "details": [
+      {
+        "taskId": "t001",
+        "category": "simple_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t002",
+        "category": "simple_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t003",
+        "category": "simple_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t004",
+        "category": "simple_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t005",
+        "category": "simple_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t006",
+        "category": "simple_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t007",
+        "category": "writing",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t008",
+        "category": "writing",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t009",
+        "category": "writing",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t010",
+        "category": "writing",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t011",
+        "category": "writing",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t012",
+        "category": "summarization",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t013",
+        "category": "summarization",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t014",
+        "category": "summarization",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t015",
+        "category": "summarization",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t016",
+        "category": "summarization",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t017",
+        "category": "translation",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t018",
+        "category": "translation",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t019",
+        "category": "translation",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t020",
+        "category": "translation",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t021",
+        "category": "translation",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t022",
+        "category": "extraction",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t023",
+        "category": "extraction",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t024",
+        "category": "extraction",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t025",
+        "category": "extraction",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t026",
+        "category": "extraction",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t027",
+        "category": "analysis",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t028",
+        "category": "analysis",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t029",
+        "category": "analysis",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t030",
+        "category": "analysis",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t031",
+        "category": "analysis",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t032",
+        "category": "complex_reasoning",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t033",
+        "category": "complex_reasoning",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t034",
+        "category": "complex_reasoning",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t035",
+        "category": "complex_reasoning",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t036",
+        "category": "complex_reasoning",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t037",
+        "category": "coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t038",
+        "category": "coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t039",
+        "category": "coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t040",
+        "category": "coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t041",
+        "category": "coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t042",
+        "category": "coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t043",
+        "category": "debugging",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t044",
+        "category": "debugging",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t045",
+        "category": "debugging",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t046",
+        "category": "debugging",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t047",
+        "category": "debugging",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t048",
+        "category": "architecture",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t049",
+        "category": "architecture",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t050",
+        "category": "architecture",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t051",
+        "category": "architecture",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t052",
+        "category": "tool_use",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t053",
+        "category": "tool_use",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t054",
+        "category": "tool_use",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t055",
+        "category": "tool_use",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t056",
+        "category": "tool_use",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t057",
+        "category": "vision",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t058",
+        "category": "vision",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t059",
+        "category": "vision",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t060",
+        "category": "vision",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t061",
+        "category": "structured_output",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t062",
+        "category": "structured_output",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t063",
+        "category": "structured_output",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t064",
+        "category": "structured_output",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t065",
+        "category": "structured_output",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t066",
+        "category": "streaming",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t067",
+        "category": "streaming",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t068",
+        "category": "streaming",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t069",
+        "category": "streaming",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t070",
+        "category": "streaming",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t071",
+        "category": "streaming",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t072",
+        "category": "long_context",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t073",
+        "category": "long_context",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t074",
+        "category": "long_context",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t075",
+        "category": "long_context",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t076",
+        "category": "strict",
+        "expected": "no_candidate",
+        "actual": "no_candidate",
+        "ok": true
+      },
+      {
+        "taskId": "t077",
+        "category": "strict",
+        "expected": "no_candidate",
+        "actual": "no_candidate",
+        "ok": true
+      },
+      {
+        "taskId": "t078",
+        "category": "strict",
+        "expected": "no_candidate",
+        "actual": "no_candidate",
+        "ok": true
+      },
+      {
+        "taskId": "t079",
+        "category": "strict",
+        "expected": "no_candidate",
+        "actual": "no_candidate",
+        "ok": true
+      },
+      {
+        "taskId": "t080",
+        "category": "allowPaid_false",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t081",
+        "category": "allowPaid_false",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t082",
+        "category": "allowPaid_false",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t083",
+        "category": "allowPaid_false",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t084",
+        "category": "maxRequestCost",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t085",
+        "category": "maxRequestCost",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t086",
+        "category": "maxRequestCost",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t087",
+        "category": "maxRequestCost",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t088",
+        "category": "no_candidate",
+        "expected": "no_candidate",
+        "actual": "no_candidate",
+        "ok": true
+      },
+      {
+        "taskId": "t089",
+        "category": "no_candidate",
+        "expected": "no_candidate",
+        "actual": "no_candidate",
+        "ok": true
+      },
+      {
+        "taskId": "t090",
+        "category": "no_candidate",
+        "expected": "no_candidate",
+        "actual": "no_candidate",
+        "ok": true
+      },
+      {
+        "taskId": "t091",
+        "category": "no_candidate",
+        "expected": "no_candidate",
+        "actual": "no_candidate",
+        "ok": true
+      },
+      {
+        "taskId": "t092",
+        "category": "fallback",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t093",
+        "category": "fallback",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t094",
+        "category": "fallback",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t095",
+        "category": "fallback",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t096",
+        "category": "client_aborted",
+        "expected": "client_aborted",
+        "actual": "client_aborted",
+        "ok": true
+      },
+      {
+        "taskId": "t097",
+        "category": "client_aborted",
+        "expected": "client_aborted",
+        "actual": "client_aborted",
+        "ok": true
+      },
+      {
+        "taskId": "t098",
+        "category": "client_aborted",
+        "expected": "client_aborted",
+        "actual": "client_aborted",
+        "ok": true
+      },
+      {
+        "taskId": "t099",
+        "category": "incomplete",
+        "expected": "incomplete",
+        "actual": "incomplete",
+        "ok": true
+      },
+      {
+        "taskId": "t100",
+        "category": "incomplete",
+        "expected": "incomplete",
+        "actual": "incomplete",
+        "ok": true
+      },
+      {
+        "taskId": "t101",
+        "category": "incomplete",
+        "expected": "incomplete",
+        "actual": "incomplete",
+        "ok": true
+      },
+      {
+        "taskId": "t102",
+        "category": "provider_health",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t103",
+        "category": "provider_health",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t104",
+        "category": "provider_health",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "t105",
+        "category": "provider_health",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      }
+    ]
+  },
+  "prompt_injection": 0,
+  "message_rewrite": 0,
+  "rows": [
+    {
+      "id": "t001",
+      "category": "simple_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t002",
+      "category": "simple_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t003",
+      "category": "simple_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t004",
+      "category": "simple_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t005",
+      "category": "simple_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t006",
+      "category": "simple_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t007",
+      "category": "writing",
+      "httpStatus": 200,
+      "taskType": "writing",
+      "expectedType": "writing",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t008",
+      "category": "writing",
+      "httpStatus": 200,
+      "taskType": "writing",
+      "expectedType": "writing",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t009",
+      "category": "writing",
+      "httpStatus": 200,
+      "taskType": "writing",
+      "expectedType": "writing",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t010",
+      "category": "writing",
+      "httpStatus": 200,
+      "taskType": "writing",
+      "expectedType": "writing",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t011",
+      "category": "writing",
+      "httpStatus": 200,
+      "taskType": "writing",
+      "expectedType": "writing",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t012",
+      "category": "summarization",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t013",
+      "category": "summarization",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t014",
+      "category": "summarization",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/M-nostream",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t015",
+      "category": "summarization",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t016",
+      "category": "summarization",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t017",
+      "category": "translation",
+      "httpStatus": 200,
+      "taskType": "translation",
+      "expectedType": "translation",
+      "suggested": "mock/M-chat-t1",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "exact_match",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t018",
+      "category": "translation",
+      "httpStatus": 200,
+      "taskType": "translation",
+      "expectedType": "translation",
+      "suggested": "mock/M-chat-t1",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "exact_match",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t019",
+      "category": "translation",
+      "httpStatus": 200,
+      "taskType": "translation",
+      "expectedType": "translation",
+      "suggested": "mock/M-chat-t1",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "exact_match",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t020",
+      "category": "translation",
+      "httpStatus": 200,
+      "taskType": "translation",
+      "expectedType": "translation",
+      "suggested": "mock/M-chat-t1",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "exact_match",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t021",
+      "category": "translation",
+      "httpStatus": 200,
+      "taskType": "translation",
+      "expectedType": "translation",
+      "suggested": "mock/M-chat-t1",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "exact_match",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t022",
+      "category": "extraction",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "expectedType": "extraction",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t023",
+      "category": "extraction",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "expectedType": "extraction",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t024",
+      "category": "extraction",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "expectedType": "extraction",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t025",
+      "category": "extraction",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "expectedType": "extraction",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t026",
+      "category": "extraction",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "expectedType": "extraction",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t027",
+      "category": "analysis",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/M-reason",
+      "hardBlocks": [],
+      "predictedCost": 0.00442,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-reason",
+        "M-chat-t1",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t028",
+      "category": "analysis",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/M-reason",
+      "hardBlocks": [],
+      "predictedCost": 0.00441,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-reason",
+        "M-chat-t1",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t029",
+      "category": "analysis",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/M-reason",
+      "hardBlocks": [],
+      "predictedCost": 0.00442,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-reason",
+        "M-chat-t1",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t030",
+      "category": "analysis",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/M-reason",
+      "hardBlocks": [],
+      "predictedCost": 0.00441,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-reason",
+        "M-chat-t1",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t031",
+      "category": "analysis",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/M-reason",
+      "hardBlocks": [],
+      "predictedCost": 0.00446,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-reason",
+        "M-chat-t1",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t032",
+      "category": "complex_reasoning",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/M-reason",
+      "hardBlocks": [],
+      "predictedCost": 0.004425,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-reason"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-chat-t1"
+      ]
+    },
+    {
+      "id": "t033",
+      "category": "complex_reasoning",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/M-reason",
+      "hardBlocks": [],
+      "predictedCost": 0.00443,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-reason"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-chat-t1"
+      ]
+    },
+    {
+      "id": "t034",
+      "category": "complex_reasoning",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/M-reason",
+      "hardBlocks": [],
+      "predictedCost": 0.00442,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-reason"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-chat-t1"
+      ]
+    },
+    {
+      "id": "t035",
+      "category": "complex_reasoning",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/M-reason",
+      "hardBlocks": [],
+      "predictedCost": 0.00446,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-reason"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-chat-t1"
+      ]
+    },
+    {
+      "id": "t036",
+      "category": "complex_reasoning",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/M-reason",
+      "hardBlocks": [],
+      "predictedCost": 0.004435,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-reason"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-chat-t1"
+      ]
+    },
+    {
+      "id": "t037",
+      "category": "coding",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-tool",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing coding (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-coding",
+        "M-stream",
+        "M-tool"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-chat-t1"
+      ]
+    },
+    {
+      "id": "t038",
+      "category": "coding",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-tool",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing coding (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-coding",
+        "M-stream",
+        "M-tool"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-chat-t1"
+      ]
+    },
+    {
+      "id": "t039",
+      "category": "coding",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-tool",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing coding (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-coding",
+        "M-stream",
+        "M-tool"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-chat-t1"
+      ]
+    },
+    {
+      "id": "t040",
+      "category": "coding",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-tool",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing coding (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-coding",
+        "M-stream",
+        "M-tool"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-chat-t1"
+      ]
+    },
+    {
+      "id": "t041",
+      "category": "coding",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-tool",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing coding (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-coding",
+        "M-stream",
+        "M-tool"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-chat-t1"
+      ]
+    },
+    {
+      "id": "t042",
+      "category": "coding",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-tool",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing coding (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-coding",
+        "M-stream",
+        "M-tool"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-chat-t1"
+      ]
+    },
+    {
+      "id": "t043",
+      "category": "debugging",
+      "httpStatus": 200,
+      "taskType": "debugging",
+      "expectedType": "debugging",
+      "suggested": "mock/M-stream",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-tool",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing coding (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-coding",
+        "M-reason",
+        "M-stream"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-chat-t1"
+      ]
+    },
+    {
+      "id": "t044",
+      "category": "debugging",
+      "httpStatus": 200,
+      "taskType": "debugging",
+      "expectedType": "debugging",
+      "suggested": "mock/M-stream",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-tool",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing coding (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-coding",
+        "M-reason",
+        "M-stream"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-chat-t1"
+      ]
+    },
+    {
+      "id": "t045",
+      "category": "debugging",
+      "httpStatus": 200,
+      "taskType": "debugging",
+      "expectedType": "debugging",
+      "suggested": "mock/M-stream",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-tool",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing coding (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-coding",
+        "M-reason",
+        "M-stream"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-chat-t1"
+      ]
+    },
+    {
+      "id": "t046",
+      "category": "debugging",
+      "httpStatus": 200,
+      "taskType": "debugging",
+      "expectedType": "debugging",
+      "suggested": "mock/M-stream",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-tool",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing coding (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-coding",
+        "M-reason",
+        "M-stream"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-chat-t1"
+      ]
+    },
+    {
+      "id": "t047",
+      "category": "debugging",
+      "httpStatus": 200,
+      "taskType": "debugging",
+      "expectedType": "debugging",
+      "suggested": "mock/M-stream",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-tool",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing coding (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-coding",
+        "M-reason",
+        "M-stream"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-chat-t1"
+      ]
+    },
+    {
+      "id": "t048",
+      "category": "architecture",
+      "httpStatus": 200,
+      "taskType": "architecture",
+      "expectedType": "architecture",
+      "suggested": "mock/M-nostream",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-coding",
+        "M-reason",
+        "M-chat-t1",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-cheap"
+      ]
+    },
+    {
+      "id": "t049",
+      "category": "architecture",
+      "httpStatus": 200,
+      "taskType": "architecture",
+      "expectedType": "architecture",
+      "suggested": "mock/M-nostream",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-coding",
+        "M-reason",
+        "M-chat-t1",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-cheap"
+      ]
+    },
+    {
+      "id": "t050",
+      "category": "architecture",
+      "httpStatus": 200,
+      "taskType": "architecture",
+      "expectedType": "architecture",
+      "suggested": "mock/M-nostream",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-coding",
+        "M-reason",
+        "M-chat-t1",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-cheap"
+      ]
+    },
+    {
+      "id": "t051",
+      "category": "architecture",
+      "httpStatus": 200,
+      "taskType": "architecture",
+      "expectedType": "architecture",
+      "suggested": "mock/M-nostream",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-coding",
+        "M-reason",
+        "M-chat-t1",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-cheap"
+      ]
+    },
+    {
+      "id": "t052",
+      "category": "tool_use",
+      "httpStatus": 200,
+      "taskType": "tool_orchestration",
+      "expectedType": "tool_orchestration",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-stream",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-tool",
+        "M-coding"
+      ],
+      "forbidden": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-reason",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t053",
+      "category": "tool_use",
+      "httpStatus": 200,
+      "taskType": "tool_orchestration",
+      "expectedType": "tool_orchestration",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-stream",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-tool",
+        "M-coding"
+      ],
+      "forbidden": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-reason",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t054",
+      "category": "tool_use",
+      "httpStatus": 200,
+      "taskType": "tool_orchestration",
+      "expectedType": "tool_orchestration",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-stream",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-tool",
+        "M-coding"
+      ],
+      "forbidden": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-reason",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t055",
+      "category": "tool_use",
+      "httpStatus": 200,
+      "taskType": "tool_orchestration",
+      "expectedType": "tool_orchestration",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-stream",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-tool",
+        "M-coding"
+      ],
+      "forbidden": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-reason",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t056",
+      "category": "tool_use",
+      "httpStatus": 200,
+      "taskType": "tool_orchestration",
+      "expectedType": "tool_orchestration",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-stream",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-tool",
+        "M-coding"
+      ],
+      "forbidden": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-reason",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t057",
+      "category": "vision",
+      "httpStatus": 200,
+      "taskType": "vision",
+      "expectedType": "vision",
+      "suggested": "mock/M-vision",
+      "hardBlocks": [],
+      "predictedCost": 0.00536,
+      "realOutcome": "completed",
+      "real": "mock/M-vision",
+      "comparisonStatus": "exact_match",
+      "acceptable": [
+        "M-vision"
+      ],
+      "forbidden": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding"
+      ]
+    },
+    {
+      "id": "t058",
+      "category": "vision",
+      "httpStatus": 200,
+      "taskType": "vision",
+      "expectedType": "vision",
+      "suggested": "mock/M-vision",
+      "hardBlocks": [],
+      "predictedCost": 0.00537,
+      "realOutcome": "completed",
+      "real": "mock/M-vision",
+      "comparisonStatus": "exact_match",
+      "acceptable": [
+        "M-vision"
+      ],
+      "forbidden": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding"
+      ]
+    },
+    {
+      "id": "t059",
+      "category": "vision",
+      "httpStatus": 200,
+      "taskType": "vision",
+      "expectedType": "vision",
+      "suggested": "mock/M-vision",
+      "hardBlocks": [],
+      "predictedCost": 0.005385,
+      "realOutcome": "completed",
+      "real": "mock/M-vision",
+      "comparisonStatus": "exact_match",
+      "acceptable": [
+        "M-vision"
+      ],
+      "forbidden": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding"
+      ]
+    },
+    {
+      "id": "t060",
+      "category": "vision",
+      "httpStatus": 200,
+      "taskType": "vision",
+      "expectedType": "vision",
+      "suggested": "mock/M-vision",
+      "hardBlocks": [],
+      "predictedCost": 0.00537,
+      "realOutcome": "completed",
+      "real": "mock/M-vision",
+      "comparisonStatus": "exact_match",
+      "acceptable": [
+        "M-vision"
+      ],
+      "forbidden": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding"
+      ]
+    },
+    {
+      "id": "t061",
+      "category": "structured_output",
+      "httpStatus": 200,
+      "taskType": "structured_output",
+      "expectedType": "structured_output",
+      "suggested": "mock/M-struct",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-coding",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-stream",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-tool",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-struct",
+        "M-coding"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "t062",
+      "category": "structured_output",
+      "httpStatus": 200,
+      "taskType": "structured_output",
+      "expectedType": "structured_output",
+      "suggested": "mock/M-struct",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-coding",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-stream",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-tool",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-struct",
+        "M-coding"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "t063",
+      "category": "structured_output",
+      "httpStatus": 200,
+      "taskType": "structured_output",
+      "expectedType": "structured_output",
+      "suggested": "mock/M-struct",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-coding",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-stream",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-tool",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-struct",
+        "M-coding"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "t064",
+      "category": "structured_output",
+      "httpStatus": 200,
+      "taskType": "structured_output",
+      "expectedType": "structured_output",
+      "suggested": "mock/M-struct",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-coding",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-stream",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-tool",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-struct",
+        "M-coding"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "t065",
+      "category": "structured_output",
+      "httpStatus": 200,
+      "taskType": "structured_output",
+      "expectedType": "structured_output",
+      "suggested": "mock/M-struct",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-coding",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-stream",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-tool",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-struct",
+        "M-coding"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "t066",
+      "category": "streaming",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing streaming (required); missing streaming (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-stream",
+        "M-coding"
+      ],
+      "forbidden": [
+        "M-nostream",
+        "M-struct",
+        "M-cheap"
+      ]
+    },
+    {
+      "id": "t067",
+      "category": "streaming",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing streaming (required); missing streaming (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-stream",
+        "M-coding"
+      ],
+      "forbidden": [
+        "M-nostream",
+        "M-struct",
+        "M-cheap"
+      ]
+    },
+    {
+      "id": "t068",
+      "category": "streaming",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing streaming (required); missing streaming (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-stream",
+        "M-coding"
+      ],
+      "forbidden": [
+        "M-nostream",
+        "M-struct",
+        "M-cheap"
+      ]
+    },
+    {
+      "id": "t069",
+      "category": "streaming",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing streaming (required); missing streaming (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-stream",
+        "M-coding"
+      ],
+      "forbidden": [
+        "M-nostream",
+        "M-struct",
+        "M-cheap"
+      ]
+    },
+    {
+      "id": "t070",
+      "category": "streaming",
+      "httpStatus": null,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing streaming (required); missing streaming (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-stream",
+        "M-coding"
+      ],
+      "forbidden": [
+        "M-nostream",
+        "M-struct",
+        "M-cheap"
+      ]
+    },
+    {
+      "id": "t071",
+      "category": "streaming",
+      "httpStatus": null,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing streaming (required); missing streaming (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing streaming (required); missing streaming (required)"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-stream",
+        "M-coding"
+      ],
+      "forbidden": [
+        "M-nostream",
+        "M-struct",
+        "M-cheap"
+      ]
+    },
+    {
+      "id": "t072",
+      "category": "long_context",
+      "httpStatus": null,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/M-reason",
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 5732 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0.0336,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-reason",
+        "M-coding",
+        "M-stream",
+        "M-chat-t1",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t073",
+      "category": "long_context",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/M-reason",
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 5007 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0.029905,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-reason",
+        "M-coding",
+        "M-stream",
+        "M-chat-t1"
+      ],
+      "forbidden": [
+        "M-cheap",
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t074",
+      "category": "long_context",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-tool",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing coding (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing coding (required); input tokens 2329 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-coding",
+        "M-stream",
+        "M-reason"
+      ],
+      "forbidden": [
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t075",
+      "category": "long_context",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": null,
+      "hardBlocks": [
+        {
+          "modelId": "M-chat-t1",
+          "reason": "missing long_context (required)"
+        },
+        {
+          "modelId": "M-coding",
+          "reason": "missing long_context (required)"
+        },
+        {
+          "modelId": "M-stream",
+          "reason": "missing long_context (required)"
+        },
+        {
+          "modelId": "M-tool",
+          "reason": "missing long_context (required)"
+        },
+        {
+          "modelId": "M-eof",
+          "reason": "missing long_context (required)"
+        },
+        {
+          "modelId": "M-slow",
+          "reason": "missing long_context (required)"
+        },
+        {
+          "modelId": "M-nostream",
+          "reason": "missing long_context (required)"
+        },
+        {
+          "modelId": "M-struct",
+          "reason": "missing long_context (required)"
+        },
+        {
+          "modelId": "M-reason",
+          "reason": "missing long_context (required)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "missing long_context (required)"
+        },
+        {
+          "modelId": "M-cheap",
+          "reason": "missing long_context (required)"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "missing long_context (required); input tokens 7151 > contextWindow 500"
+        }
+      ],
+      "predictedCost": null,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-reason",
+        "M-coding"
+      ],
+      "forbidden": [
+        "M-smallctx"
+      ]
+    },
+    {
+      "id": "t076",
+      "category": "strict",
+      "httpStatus": 503,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": null,
+      "hardBlocks": [],
+      "predictedCost": null,
+      "realOutcome": "no_candidate",
+      "real": null,
+      "comparisonStatus": "policy_agreement",
+      "acceptable": [],
+      "forbidden": []
+    },
+    {
+      "id": "t077",
+      "category": "strict",
+      "httpStatus": 503,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": null,
+      "hardBlocks": [],
+      "predictedCost": null,
+      "realOutcome": "no_candidate",
+      "real": null,
+      "comparisonStatus": "policy_agreement",
+      "acceptable": [],
+      "forbidden": []
+    },
+    {
+      "id": "t078",
+      "category": "strict",
+      "httpStatus": 503,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": null,
+      "hardBlocks": [],
+      "predictedCost": null,
+      "realOutcome": "no_candidate",
+      "real": null,
+      "comparisonStatus": "policy_agreement",
+      "acceptable": [],
+      "forbidden": []
+    },
+    {
+      "id": "t079",
+      "category": "strict",
+      "httpStatus": 503,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": null,
+      "hardBlocks": [],
+      "predictedCost": null,
+      "realOutcome": "no_candidate",
+      "real": null,
+      "comparisonStatus": "policy_agreement",
+      "acceptable": [],
+      "forbidden": []
+    },
+    {
+      "id": "t080",
+      "category": "allowPaid_false",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-reason",
+          "reason": "paid model blocked by allowPaid=false"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "paid model blocked by allowPaid=false"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-nostream",
+        "M-struct"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t081",
+      "category": "allowPaid_false",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-reason",
+          "reason": "paid model blocked by allowPaid=false"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "paid model blocked by allowPaid=false"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-nostream",
+        "M-struct"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t082",
+      "category": "allowPaid_false",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-reason",
+          "reason": "paid model blocked by allowPaid=false"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "paid model blocked by allowPaid=false"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-nostream",
+        "M-struct"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t083",
+      "category": "allowPaid_false",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/M-nostream",
+      "hardBlocks": [
+        {
+          "modelId": "M-reason",
+          "reason": "paid model blocked by allowPaid=false"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "paid model blocked by allowPaid=false"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-nostream",
+        "M-struct"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t084",
+      "category": "maxRequestCost",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": null,
+      "hardBlocks": [
+        {
+          "modelId": "M-reason",
+          "reason": "request_cost_exceeded (estimated 0.004405 > maxRequestCost 0.000001)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "request_cost_exceeded (estimated 0.004405 > maxRequestCost 0.000001)"
+        }
+      ],
+      "predictedCost": null,
+      "realOutcome": "completed",
+      "real": "mock/M-reason",
+      "comparisonStatus": "different",
+      "acceptable": [],
+      "forbidden": [
+        "M-reason",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t085",
+      "category": "maxRequestCost",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": null,
+      "hardBlocks": [
+        {
+          "modelId": "M-reason",
+          "reason": "request_cost_exceeded (estimated 0.004415 > maxRequestCost 0.000001)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "request_cost_exceeded (estimated 0.004415 > maxRequestCost 0.000001)"
+        }
+      ],
+      "predictedCost": null,
+      "realOutcome": "completed",
+      "real": "mock/M-reason",
+      "comparisonStatus": "different",
+      "acceptable": [],
+      "forbidden": [
+        "M-reason",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t086",
+      "category": "maxRequestCost",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": null,
+      "hardBlocks": [
+        {
+          "modelId": "M-reason",
+          "reason": "request_cost_exceeded (estimated 0.004410 > maxRequestCost 0.000001)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "request_cost_exceeded (estimated 0.004410 > maxRequestCost 0.000001)"
+        }
+      ],
+      "predictedCost": null,
+      "realOutcome": "completed",
+      "real": "mock/M-reason",
+      "comparisonStatus": "different",
+      "acceptable": [],
+      "forbidden": [
+        "M-reason",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t087",
+      "category": "maxRequestCost",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": null,
+      "hardBlocks": [
+        {
+          "modelId": "M-reason",
+          "reason": "request_cost_exceeded (estimated 0.004405 > maxRequestCost 0.000001)"
+        },
+        {
+          "modelId": "M-vision",
+          "reason": "request_cost_exceeded (estimated 0.004405 > maxRequestCost 0.000001)"
+        }
+      ],
+      "predictedCost": null,
+      "realOutcome": "completed",
+      "real": "mock/M-reason",
+      "comparisonStatus": "different",
+      "acceptable": [],
+      "forbidden": [
+        "M-reason",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t088",
+      "category": "no_candidate",
+      "httpStatus": 503,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": null,
+      "hardBlocks": [],
+      "predictedCost": null,
+      "realOutcome": "no_candidate",
+      "real": null,
+      "comparisonStatus": "policy_agreement",
+      "acceptable": [],
+      "forbidden": []
+    },
+    {
+      "id": "t089",
+      "category": "no_candidate",
+      "httpStatus": 503,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": null,
+      "hardBlocks": [],
+      "predictedCost": null,
+      "realOutcome": "no_candidate",
+      "real": null,
+      "comparisonStatus": "policy_agreement",
+      "acceptable": [],
+      "forbidden": []
+    },
+    {
+      "id": "t090",
+      "category": "no_candidate",
+      "httpStatus": 503,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": null,
+      "hardBlocks": [],
+      "predictedCost": null,
+      "realOutcome": "no_candidate",
+      "real": null,
+      "comparisonStatus": "policy_agreement",
+      "acceptable": [],
+      "forbidden": []
+    },
+    {
+      "id": "t091",
+      "category": "no_candidate",
+      "httpStatus": 503,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": null,
+      "hardBlocks": [],
+      "predictedCost": null,
+      "realOutcome": "no_candidate",
+      "real": null,
+      "comparisonStatus": "policy_agreement",
+      "acceptable": [],
+      "forbidden": []
+    },
+    {
+      "id": "t092",
+      "category": "fallback",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock-fail/M-fail",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-fail",
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "t093",
+      "category": "fallback",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-fail",
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "t094",
+      "category": "fallback",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-fail",
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "t095",
+      "category": "fallback",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-fail",
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "t096",
+      "category": "client_aborted",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-slow",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "client_aborted",
+      "real": "mock/M-slow",
+      "comparisonStatus": "not_comparable",
+      "acceptable": [],
+      "forbidden": []
+    },
+    {
+      "id": "t097",
+      "category": "client_aborted",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-slow",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "client_aborted",
+      "real": "mock/M-slow",
+      "comparisonStatus": "not_comparable",
+      "acceptable": [],
+      "forbidden": []
+    },
+    {
+      "id": "t098",
+      "category": "client_aborted",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-slow",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "client_aborted",
+      "real": "mock/M-slow",
+      "comparisonStatus": "not_comparable",
+      "acceptable": [],
+      "forbidden": []
+    },
+    {
+      "id": "t099",
+      "category": "incomplete",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-eof",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "incomplete",
+      "real": "mock/M-eof",
+      "comparisonStatus": "different",
+      "acceptable": [],
+      "forbidden": []
+    },
+    {
+      "id": "t100",
+      "category": "incomplete",
+      "httpStatus": null,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-eof",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "incomplete",
+      "real": "mock/M-eof",
+      "comparisonStatus": "different",
+      "acceptable": [],
+      "forbidden": []
+    },
+    {
+      "id": "t101",
+      "category": "incomplete",
+      "httpStatus": null,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-eof",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "incomplete",
+      "real": "mock/M-eof",
+      "comparisonStatus": "different",
+      "acceptable": [],
+      "forbidden": []
+    },
+    {
+      "id": "t102",
+      "category": "provider_health",
+      "httpStatus": null,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t103",
+      "category": "provider_health",
+      "httpStatus": null,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t104",
+      "category": "provider_health",
+      "httpStatus": null,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision"
+      ]
+    },
+    {
+      "id": "t105",
+      "category": "provider_health",
+      "httpStatus": null,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/M-coding",
+      "hardBlocks": [],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "real": "mock/M-chat-t1",
+      "comparisonStatus": "different",
+      "acceptable": [
+        "M-chat-t1",
+        "M-cheap",
+        "M-coding",
+        "M-stream",
+        "M-tool",
+        "M-nostream"
+      ],
+      "forbidden": [
+        "M-reason",
+        "M-vision"
+      ]
+    }
+  ],
+  "gates": {
+    "classification_ge_95": true,
+    "hard_violations_zero": true,
+    "streaming_zero": true,
+    "vision_zero": true,
+    "tool_zero": true,
+    "context_zero": true,
+    "budget_zero": true,
+    "no_paid_zero": true,
+    "strict_zero": true,
+    "acceptable_ge_90": true,
+    "prompt_injection_zero": true,
+    "message_rewrite_zero": true
+  },
+  "gates_passed": true
+}

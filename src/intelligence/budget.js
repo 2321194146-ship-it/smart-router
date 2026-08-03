@@ -1,41 +1,31 @@
 // src/intelligence/budget.js
-// Smart Router Mainline - Phase 2-A (Shadow)
-// 基础 Budget：Shadow 版预算评估。
+// Smart Router Mainline - Phase 2-B (Active Readiness)
+// Budget：Shadow 预算评估（与 Policy.budgetBlock 保持一致）。
 //
-// 与 Phase1 的 CostTracker（硬性安全闸门）互补：
-//   - Phase1 CostTracker：生产执行时硬性拦截（budget_exceeded）
-//   - Phase2 Budget：Shadow 评估「请求的预算画像」（预估成本、付费状态、allowed 检查、
-//     日度预算占用预测），仅供智能建议与记录，不拦截执行
+// 修复：
+//   - budgetAssessment.estimatedCost：用标准化候选画像的 price 分别计算，
+//     取「通过能力硬约束的候选」中最便宜者（不再取错误顶层字段）
+//   - wouldBlockAll：若全部候选被预算阻止（含 request_cost_exceeded）→ true
+//   - maxRequestCost：每个候选先算自己的 estimatedCost，超限即 blocked
 //
-// Shadow 约束：只读配置 + 纯本地计算。
+// Shadow 约束：只读配置 + 纯本地计算，不拦截执行（Phase1 CostTracker 负责真实拦截）。
 //
 // 仅使用 Node.js 内置模块，无第三方依赖。
 
-// ----------------------------------------------------------------------------
-// 预算画像
-// ----------------------------------------------------------------------------
+import { budgetBlock, estimateCost } from './policy.js';
 
 /**
  * 评估请求的预算画像（Shadow）。
  *
  * @param {object} params
  * @param {string} params.agentId
- * @param {string} params.requestedModel 请求的模型（可为 null）
- * @param {object} params.task 任务画像
- * @param {object} params.candidates 候选列表（含 paid / price / provider）
+ * @param {string} params.requestedModel
+ * @param {object} params.task 任务画像（含 estimatedInputTokens / complexity）
+ * @param {object[]} params.candidates 标准化候选画像列表（含 price/paid/modelId/provider）
  * @param {object} params.config 配置（含 budget / agent_bindings）
  * @returns {{
- *   agentId: string,
- *   allowPaid: boolean,
- *   maxRequestCost: number,
- *   allowedModels: string[],
- *   allowedProviders: string[],
- *   strictModel: boolean,
- *   estimatedCost: number|null,
- *   paidCandidates: number,
- *   freeCandidates: number,
- *   wouldBlockAll: boolean,   // 预算是否会阻止所有候选（Shadow 评估）
- *   reasons: string[]
+ *   agentId, allowPaid, maxRequestCost, allowedModels, allowedProviders, strictModel,
+ *   estimatedCost, paidCandidates, freeCandidates, wouldBlockAll, reasons, blockedCandidates
  * }}
  */
 export function evaluateBudget({ agentId, requestedModel, task, candidates, config }) {
@@ -76,41 +66,41 @@ export function evaluateBudget({ agentId, requestedModel, task, candidates, conf
         : false;
 
   const list = Array.isArray(candidates) ? candidates : [];
+  const budget = { allowPaid, maxRequestCost, allowedModels, allowedProviders, strictModel };
   const paidCandidates = list.filter((c) => c.paid).length;
   const freeCandidates = list.length - paidCandidates;
 
-  // 预估成本：取候选中最便宜的付费价（若全免费则 0）
+  // 每个候选计算自己的预算状态（与 Policy.budgetBlock 一致）
   let estimatedCost = null;
-  const priced = list.filter((c) => c.price && ((c.price.input_cost_per_1k || 0) > 0 || (c.price.output_cost_per_1k || 0) > 0));
-  if (priced.length > 0) {
-    const est = list.map((c) => {
-      const price = c.price || {};
-      const inTokens = task?.estimatedInputTokens || 1000;
-      const outTokens = Math.ceil((task?.complexity || 0.3) * 800) + 100;
-      return (inTokens / 1000) * (price.input_cost_per_1k || 0)
-        + (outTokens / 1000) * (price.output_cost_per_1k || 0);
-    });
-    estimatedCost = Math.min(...est);
+  let wouldBlockAll = false;
+  const blockedCandidates = [];
+  let anyBudgetBlock = false;
+  let anyCandidate = false;
+
+  for (const c of list) {
+    anyCandidate = true;
+    const block = budgetBlock(c, task, budget);
+    if (block) {
+      blockedCandidates.push({ modelId: c.modelId, provider: c.provider, reason: block });
+      if (block.startsWith('request_cost_exceeded')) anyBudgetBlock = true;
+    } else {
+      const cost = estimateCost(c, task);
+      if (estimatedCost === null || cost < estimatedCost) estimatedCost = cost;
+    }
   }
 
-  // 预算是否会阻止所有候选
-  let wouldBlockAll = false;
-  const blockReasons = [];
-  if (!allowPaid && paidCandidates === list.length && list.length > 0) {
-    wouldBlockAll = true;
-    blockReasons.push('all candidates paid and allowPaid=false');
+  if (anyCandidate && list.length > 0) {
+    if (blockedCandidates.length === list.length) {
+      wouldBlockAll = true;
+      if (anyBudgetBlock) reasons.push('all candidates exceed maxRequestCost');
+      else if (!allowPaid && paidCandidates === list.length) reasons.push('all candidates paid and allowPaid=false');
+      else if (allowedModels.length > 0) reasons.push('no candidate in allowedModels');
+      else if (allowedProviders.length > 0) reasons.push('no candidate in allowedProviders');
+      else reasons.push('all candidates blocked by budget');
+    } else if (blockedCandidates.length > 0) {
+      reasons.push(`${blockedCandidates.length}/${list.length} candidates blocked by budget`);
+    }
   }
-  if (allowedModels.length > 0 && list.length > 0
-    && !list.some((c) => allowedModels.includes(c.modelId))) {
-    wouldBlockAll = true;
-    blockReasons.push('no candidate in allowedModels');
-  }
-  if (allowedProviders.length > 0 && list.length > 0
-    && !list.some((c) => allowedProviders.includes(c.provider))) {
-    wouldBlockAll = true;
-    blockReasons.push('no candidate in allowedProviders');
-  }
-  if (wouldBlockAll) reasons.push(...blockReasons);
 
   return {
     agentId,
@@ -123,6 +113,7 @@ export function evaluateBudget({ agentId, requestedModel, task, candidates, conf
     paidCandidates,
     freeCandidates,
     wouldBlockAll,
+    blockedCandidates,
     reasons,
   };
 }

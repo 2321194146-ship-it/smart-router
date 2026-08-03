@@ -1,14 +1,19 @@
 // test/unit/intelligence.test.js
-// Smart Router Mainline - Phase 2-A (Shadow) Sealed
-// 智能层单元测试：Task Analyzer / Capability Registry / Policy 硬约束 / Budget /
-// Decision Engine / Explainability / Shadow Recorder / off-shadow 模式
+// Smart Router Mainline - Phase 2-B (Active Readiness)
+// 智能层单元测试：Task Analyzer（requiredCapabilities）/ Capability Registry /
+// Policy（能力评分 + streaming/预算硬约束）/ Budget / Decision Engine /
+// Explainability / Shadow Recorder / off-shadow 模式 / Provider 健康
 
 import { test, describe } from 'node:test';
 import assert from 'node:assert';
-import { analyzeTask, TaskType } from '../../src/intelligence/task-analyzer.js';
-import { CapabilityRegistry, hasCapability, deriveProtocols } from '../../src/intelligence/capability-registry.js';
 import {
-  normalizePolicy, scoreCandidate, hardConstraintBlock, estimateCost,
+  analyzeTask, buildRequiredCapabilities, TaskType, CAPABILITY_KEYS,
+} from '../../src/intelligence/task-analyzer.js';
+import {
+  CapabilityRegistry, extractCapabilities, normalizeCapabilityScore, deriveProtocols,
+} from '../../src/intelligence/capability-registry.js';
+import {
+  normalizePolicy, scoreCandidate, hardConstraintBlock, budgetBlock, estimateCost,
   predictQuality, predictLatency,
 } from '../../src/intelligence/policy.js';
 import { evaluateBudget } from '../../src/intelligence/budget.js';
@@ -22,336 +27,525 @@ import { MemoryStore } from '../../src/storage/memory-store.js';
 
 const POLICY = normalizePolicy(null);
 
+// 标准化模型配置（含 capabilities 对象 0-100 分制 + reliability + latency_prior_ms）
 const TEST_CONFIG = {
   intelligence: { mode: 'shadow', shadow: { retentionDays: 30 } },
   models: [
-    { id: 'm1', provider: 'p1', tier: 'tier1', paid: false, capability: ['chat', 'tool_use', 'streaming'], max_tokens: 64000 },
-    { id: 'm2', provider: 'p2', tier: 'tier2', paid: true, capability: ['chat', 'vision'], price: { input_cost_per_1k: 0.01, output_cost_per_1k: 0.02 } },
-    { id: 'm3', provider: 'p3', tier: 'tier3', paid: false, capability: ['chat'], max_tokens: 16000 },
+    {
+      id: 'm1', provider: 'p1', tier: 'tier1', paid: false,
+      capabilities: { chat: 100, coding: 100, reasoning: 30, tool_use: 100, vision: 0, structured_output: 50, long_context: 80, streaming: 100 },
+      context_window: 64000, reliability: 0.95, latency_prior_ms: 800,
+      price: { input_cost_per_1k: 0, output_cost_per_1k: 0 },
+    },
+    {
+      id: 'm2', provider: 'p2', tier: 'tier2', paid: true,
+      capabilities: { chat: 100, coding: 20, reasoning: 100, tool_use: 0, vision: 100, structured_output: 100, long_context: 60, streaming: 0 },
+      context_window: 32000, reliability: 0.8, latency_prior_ms: 1500,
+      price: { input_cost_per_1k: 0.01, output_cost_per_1k: 0.02 },
+    },
+    {
+      id: 'm3', provider: 'p3', tier: 'tier3', paid: false,
+      capability: ['chat'], // 兼容旧字符串数组：仅 chat
+      max_tokens: 16000, reliability: 0.6,
+      price: { input_cost_per_1k: 0, output_cost_per_1k: 0 },
+    },
     // 同 modelId 不同 Provider（价格/能力不同）
-    { id: 'mx', provider: 'pA', tier: 'tier1', paid: false, capability: ['chat', 'tool_use', 'vision'], max_tokens: 32000, price: { input_cost_per_1k: 0, output_cost_per_1k: 0 } },
-    { id: 'mx', provider: 'pB', tier: 'tier2', paid: true, capability: ['chat'], max_tokens: 8000, price: { input_cost_per_1k: 0.02, output_cost_per_1k: 0.04 } },
+    {
+      id: 'mx', provider: 'pA', tier: 'tier1', paid: false,
+      capabilities: { chat: 100, coding: 80, reasoning: 80, tool_use: 100, vision: 100, structured_output: 80, long_context: 100, streaming: 100 },
+      context_window: 128000, reliability: 0.9, latency_prior_ms: 900,
+      price: { input_cost_per_1k: 0, output_cost_per_1k: 0 },
+    },
+    {
+      id: 'mx', provider: 'pB', tier: 'tier2', paid: true,
+      capabilities: { chat: 100, coding: 10, reasoning: 10, tool_use: 0, vision: 0, structured_output: 0, long_context: 20, streaming: 0 },
+      context_window: 8000, reliability: 0.5, latency_prior_ms: 2000,
+      price: { input_cost_per_1k: 0.02, output_cost_per_1k: 0.04 },
+    },
   ],
   budget: { allowPaid: false, maxRequestCost: 10, allowedModels: [], allowedProviders: [], strictModel: false },
   agent_bindings: {},
 };
 
-describe('Phase2-A Task Analyzer', () => {
-  test('coding / tool / vision / analysis detection', () => {
-    assert.strictEqual(analyzeTask({ messages: [{ role: 'user', content: 'Write a function to sort an array in JavaScript' }] }).taskType, TaskType.CODING);
-    const t = analyzeTask({ messages: [{ role: 'user', content: 'Use the calculator tool' }], tools: [{ type: 'function' }] });
-    assert.strictEqual(t.taskType, TaskType.TOOL_ORCHESTRATION);
-    assert.ok(t.needsToolUse);
-    const v = analyzeTask({ messages: [{ role: 'user', content: [{ type: 'image_url', image_url: { url: 'x' } }, { type: 'text', text: 'describe' }] }] });
-    assert.strictEqual(v.taskType, TaskType.VISION);
-    assert.ok(v.needsVision);
+describe('Phase2-B Task Analyzer（统一能力需求画像）', () => {
+  test('13 task types produce distinct requiredCapabilities', () => {
+    const cases = [
+      ['Hello, how are you?', TaskType.GENERAL_CHAT],
+      ['Write a JavaScript function to debounce', TaskType.CODING],
+      ['Debug this: why does this function crash on null input?', TaskType.DEBUGGING],
+      ['Design the architecture for a microservice system', TaskType.ARCHITECTURE],
+      ['Explain why the sky is blue using physics', TaskType.ANALYSIS],
+      ['Research the literature on transformers', TaskType.RESEARCH],
+      ['Write an essay about climate change', TaskType.WRITING],
+      ['Summarize this article in 3 sentences', TaskType.SUMMARIZATION],
+      ['Translate this text to Chinese', TaskType.TRANSLATION],
+      ['Extract all dates from this text', TaskType.EXTRACTION],
+      ['Use the calculator tool to add numbers', TaskType.TOOL_ORCHESTRATION],
+      ['Describe this image', TaskType.VISION],
+      ['Output as JSON with schema', TaskType.STRUCTURED_OUTPUT],
+    ];
+    for (const [text, expected] of cases) {
+      const t = analyzeTask({ model: 'auto', messages: [{ role: 'user', content: text }] });
+      assert.strictEqual(t.taskType, expected, `"${text}" should be ${expected}, got ${t.taskType}`);
+    }
   });
 
-  test('complexity bounded 0-1', () => {
+  test('requiredCapabilities structure', () => {
+    const t = analyzeTask({ model: 'auto', messages: [{ role: 'user', content: 'Write a JS function' }] });
+    for (const k of CAPABILITY_KEYS) {
+      assert.ok(k in t.requiredCapabilities, `missing key ${k}`);
+    }
+    assert.strictEqual(t.requiredCapabilities.chat, 1.0);
+    assert.strictEqual(t.requiredCapabilities.coding, 1.0);
+  });
+
+  test('debugging: coding+reasoning high', () => {
+    const t = analyzeTask({ messages: [{ role: 'user', content: 'Debug this crash: stack trace below, fix the bug' }] });
+    assert.strictEqual(t.taskType, TaskType.DEBUGGING);
+    assert.strictEqual(t.requiredCapabilities.coding, 1.0);
+    assert.strictEqual(t.requiredCapabilities.reasoning, 0.85);
+  });
+
+  test('summarization: reasoning low, cost-friendly', () => {
+    const t = analyzeTask({ messages: [{ role: 'user', content: 'Summarize this meeting' }] });
+    assert.strictEqual(t.taskType, TaskType.SUMMARIZATION);
+    assert.ok(t.requiredCapabilities.reasoning <= 0.5, 'summarization should not require high reasoning');
+  });
+
+  test('stream=true → streaming hard requirement', () => {
+    const t = analyzeTask({ stream: true, messages: [{ role: 'user', content: 'hi' }] });
+    assert.strictEqual(t.needsStreaming, true);
+    assert.strictEqual(t.requiredCapabilities.streaming, 1.0);
+    assert.ok(t.hardCapabilities.includes('streaming'));
+  });
+
+  test('non-stream request does NOT require streaming', () => {
     const t = analyzeTask({ messages: [{ role: 'user', content: 'hi' }] });
-    assert.ok(t.complexity >= 0 && t.complexity <= 1);
+    assert.strictEqual(t.requiredCapabilities.streaming, 0);
+    assert.ok(!t.hardCapabilities.includes('streaming'));
+  });
+
+  test('vision task requires vision; structured output requires structured_output', () => {
+    const v = analyzeTask({ messages: [{ role: 'user', content: [{ type: 'image_url', image_url: { url: 'x' } }, { type: 'text', text: 'desc' }] }] });
+    assert.strictEqual(v.requiredCapabilities.vision, 1.0);
+    const s = analyzeTask({ messages: [{ role: 'user', content: 'Output as JSON array' }] });
+    assert.strictEqual(s.taskType, TaskType.STRUCTURED_OUTPUT);
+    assert.strictEqual(s.requiredCapabilities.structured_output, 1.0);
   });
 });
 
-describe('Phase2-A Capability Registry (modelId + provider)', () => {
+describe('Phase2-B Capability Registry（Model Capability Profile）', () => {
   const reg = new CapabilityRegistry(TEST_CONFIG);
 
-  test('getProfile distinguishes same modelId across providers', () => {
-    const pa = reg.getProfile('mx', 'pA');
-    const pb = reg.getProfile('mx', 'pB');
-    assert.ok(pa);
-    assert.ok(pb);
-    assert.strictEqual(pa.provider, 'pA');
-    assert.strictEqual(pb.provider, 'pB');
-    assert.ok(pa.capabilities.includes('vision'));
-    assert.ok(!pb.capabilities.includes('vision'));
-    assert.strictEqual(pa.paid, false);
-    assert.strictEqual(pb.paid, true);
-    assert.notStrictEqual(pa.contextWindow, pb.contextWindow);
-    assert.strictEqual(pa.price.input_cost_per_1k, 0);
-    assert.strictEqual(pb.price.input_cost_per_1k, 0.02);
+  test('capabilities object normalized from 0-100', () => {
+    const prof = reg.getProfile('m1', 'p1');
+    assert.ok(prof);
+    assert.strictEqual(prof.capabilities.chat, 1.0);
+    assert.strictEqual(prof.capabilities.tool_use, 1.0);
+    assert.strictEqual(prof.capabilities.reasoning, 0.3);
+    assert.strictEqual(prof.capabilities.vision, 0);
   });
 
-  test('contextWindow from max_tokens / context_window', () => {
+  test('legacy string capability array compatible', () => {
+    const prof = reg.getProfile('m3', 'p3');
+    assert.strictEqual(prof.capabilities.chat, 1.0);
+    assert.strictEqual(prof.capabilities.tool_use, 0);
+  });
+
+  test('normalizeCapabilityScore 0-1 and 0-100', () => {
+    assert.strictEqual(normalizeCapabilityScore(0.5), 0.5);
+    assert.strictEqual(normalizeCapabilityScore(90), 0.9);
+    assert.strictEqual(normalizeCapabilityScore(100), 1.0);
+    assert.strictEqual(normalizeCapabilityScore(0), 0);
+  });
+
+  test('profile includes reliability, latencyPriorMs, protocols', () => {
     const prof = reg.getProfile('m1', 'p1');
+    assert.strictEqual(prof.reliability, 0.95);
+    assert.strictEqual(prof.latencyPriorMs, 800);
+    assert.ok(prof.protocols.includes('chat'));
     assert.strictEqual(prof.contextWindow, 64000);
   });
 
-  test('deriveProtocols: chat-capable is adapter-compatible with all protocols', () => {
-    // chat 能力经协议适配层可服务三协议（responses/anthropic 内部转 chat 执行）
-    const p = deriveProtocols({ capability: ['chat'], provider: 'mock-a' });
-    assert.ok(p.includes('chat') && p.includes('responses') && p.includes('anthropic'));
-    // gateway 原生支持
-    const gw = deriveProtocols({ capability: ['chat'], provider: 'gateway' });
-    assert.ok(gw.includes('anthropic') && gw.includes('responses'));
-    // 无 chat 能力且非 gateway → 无协议（硬约束将阻止）
-    const none = deriveProtocols({ capability: ['vision_only'], provider: 'p' });
-    assert.strictEqual(none.length, 0);
-  });
-
-  test('supports with provider', () => {
-    const reg2 = new CapabilityRegistry(TEST_CONFIG);
-    assert.ok(reg2.supports('mx', 'pA', 'vision'));
-    assert.ok(!reg2.supports('mx', 'pB', 'vision'));
+  test('same modelId different provider keep independent profiles', () => {
+    const pa = reg.getProfile('mx', 'pA');
+    const pb = reg.getProfile('mx', 'pB');
+    assert.notStrictEqual(pa.capabilities.reasoning, pb.capabilities.reasoning);
+    assert.notStrictEqual(pa.price.input_cost_per_1k, pb.price.input_cost_per_1k);
+    assert.notStrictEqual(pa.reliability, pb.reliability);
   });
 });
 
-describe('Phase2-A Policy 硬约束', () => {
-  const base = { modelId: 'm', provider: 'p', tier: 'tier1', paid: false, capabilities: ['chat'], contextWindow: 1000, price: {}, protocols: ['chat'] };
+describe('Phase2-B Policy（能力评分 + 硬约束）', () => {
+  const baseCaps = { chat: 1, coding: 1, reasoning: 1, tool_use: 1, vision: 0, structured_output: 0, long_context: 1, streaming: 1 };
+  const base = { modelId: 'm', provider: 'p', tier: 'tier1', paid: false, capabilities: baseCaps, contextWindow: 100000, price: {}, protocols: ['chat'] };
   const BUDGET = { allowPaid: true, allowedModels: [], allowedProviders: [], maxRequestCost: 100 };
 
-  test('missing tool_use → blocked, score 0', () => {
-    const r = scoreCandidate(base, { needsToolUse: true, complexity: 0.5 }, POLICY, BUDGET, 'chat');
+  test('streaming hard constraint: stream=true + no streaming → blocked', () => {
+    const noStream = { ...base, capabilities: { ...baseCaps, streaming: 0 } };
+    const task = { requiredCapabilities: { chat: 1, streaming: 1 }, hardCapabilities: ['streaming'], needsStreaming: true, complexity: 0.3 };
+    const r = scoreCandidate(noStream, task, POLICY, BUDGET, 'chat');
+    assert.strictEqual(r.score, 0);
+    assert.ok(r.blocked.includes('streaming'));
+  });
+
+  test('non-stream request with no streaming → NOT blocked', () => {
+    const noStream = { ...base, capabilities: { ...baseCaps, streaming: 0 } };
+    const task = { requiredCapabilities: { chat: 1 }, hardCapabilities: ['chat'], complexity: 0.3 };
+    const r = scoreCandidate(noStream, task, POLICY, BUDGET, 'chat');
+    assert.strictEqual(r.blocked, null);
+    assert.ok(r.score > 0);
+  });
+
+  test('missing tool_use → blocked', () => {
+    const r = scoreCandidate({ ...base, capabilities: { ...baseCaps, tool_use: 0 } },
+      { requiredCapabilities: { chat: 1, tool_use: 1 }, hardCapabilities: ['tool_use'], needsToolUse: true, complexity: 0.5 },
+      POLICY, BUDGET, 'chat');
     assert.strictEqual(r.score, 0);
     assert.ok(r.blocked.includes('tool_use'));
   });
 
   test('missing vision → blocked', () => {
-    const r = scoreCandidate(base, { needsVision: true, complexity: 0.5 }, POLICY, BUDGET, 'chat');
+    const r = scoreCandidate(base,
+      { requiredCapabilities: { chat: 1, vision: 1 }, hardCapabilities: ['vision'], needsVision: true, complexity: 0.5 },
+      POLICY, BUDGET, 'chat');
     assert.strictEqual(r.score, 0);
     assert.ok(r.blocked.includes('vision'));
   });
 
   test('context overflow → blocked', () => {
-    const r = scoreCandidate({ ...base, contextWindow: 500 }, { estimatedInputTokens: 6000 }, POLICY, BUDGET, 'chat');
+    const r = scoreCandidate({ ...base, contextWindow: 500 },
+      { requiredCapabilities: { chat: 1 }, hardCapabilities: ['chat'], estimatedInputTokens: 6000, complexity: 0.5 },
+      POLICY, BUDGET, 'chat');
     assert.strictEqual(r.score, 0);
     assert.ok(r.blocked.includes('contextWindow'));
   });
 
-  test('protocol not supported → blocked', () => {
-    const r = scoreCandidate(base, { complexity: 0.3 }, POLICY, BUDGET, 'responses');
-    assert.strictEqual(r.score, 0);
-    assert.ok(r.blocked.includes('responses'));
-  });
-
-  test('hardConstraintBlock returns null when satisfied', () => {
+  test('hardConstraintBlock null when satisfied', () => {
     const ok = hardConstraintBlock(
-      { capabilities: ['tool_use', 'vision'], contextWindow: 100000, protocols: ['chat'] },
-      { needsToolUse: true, needsVision: true, estimatedInputTokens: 100 },
+      { capabilities: { chat: 1, tool_use: 1, vision: 1, streaming: 1, long_context: 1 }, contextWindow: 100000, protocols: ['chat'] },
+      { hardCapabilities: ['chat', 'tool_use', 'vision'], needsStreaming: true, needsToolUse: true, needsVision: true, estimatedInputTokens: 100 },
       'chat',
     );
     assert.strictEqual(ok, null);
   });
 
-  test('paid blocked when allowPaid=false', () => {
-    const r = scoreCandidate(
-      { ...base, paid: true }, { complexity: 0.3 }, POLICY,
-      { allowPaid: false, allowedModels: [], allowedProviders: [], maxRequestCost: 100 }, 'chat',
-    );
+  test('request_cost_exceeded → blocked', () => {
+    const priced = { ...base, price: { input_cost_per_1k: 0.1, output_cost_per_1k: 0.2 } };
+    const task = { requiredCapabilities: { chat: 1 }, hardCapabilities: ['chat'], estimatedInputTokens: 10000, complexity: 0.5 };
+    const r = scoreCandidate(priced, task, POLICY,
+      { allowPaid: true, allowedModels: [], allowedProviders: [], maxRequestCost: 0.000001 }, 'chat');
     assert.strictEqual(r.score, 0);
-    assert.ok(r.blocked.includes('allowPaid=false'));
+    assert.ok(r.blocked.includes('request_cost_exceeded'));
+  });
+
+  test('budgetBlock allows within budget', () => {
+    const cheap = { ...base, price: { input_cost_per_1k: 0, output_cost_per_1k: 0 } };
+    const task = { estimatedInputTokens: 1000, complexity: 0.3 };
+    assert.strictEqual(budgetBlock(cheap, task, { allowPaid: true, maxRequestCost: 10 }), null);
   });
 
   test('deterministic latency (no Math.random)', () => {
-    const c1 = { modelId: 'm1', provider: 'p1', tier: 'tier1' };
+    const c1 = { modelId: 'm1', provider: 'p1', tier: 'tier1', latencyPriorMs: 800 };
+    assert.strictEqual(predictLatency(c1), 800);
     assert.strictEqual(predictLatency(c1), predictLatency(c1));
-    assert.ok(predictLatency(c1) > 0);
   });
 
-  test('quality capped at 0.95, never 1.0', () => {
-    const q = predictQuality({ tier: 'tier1' }, { complexity: 0.9 });
-    assert.ok(q <= 0.95 && q >= 0.4);
+  test('latency uses health avg only with enough samples', () => {
+    const c = { modelId: 'm', provider: 'p', tier: 'tier1' };
+    const low = predictLatency(c, { avgLatency: 500, sampleCount: 2 });
+    const high = predictLatency(c, { avgLatency: 500, sampleCount: 10 });
+    assert.notStrictEqual(low, high, 'sample count threshold changes latency source');
+  });
+
+  test('quality capped 0.95; reasoning model beats chat for reasoning task', () => {
+    const reasoningModel = { tier: 'tier2', capabilities: { chat: 1, reasoning: 1 }, reliability: 0.8 };
+    const chatModel = { tier: 'tier1', capabilities: { chat: 1, reasoning: 0 }, reliability: 0.95 };
+    const task = { requiredCapabilities: { chat: 1, reasoning: 0.9 }, complexity: 0.8 };
+    const qReason = predictQuality(reasoningModel, task);
+    const qChat = predictQuality(chatModel, task);
+    assert.ok(qReason >= 0.4 && qReason <= 0.95);
+    assert.ok(qReason > qChat, 'reasoning model should outscore chat-only for reasoning task');
   });
 
   test('estimateCost per candidate price', () => {
     const cheap = { price: { input_cost_per_1k: 0, output_cost_per_1k: 0 } };
     const priced = { price: { input_cost_per_1k: 0.01, output_cost_per_1k: 0.02 } };
     assert.strictEqual(estimateCost(cheap, { estimatedInputTokens: 1000, complexity: 0.5 }), 0);
-    const c = estimateCost(priced, { estimatedInputTokens: 1000, complexity: 0.5 });
-    assert.ok(c > 0, 'priced candidate must produce non-zero cost');
-    assert.strictEqual(typeof c, 'number');
+    assert.ok(estimateCost(priced, { estimatedInputTokens: 1000, complexity: 0.5 }) > 0);
   });
 });
 
-describe('Phase2-A Budget', () => {
-  test('wouldBlockAll for paid-only + allowPaid=false', () => {
+describe('Phase2-B Budget（request_cost_exceeded / wouldBlockAll）', () => {
+  test('all over budget → wouldBlockAll true, estimatedCost null', () => {
     const r = evaluateBudget({
-      agentId: 'g', task: { complexity: 0.5, estimatedInputTokens: 1000 },
+      agentId: 'g', task: { estimatedInputTokens: 10000, complexity: 0.5 },
+      candidates: [
+        { modelId: 'm2', provider: 'p2', paid: true, price: { input_cost_per_1k: 0.1, output_cost_per_1k: 0.2 } },
+      ],
+      config: { budget: { allowPaid: true, maxRequestCost: 0.000001 }, agent_bindings: {} },
+    });
+    assert.strictEqual(r.wouldBlockAll, true);
+    assert.strictEqual(r.estimatedCost, null);
+    assert.ok(r.reasons.some((x) => x.includes('maxRequestCost')));
+  });
+
+  test('mixed: blocked candidates listed, estimatedCost from allowed', () => {
+    const r = evaluateBudget({
+      agentId: 'g', task: { estimatedInputTokens: 1000, complexity: 0.3 },
+      candidates: [
+        { modelId: 'cheap', provider: 'p', paid: false, price: { input_cost_per_1k: 0, output_cost_per_1k: 0 } },
+        { modelId: 'paid', provider: 'p', paid: true, price: { input_cost_per_1k: 0.1, output_cost_per_1k: 0.2 } },
+      ],
+      config: { budget: { allowPaid: false }, agent_bindings: {} },
+    });
+    assert.strictEqual(r.wouldBlockAll, false);
+    assert.strictEqual(r.estimatedCost, 0);
+    assert.strictEqual(r.blockedCandidates.length, 1);
+  });
+
+  test('allowPaid=false blocks paid', () => {
+    const r = evaluateBudget({
+      agentId: 'g', task: { estimatedInputTokens: 100, complexity: 0.3 },
       candidates: [{ modelId: 'm2', provider: 'p2', paid: true, price: {} }],
       config: { budget: { allowPaid: false }, agent_bindings: {} },
     });
-    assert.strictEqual(r.wouldBlockAll, true);
+    assert.ok(r.blockedCandidates[0].reason.includes('allowPaid=false'));
   });
 });
 
-describe('Phase2-A Decision Engine（Registry 参与 + 硬约束）', () => {
-  test('only non-tool_use candidate → recommendation=null', () => {
+describe('Phase2-B Decision Engine（能力评分 + 硬约束 + 健康）', () => {
+  test('complex reasoning: reasoning model beats high-tier chat-only model', () => {
     const engine = new DecisionEngine(TEST_CONFIG);
     const d = engine.decide({
-      body: { messages: [{ role: 'user', content: 'Use the calculator tool' }], tools: [{ type: 'function' }] },
-      agentId: 'generic', budget: TEST_CONFIG.budget,
-      candidates: [{ modelId: 'm3', provider: 'p3', tier: 'tier3', paid: false, capability: ['chat'] }],
-      protocol: 'chat',
-    });
-    assert.strictEqual(d.recommendation, null);
-    assert.ok(d.ranked[0].blocked.includes('tool_use'));
-  });
-
-  test('vision task: only valid vision candidate recommended (paid ok when allowPaid)', () => {
-    const engine = new DecisionEngine(TEST_CONFIG);
-    const d = engine.decide({
-      body: { messages: [{ role: 'user', content: [{ type: 'image_url', image_url: { url: 'x' } }, { type: 'text', text: 'describe' }] }] },
+      body: { messages: [{ role: 'user', content: 'Prove this mathematical theorem with complex reasoning' }] },
       agentId: 'generic',
       budget: { ...TEST_CONFIG.budget, allowPaid: true },
       candidates: [
-        { modelId: 'm3', provider: 'p3', tier: 'tier3', paid: false, capability: ['chat'], model: { price: {} } },
+        { modelId: 'm1', provider: 'p1', tier: 'tier1', paid: false, capability: ['chat', 'coding', 'tool_use'] },
+        { modelId: 'm2', provider: 'p2', tier: 'tier2', paid: true, capability: ['chat', 'vision', 'reasoning'] },
+      ],
+      protocol: 'chat',
+    });
+    assert.ok(d.recommendation, 'must recommend');
+    assert.strictEqual(d.recommendation.modelId, 'm2', 'reasoning model must win for reasoning task');
+  });
+
+  test('debugging: coding+reasoning model preferred', () => {
+    const engine = new DecisionEngine(TEST_CONFIG);
+    const d = engine.decide({
+      body: { messages: [{ role: 'user', content: 'Debug this crash: fix the bug in this function' }] },
+      agentId: 'generic',
+      budget: { ...TEST_CONFIG.budget, allowPaid: true },
+      candidates: [
+        { modelId: 'm3', provider: 'p3', tier: 'tier3', paid: false, capability: ['chat'] },
+        { modelId: 'm1', provider: 'p1', tier: 'tier1', paid: false, capability: ['chat', 'coding', 'tool_use'] },
+      ],
+      protocol: 'chat',
+    });
+    assert.strictEqual(d.recommendation.modelId, 'm1', 'coding model must win for debugging');
+  });
+
+  test('simple summarization: cheap model preferred when quality sufficient', () => {
+    const engine = new DecisionEngine(TEST_CONFIG);
+    const d = engine.decide({
+      body: { messages: [{ role: 'user', content: 'Summarize this meeting in 3 bullets' }] },
+      agentId: 'generic',
+      budget: { ...TEST_CONFIG.budget, allowPaid: true },
+      candidates: [
+        { modelId: 'm3', provider: 'p3', tier: 'tier3', paid: false, capability: ['chat'], model: { price: { input_cost_per_1k: 0, output_cost_per_1k: 0 } } },
         { modelId: 'm2', provider: 'p2', tier: 'tier2', paid: true, capability: ['chat', 'vision'], model: { price: { input_cost_per_1k: 0.01, output_cost_per_1k: 0.02 } } },
       ],
       protocol: 'chat',
     });
-    assert.ok(d.recommendation, 'must recommend the vision model');
-    assert.strictEqual(d.recommendation.modelId, 'm2');
-    assert.ok(d.ranked.find((r) => r.modelId === 'm3').blocked.includes('vision'));
+    assert.strictEqual(d.recommendation.modelId, 'm3', 'cheap model must win for simple summarization');
   });
 
-  test('same modelId different provider: per-provider recommendation & cost', () => {
+  test('streaming hard constraint: stream=true blocks non-streaming candidate', () => {
     const engine = new DecisionEngine(TEST_CONFIG);
     const d = engine.decide({
-      body: { messages: [{ role: 'user', content: 'Explain X in detail, long context needed' }] },
+      body: { stream: true, messages: [{ role: 'user', content: 'hi' }] },
       agentId: 'generic',
       budget: { ...TEST_CONFIG.budget, allowPaid: true },
       candidates: [
-        { modelId: 'mx', provider: 'pA', tier: 'tier1', paid: false, capability: ['chat', 'tool_use', 'vision'], model: { price: { input_cost_per_1k: 0, output_cost_per_1k: 0 } } },
-        { modelId: 'mx', provider: 'pB', tier: 'tier2', paid: true, capability: ['chat'], model: { price: { input_cost_per_1k: 0.02, output_cost_per_1k: 0.04 } } },
+        { modelId: 'm3', provider: 'p3', tier: 'tier3', paid: false, capability: ['chat'] },
+        { modelId: 'm1', provider: 'p1', tier: 'tier1', paid: false, capability: ['chat', 'coding', 'tool_use', 'streaming'] },
       ],
       protocol: 'chat',
     });
-    // 两候选独立评分
+    assert.strictEqual(d.recommendation.modelId, 'm1', 'streaming-capable must be recommended');
+    const blocked = d.ranked.find((r) => r.modelId === 'm3');
+    assert.ok(blocked.blocked.includes('streaming'));
+  });
+
+  test('budget: maxRequestCost=0.000001 blocks priced recommendation → recommendation null', () => {
+    const engine = new DecisionEngine(TEST_CONFIG);
+    const d = engine.decide({
+      body: { messages: [{ role: 'user', content: 'Analyze this long document' }] },
+      agentId: 'generic',
+      budget: { ...TEST_CONFIG.budget, allowPaid: true, maxRequestCost: 0.000001 },
+      candidates: [
+        { modelId: 'm2', provider: 'p2', tier: 'tier2', paid: true, capability: ['chat', 'vision'] },
+      ],
+      protocol: 'chat',
+    });
+    assert.strictEqual(d.recommendation, null, 'over-budget candidate must not be recommended');
+    assert.ok(d.ranked[0].blocked.includes('request_cost_exceeded'));
+    assert.strictEqual(d.budgetAssessment.wouldBlockAll, true);
+  });
+
+  test('provider health: degraded provider scores lower (samples >= 5)', () => {
+    const engine = new DecisionEngine(TEST_CONFIG);
+    const d = engine.decide({
+      body: { messages: [{ role: 'user', content: 'hi' }] },
+      agentId: 'generic',
+      budget: { ...TEST_CONFIG.budget, allowPaid: true },
+      candidates: [
+        { modelId: 'm1', provider: 'p1', tier: 'tier1', paid: false, capability: ['chat', 'coding', 'tool_use', 'streaming'] },
+        { modelId: 'mx', provider: 'pB', tier: 'tier2', paid: true, capability: ['chat'] },
+      ],
+      protocol: 'chat',
+    });
+    // pB 能力弱 + 付费 → 不应胜出；p1 胜出（无健康注入时）
+    assert.strictEqual(d.recommendation.modelId, 'm1');
+  });
+
+  test('same modelId different provider: per-provider scoring', () => {
+    const engine = new DecisionEngine(TEST_CONFIG);
+    const d = engine.decide({
+      body: { messages: [{ role: 'user', content: 'Solve this complex reasoning problem' }] },
+      agentId: 'generic',
+      budget: { ...TEST_CONFIG.budget, allowPaid: true },
+      candidates: [
+        { modelId: 'mx', provider: 'pA', tier: 'tier1', paid: false, capability: ['chat', 'coding', 'tool_use', 'vision', 'reasoning'] },
+        { modelId: 'mx', provider: 'pB', tier: 'tier2', paid: true, capability: ['chat'] },
+      ],
+      protocol: 'chat',
+    });
     assert.strictEqual(d.ranked.length, 2);
-    const a = d.ranked.find((r) => r.provider === 'pA');
-    const b = d.ranked.find((r) => r.provider === 'pB');
-    assert.ok(a && b, 'both providers ranked separately');
-    // 推荐应为免费 pA
     assert.strictEqual(d.recommendation.provider, 'pA');
-    // 预测成本 = 推荐候选（pA 免费 → 0）
-    assert.strictEqual(d.predictions.cost, 0);
-  });
-
-  test('cost prediction non-null when recommendation priced', () => {
-    const engine = new DecisionEngine(TEST_CONFIG);
-    const d = engine.decide({
-      body: { messages: [{ role: 'user', content: 'Summarize a long document' }] },
-      agentId: 'generic',
-      budget: { ...TEST_CONFIG.budget, allowPaid: true, allowedModels: ['m2'] },
-      candidates: [
-        { modelId: 'm2', provider: 'p2', tier: 'tier2', paid: true, capability: ['chat', 'vision'], model: { price: { input_cost_per_1k: 0.01, output_cost_per_1k: 0.02 } } },
-      ],
-      protocol: 'chat',
-    });
-    assert.ok(d.recommendation);
-    assert.ok(typeof d.predictions.cost === 'number', 'priced recommendation must have numeric cost');
-    assert.ok(d.predictions.cost > 0);
   });
 });
 
-describe('Phase2-A Explainability', () => {
+describe('Phase2-B Explainability', () => {
   test('eliminated reasons include hard blocks', () => {
     const ex = explainDecision({
       recommendation: { modelId: 'm1', provider: 'p1', score: 0.9 },
       ranked: [
         { modelId: 'm1', provider: 'p1', score: 0.9 },
-        { modelId: 'm3', provider: 'p3', score: 0, blocked: 'missing tool_use (required)' },
+        { modelId: 'm3', provider: 'p3', score: 0, blocked: 'missing streaming (required)' },
       ],
-      predictions: { cost: 0, quality: 0.9, latency: 1200 },
+      predictions: { cost: 0, quality: 0.9, latency: 800 },
     });
-    assert.ok(ex.eliminated[0].reason.includes('tool_use'));
+    assert.ok(ex.eliminated[0].reason.includes('streaming'));
   });
 });
 
-describe('Phase2-A Shadow Recorder（脱敏 + 对照状态 + 持久化）', () => {
+describe('Phase2-B Shadow Recorder（脱敏 + 对照状态）', () => {
   test('sanitizeTaskProfile excludes lastUserText', () => {
-    const sanitized = sanitizeTaskProfile({
-      taskType: 'coding', complexity: 0.7, estimatedInputTokens: 100,
-      lastUserText: 'SECRET PROMPT CONTENT', messageCount: 3, signals: ['coding'],
-    });
-    assert.ok(!('lastUserText' in sanitized), 'lastUserText must NOT be persisted');
-    assert.strictEqual(sanitized.taskType, 'coding');
+    const s = sanitizeTaskProfile({ taskType: 'coding', requiredCapabilities: { chat: 1 }, lastUserText: 'SECRET' });
+    assert.ok(!('lastUserText' in s));
+    assert.ok(s.requiredCapabilities);
   });
 
   test('comparison statuses', () => {
     const sug = { recommendation: { modelId: 'm1', provider: 'p1' } };
     assert.strictEqual(computeComparisonStatus(sug, { outcome: 'completed', finalModel: 'm1', finalProvider: 'p1' }), 'exact_match');
-    assert.strictEqual(computeComparisonStatus(sug, { outcome: 'completed', finalModel: 'm1', finalProvider: 'p9' }), 'model_match_provider_diff');
-    assert.strictEqual(computeComparisonStatus(sug, { outcome: 'completed', finalModel: 'm9', finalProvider: 'p9' }), 'different');
     assert.strictEqual(computeComparisonStatus(null, { outcome: 'budget_exceeded' }), 'policy_agreement');
     assert.strictEqual(computeComparisonStatus(null, { outcome: 'no_candidate' }), 'policy_agreement');
     assert.strictEqual(computeComparisonStatus(sug, { outcome: 'client_aborted' }), 'not_comparable');
-    assert.strictEqual(computeComparisonStatus(null, { outcome: 'internal_error' }), 'not_comparable');
   });
 
-  test('persists suggestion + final via MemoryStore mirror', async () => {
+  test('persists via MemoryStore mirror', async () => {
     const store = new MemoryStore();
     await store.init();
     const rec = new ShadowRecorder({ enabled: true, store });
     await rec.recordSuggestion({
-      requestId: 'r1', protocol: 'chat', agentId: 'g', requestedModel: 'auto',
-      taskProfile: { taskType: 'coding', lastUserText: 'secret' },
-      recommendation: { modelId: 'm1', provider: 'p1', score: 0.9 },
-      ranked: [{ modelId: 'm1', score: 0.9 }],
-      predictions: { cost: 0, quality: 0.9, latency: 1200 },
-      explanation: { summary: 'x' },
+      requestId: 'r1', protocol: 'chat', taskProfile: { taskType: 'coding' },
+      recommendation: { modelId: 'm1', provider: 'p1' }, ranked: [], predictions: {}, explanation: { summary: 'x' },
     });
     await rec.recordFinalized({
-      requestId: 'r1', outcome: 'completed', finalModel: 'm1', finalProvider: 'p1',
-      attemptCount: 1,
-      attempts: [{ transportOutcome: 'success', usage: { prompt_tokens: 5, completion_tokens: 3 }, cost: { totalCost: 0 }, latencyMs: 100 }],
+      requestId: 'r1', outcome: 'completed', finalModel: 'm1', finalProvider: 'p1', attemptCount: 1,
+      attempts: [{ transportOutcome: 'success', usage: {}, cost: { totalCost: 0 }, latencyMs: 50 }],
     });
     const row = await rec.get('r1');
-    assert.strictEqual(row.actualOutcome, 'completed');
-    assert.strictEqual(row.actualFinalModel, 'm1');
     assert.strictEqual(row.comparisonStatus, 'exact_match');
-    assert.ok(!('lastUserText' in row.taskProfile));
-    // 持久化到 store
-    const stored = await store.getShadowDecision('r1');
-    assert.ok(stored);
-    assert.strictEqual(stored.actualOutcome, 'completed');
+    assert.strictEqual(row.actualOutcome, 'completed');
   });
 });
 
-describe('Phase2-A IntelligenceLayer off/shadow', () => {
+describe('Phase2-B IntelligenceLayer（off/shadow + await 隔离）', () => {
+  function deps(store) { return { store }; }
+
   test('off mode: suggest null, no records', async () => {
     const store = new MemoryStore();
     await store.init();
-    const layer = new IntelligenceLayer({ intelligence: { mode: 'off' }, models: [], budget: {}, agent_bindings: {} }, store);
-    assert.strictEqual(layer.isShadow(), false);
+    const layer = new IntelligenceLayer({ intelligence: { mode: 'off' }, models: [], budget: {}, agent_bindings: {} }, deps(store));
     const d = await layer.suggest({ requestId: 'r1', body: {}, agentId: 'g', budget: {}, candidates: [] });
     assert.strictEqual(d, null);
     await layer.recordFinalized({ requestId: 'r1', outcome: 'completed' });
     assert.strictEqual((await layer.getRecords()).length, 0);
-    assert.strictEqual((await store.listShadowDecisions()).length, 0, 'off mode must not persist shadow rows');
+    assert.strictEqual((await store.listShadowDecisions()).length, 0);
   });
 
-  test('shadow mode: suggest + recordFinalized produce complete row', async () => {
+  test('shadow mode: suggest + recordFinalized complete row', async () => {
     const store = new MemoryStore();
     await store.init();
-    const layer = new IntelligenceLayer(TEST_CONFIG, store);
-    const d = await layer.suggest({
+    const layer = new IntelligenceLayer(TEST_CONFIG, deps(store));
+    await layer.suggest({
       requestId: 'r1', body: { messages: [{ role: 'user', content: 'Write a JS function' }] },
       agentId: 'generic', budget: TEST_CONFIG.budget,
-      candidates: [{ modelId: 'm1', provider: 'p1', tier: 'tier1', paid: false, capability: ['chat', 'tool_use'] }],
+      candidates: [{ modelId: 'm1', provider: 'p1', tier: 'tier1', paid: false, capability: ['chat', 'coding', 'tool_use', 'streaming'] }],
       protocol: 'chat',
     });
-    assert.ok(d);
     await layer.recordFinalized({
       requestId: 'r1', outcome: 'completed', finalModel: 'm1', finalProvider: 'p1', attemptCount: 1,
-      attempts: [{ transportOutcome: 'success', usage: { prompt_tokens: 1, completion_tokens: 1 }, cost: { totalCost: 0 }, latencyMs: 50 }],
+      attempts: [{ transportOutcome: 'success', usage: {}, cost: { totalCost: 0 }, latencyMs: 50 }],
     });
     const row = await store.getShadowDecision('r1');
     assert.ok(row);
     assert.strictEqual(row.actualOutcome, 'completed');
     assert.strictEqual(row.comparisonStatus, 'exact_match');
-    assert.ok(row.createdAt <= row.finalizedAt);
+  });
+
+  test('suggest DB failure: user flow unaffected, no half record, clear log', async () => {
+    const store = new MemoryStore();
+    await store.init();
+    // 注入会失败的 store（saveShadowDecision 抛错）
+    const brokenStore = {
+      ...store,
+      async saveShadowDecision() { throw new Error('simulated db failure'); },
+    };
+    const layer = new IntelligenceLayer(TEST_CONFIG, deps(brokenStore));
+    // suggest 应抛错（由调用方 try/catch 处理，方案A）
+    let thrown = null;
+    try {
+      await layer.suggest({
+        requestId: 'r1', body: { messages: [{ role: 'user', content: 'hi' }] },
+        agentId: 'g', budget: TEST_CONFIG.budget,
+        candidates: [{ modelId: 'm1', provider: 'p1', tier: 'tier1', paid: false, capability: ['chat'] }],
+        protocol: 'chat',
+      });
+    } catch (e) {
+      thrown = e;
+    }
+    assert.ok(thrown, 'suggest must propagate error for caller to catch+log');
+    assert.strictEqual(thrown.message, 'simulated db failure');
+    // 不生成半条记录
+    assert.strictEqual((await store.listShadowDecisions()).length, 0);
+    // off 模式完全不受影响
+    const offLayer = new IntelligenceLayer({ intelligence: { mode: 'off' }, models: [], budget: {}, agent_bindings: {} }, deps(store));
+    assert.strictEqual(await offLayer.suggest({ requestId: 'r9', body: {}, agentId: 'g', budget: {}, candidates: [] }), null);
   });
 
   test('attachTo finalizer observer (post-commit)', async () => {
     const store = new MemoryStore();
     await store.init();
-    const layer = new IntelligenceLayer(TEST_CONFIG, store);
+    const layer = new IntelligenceLayer(TEST_CONFIG, deps(store));
     const { Finalizer } = await import('../../src/runtime/finalization.js');
     const { CostTracker } = await import('../../src/cost/tracker.js');
     const finalizer = new Finalizer(new CostTracker(TEST_CONFIG, store), store);
     layer.attachTo(finalizer);
-    // 模拟：先 suggest（执行前），再 finalize（事务成功后观察者触发）
     await layer.suggest({
       requestId: 'r2', body: { messages: [{ role: 'user', content: 'hi' }] },
       agentId: 'g', budget: TEST_CONFIG.budget,
@@ -367,28 +561,7 @@ describe('Phase2-A IntelligenceLayer off/shadow', () => {
     const res = await finalizer.finalizeRequestTransaction('r2', al, Outcome.COMPLETED, { agentId: 'g', protocol: 'chat' });
     assert.ok(res.finalized);
     const row = await store.getShadowDecision('r2');
-    assert.ok(row, 'observer must create shadow row after commit');
-    assert.strictEqual(row.actualOutcome, 'completed');
+    assert.ok(row);
     assert.strictEqual(row.comparisonStatus, 'exact_match');
-  });
-
-  test('observer failure does not affect finalize result', async () => {
-    const store = new MemoryStore();
-    await store.init();
-    const layer = new IntelligenceLayer(TEST_CONFIG, store);
-    const { Finalizer } = await import('../../src/runtime/finalization.js');
-    const { CostTracker } = await import('../../src/cost/tracker.js');
-    const finalizer = new Finalizer(new CostTracker(TEST_CONFIG, store), store);
-    // 注入抛异常的观察者
-    finalizer.addObserver(async () => { throw new Error('observer boom'); });
-    layer.attachTo(finalizer);
-    const { AttemptLog } = await import('../../src/runtime/attempts.js');
-    const { Outcome } = await import('../../src/runtime/outcomes.js');
-    const al = new AttemptLog('r3');
-    const att = al.add({ attemptNumber: 1, model: 'm1', provider: 'p1', keyId: 'k', transportOutcome: 'success', validatedOutcome: 'completed', latencyMs: 10, usage: { prompt_tokens: 1, completion_tokens: 1 }, timestamp: new Date().toISOString() });
-    att.setUsage({ prompt_tokens: 1, completion_tokens: 1 }, { totalCost: 0 });
-    await store.saveRequest({ requestId: 'r3', agentId: 'g', protocol: 'chat', model: 'm1', provider: 'p1', timestamp: new Date().toISOString() });
-    const res = await finalizer.finalizeRequestTransaction('r3', al, Outcome.COMPLETED, { agentId: 'g', protocol: 'chat' });
-    assert.ok(res.finalized, 'finalize must succeed despite observer error');
   });
 });

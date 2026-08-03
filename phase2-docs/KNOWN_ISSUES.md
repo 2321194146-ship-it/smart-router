@@ -1,57 +1,58 @@
-# KNOWN_ISSUES（Smart Router Mainline - Phase 2-A Shadow Sealed）
+# KNOWN_ISSUES（Smart Router Mainline - Phase 2-B Active Readiness）
 
-本文件记录 Phase 2-A Shadow Sealed 版已知限制与后续处理建议。本阶段不进入 Active / 网站 / Dashboard / 收费。
+本文件记录 Phase 2-B 已知限制与后续处理建议。本阶段不开启 Active；5% 低风险 Active 必须经独立验收。
 
 ## 1. 智能层未参与执行（Shadow 版边界）
 
 - 现象：Decision Engine 的建议（recommendation）只记录，不改变实际路由。
-- 影响：建议采纳率（评测 76%、真实运行 66.7%）仅为观测指标，不影响生产行为。
-- 处理：Active 阶段需先评审 Policy 权重、硬约束与回滚机制，禁止自动学习直接修改生产权重。
+- 影响：建议采纳率（评测 acceptance=exact_match 分母小）仅为观测指标，不影响生产行为。
+- 处理：Active 阶段需先评审 Policy 权重、硬约束与回滚机制；禁止自动学习直接修改生产权重。
 
 ## 2. 任务分析为启发式（无 LLM / 无 Tokenizer）
 
-- 现象：Task Analyzer 用关键词信号 + 字符/3.5 估算 token，无真实 tokenizer。
-- 影响：评测 33 任务中 1 个分类偏差（summ-02 "Give me a brief summary" 未命中 extract 关键词，归为 chat），分类准确率 97%。
-- 处理：Shadow 版可接受；Active 前可引入轻量 tokenizer 或基于观测数据校准。
+- 现象：Task Analyzer 用关键词信号 + 字符/3.5 估算 token。
+- 影响：评测 105 任务分类准确率 100%，但关键词变体（如 "give me a brief summary"）可能漏检；
+  复杂混合任务可能误判。
+- 处理：Active 前可引入轻量 tokenizer 或基于观测数据校准。
 
 ## 3. 成本/质量/延迟预测为确定性静态先验
 
-- 现象：predictLatency 为 tier+provider 静态先验（无随机）；predictQuality 按 tier+复杂度，上限 0.95。
+- 现象：predictLatency 为 tier+provider 静态先验（无随机）；predictQuality 为能力匹配 + tier + reliability。
 - 影响：预测为粗粒度估计，非历史统计。
-- 处理：ShadowRecorder 已积累真实 latency/quality/cost 数据，Active 前可用其校准（或接 ProviderHealth 历史均值）。
+- 处理：ShadowRecorder 已积累真实 latency/quality/cost 数据，Active 前可用其校准。
 
-## 4. Shadow 观测记录未暴露查询 API
+## 4. Provider 健康统计样本阈值（5）
 
-- 现象：shadow_decisions 表已持久化，但暂无对外查询接口（仅进程内 store 方法）。
-- 影响：观测数据可通过 SQLite 直接查询，但无 HTTP/CLI 入口。
-- 处理：Dashboard/查询接口属后续阶段（不在 Phase2-A）。
+- 现象：样本数 <5 时只用静态先验（reliability 配置）；>=5 才启用成功率/延迟修正。
+- 影响：新 Provider 早期无健康修正，属保守行为（不剧烈调整）。
+- 处理：阈值可配置化（当前硬编码 5）。
 
-## 5. 真实外部 Pilot 的端点约束
+## 5. Phase1 候选构建仅识别旧 capability 数组
 
-- 现象：Anthropic / Responses 经本地 7878 网关转发（环境标准路径），OpenAI 兼容 chat 直连 modelscope。
-- 影响：Responses 上游偶发真实 429（Pilot 脚本已自动重试）；Anthropic 直连 api.anthropic.com 不通。
-- 处理：已按环境约束完成真实 Pilot 9/9；网络/账号条件变化时可重跑。
+- 现象：`src/router/candidates.js` 的 `hasCapability` 只查 `model.capability` 数组；
+  新 `capabilities` 对象需同时提供兼容数组（评测配置已自动生成）。
+- 影响：生产配置若只用 capabilities 对象，Phase1 vision 过滤会失效（评测已用双格式规避）。
+- 处理：Active 前可平滑升级 candidates.js 支持 capabilities 对象（属 Phase1 演进，本阶段未改）。
 
 ## 6. cost 提前写入（execute 阶段 _recordCost）
 
 - 现象：execution 在 execute 阶段直接 saveCost，finalizeRequestAtomic 对已存在 cost 跳过。
-- 影响：若 finalize 后续失败，cost 可能残留（不在 finalize 事务内）；Shadow 记录不依赖该路径（实际值来自 Audit attempts）。
-- 处理：属 Phase1 架构特性；Shadow 版不改变。后续可将 cost 写入移入 finalize 事务。
+- 影响：若 finalize 后续失败，cost 可能残留；Shadow 记录不依赖该路径。
+- 处理：属 Phase1 架构特性；Shadow 版不改变。
 
-## 7. 观察者基于内存快照匹配
+## 7. 对照统计的 different 占比较高（评测 86/105）
 
-- 现象：recordFinalized 通过内存 suggestion 快照（recordSuggestion 时同步写入）匹配 requestId；SQLite 同步写保证建议先于 finalize 落库。
-- 影响：单进程语义正确（DatabaseSync 同步）；若未来多进程共享 DB，需改为从 DB 读取建议。
-- 处理：当前单进程架构无此需求。
+- 现象：Shadow 推荐模型（能力优先）与 Phase1 实际执行模型（tier 优先）经常不同 → different。
+- 影响：acceptance（exact_match）率低，但这是 Shadow 观测的预期差异，非缺陷；
+  exact_match=5、model_match_provider_diff=0、policy_agreement=17、not_comparable=6、different=86。
+- 处理：Active 阶段评估"建议-执行一致性"作为改进指标。
 
-## 8. 协议适配兼容的 protocols 推导
+## 8. Shadow 观测记录未暴露查询 API
 
-- 现象：deriveProtocols 将 chat 能力模型视为三协议 adapter 兼容（responses/anthropic 内部转 chat 执行）。
-- 影响：protocol 硬约束仅在模型无 chat 能力时触发（当前配置下几乎不触发，属正确语义）。
-- 处理：Active 前若引入真正的协议级限制，可改为显式 protocols 配置。
+- 现象：shadow_decisions 表已持久化，但无对外查询接口。
+- 处理：Dashboard/查询接口属后续阶段（不在 Phase2-B）。
 
-## 9. 客户端取消归因
+## 9. 真实外部 Pilot 的端点约束
 
-- 现象：client_aborted 的 Attempt 标记为明确非质量结果，Shadow comparison=not_comparable。
-- 影响：与 Phase1 语义一致。
-- 处理：无需处理。
+- 现象：Anthropic / Responses 经本地 7878 网关转发；OpenAI 兼容 chat 直连 modelscope。
+- 处理：真实 Pilot 9/9 已完成；评测使用确定性本地 Mock（离线可复跑）。

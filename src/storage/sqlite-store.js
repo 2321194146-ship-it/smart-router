@@ -752,7 +752,8 @@ export class SQLiteStore extends StorageInterface {
   }
 
   async listShadowDecisions() {
-    const rows = this._db.prepare('SELECT * FROM shadow_decisions ORDER BY created_at').all();
+    // rowid = 插入顺序（同毫秒 created_at 下顺序稳定；请求按 await 顺序落库）
+    const rows = this._db.prepare('SELECT * FROM shadow_decisions ORDER BY rowid').all();
     return rows.map((r) => this._parseShadowRow(r));
   }
 

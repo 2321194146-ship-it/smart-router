@@ -1013,11 +1013,12 @@ export async function handleAnthropicMessageStream(req, res, body, context) {
       keyPool: executionEngine.keyPool,
     });
 
-    // 3b. Shadow 智能建议（执行前生成；不改变任何行为；off 模式 no-op）
+    // 3b. Shadow 智能建议（执行前生成；await 保证建议落库后才执行；off 模式 no-op）
     //     无候选/预算拦截也记录；真实结果由 Finalizer 事务成功后观察钩子回填
+    //     异步异常隔离（方案A）：await + try/catch + log shadow_error
     if (context.intelligence && typeof context.intelligence.suggest === 'function') {
       try {
-        context.intelligence.suggest({
+        await context.intelligence.suggest({
           requestId,
           body: patchedBody,
           agentId,
@@ -1026,7 +1027,12 @@ export async function handleAnthropicMessageStream(req, res, body, context) {
           protocol: context.protocol || 'chat',
         });
       } catch (_e) {
-        // Shadow 层失败不影响主流程
+        // Shadow 层失败不影响主流程；错误必须有明确日志
+        if (context.log && typeof context.log === 'function') {
+          context.log(`[shadow_error] suggest failed for ${requestId}: ${_e.message}`);
+        } else {
+          process.stderr.write(`[shadow_error] suggest failed for ${requestId}: ${_e.message}\n`);
+        }
       }
     }
     // 无候选可用
