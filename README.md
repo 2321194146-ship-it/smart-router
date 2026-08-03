@@ -124,6 +124,18 @@ Active Canary 控制器 8 项安全收口（独立验收后，仅修以下内容
 
 最终提交：见 evidence/git-commit-sha.txt 与 RELEASE_MANIFEST.json 的 commit 字段。
 
+## Phase 2-C 5% Canary Live Pilot（127.0.0.1:28788 内部实验）
+
+真实 5% 低风险 Active Canary 启动补丁（仅完成以下内容，未新增评测体系 / Task 分类 / 网站 / Dashboard / 决策算法）：
+
+- 允许 Claude Code 低风险流式请求参与 Canary：needsStreaming 不再直接排除；流式请求须 protocol=anthropic + agentId=claude-code + 低风险任务类型 + 所有执行候选支持 streaming；流式硬能力保留（stream=true + 模型不支持 streaming → 候选 blocked，不进 Fallback）
+- 自动停止状态立即持久化：apply 阶段（budget_violation）与 Finalize 阶段（budget_exceeded / first_byte_switch / repeated_tool / incomplete_rise / consecutive_provider_errors / consecutive_no_candidate）停止后立即写入 SQLite app_state.canary.killed；持久化失败不影响进程内停止采样；重启后仍 stopped，不恢复 5% 采样
+- 首批 Canary 严格限制 Anthropic：allowedProtocols=["anthropic"]；Responses / Chat 本轮禁止进入真实 Active Canary（Responses text.format 问题进入维护清单，不阻塞本轮）
+- Live Pilot 结果（node scripts/canary-live-pilot.mjs）：127.0.0.1:28788 发送 456 个 Claude Code Anthropic 流式请求，active=20（5% 确定性采样）；20 个 Active 全部重排到 Canary Primary（canary-best），436 个非采样请求走 Phase1（phase1-first）；completed 456；Kill Switch 验证：kill → 重启 stopped=true（restored）→ resume-shadow 回 shadow（canaryEnabled=false）
+- 保护规则：不修改 7878/17878；不使用生产全部 Key（Mock / 低额度测试链路）；不对外开放（127.0.0.1）；Admin Token 只放环境变量；Kill 接口仅 127.0.0.1；不开启 Cloud 收费（Cloud Billing Blocker 保持标记，网站公开收费前必须单独解决）
+
+验证：600/600 测试全绿（unit 478 / integration 89 / audit 33）；流式资格测试 5 项；自动停止重启持久化测试 4 项（incomplete_rise / provider_errors / first_byte_switch / budget_violation apply）；Live Pilot evidence 见 evidence/canary-live-pilot-evidence.json。报告见 phase2-docs/CANARY_LIVE_PILOT_REPORT.md。
+
 ## 关于交付包（ZIP）内容说明
 
 - 交付包根目录含全部报告（*_REPORT.md、READ_ME_FIRST.md、RELEASE_MANIFEST.json）

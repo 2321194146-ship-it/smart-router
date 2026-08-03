@@ -1,1 +1,1 @@
-syntax check OK (all files)
+syntax check OK

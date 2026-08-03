@@ -1,0 +1,76 @@
+{
+  "pilot": "Smart Router Phase2 5% Canary Live Pilot (internal, 127.0.0.1:28788)",
+  "runtime": "2026-08-03T06:11:52.471Z",
+  "config": {
+    "mode": "active_canary",
+    "percentage": 5,
+    "allowedAgents": [
+      "claude-code"
+    ],
+    "allowedProtocols": [
+      "anthropic"
+    ],
+    "allowedTaskTypes": [
+      "general_chat",
+      "writing",
+      "summarization",
+      "translation",
+      "extraction"
+    ],
+    "provider": "local mock (HTTP + SSE + SQLite full chain)",
+    "admin_token": "env SMART_ROUTER_ADMIN_TOKEN only",
+    "external_exposure": "none (loopback only)",
+    "cloud_billing": "not enabled"
+  },
+  "traffic": {
+    "sent": 456,
+    "activeTarget": 20
+  },
+  "canary_metrics": {
+    "eligible": 456,
+    "sampled": 20,
+    "active": 20,
+    "activeVsPhase1": {
+      "same": 0,
+      "diff": 20
+    },
+    "actuallyReordered": 20,
+    "incomplete": 0,
+    "failed": 0,
+    "aborted": 0,
+    "attempts": 20,
+    "fallbackCount": 0,
+    "totalCost": 0,
+    "autoStop": null,
+    "stopped": false
+  },
+  "outcome_distribution": {
+    "completed": 456
+  },
+  "final_model_distribution": {
+    "canary-best@mock": 20,
+    "phase1-first@mock": 436
+  },
+  "phase1_primary": [
+    "phase1-first@mock"
+  ],
+  "canary_primary": [
+    "canary-best@mock"
+  ],
+  "cost": {
+    "estimatedTotal": 0,
+    "actualTotal": 0
+  },
+  "kill_switch": {
+    "kill_status": 200,
+    "killed": true,
+    "restart_status": 200,
+    "restart_stopped": true,
+    "restart_autoStop_reason": "admin_kill_switch",
+    "restart_restored": true,
+    "resume_shadow_status": 200,
+    "resume_shadow_mode": "shadow",
+    "resume_shadow_canary_enabled": false
+  },
+  "active_requests_collected": true
+}

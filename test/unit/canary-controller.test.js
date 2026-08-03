@@ -263,11 +263,61 @@ describe('Phase2-C Active Canary 控制器（Safety Sealed）', () => {
     assert.strictEqual(r.reason, 'excluded:long_context');
   });
 
-  test('S3 low-risk exclusion: streaming', () => {
-    const cc = new CanaryController({ percentage: 100 }, true);
-    const r = cc.apply(applyArgs({ task: { ...BASE_TASK, needsStreaming: true } }));
+  test('L1 streaming exclusion: needsStreaming + non-anthropic protocol excluded', () => {
+    const cc = new CanaryController({ percentage: 100, allowedAgents: ['claude-code'], allowedProtocols: ['anthropic'] }, true);
+    // chat 协议 + 流式 → 第一批只允许 anthropic
+    const r = cc.apply(applyArgs({ task: { ...BASE_TASK, needsStreaming: true }, protocol: 'chat', agentId: 'claude-code' }));
     assert.strictEqual(r.active, false);
-    assert.strictEqual(r.reason, 'excluded:streaming');
+    assert.strictEqual(r.reason, 'excluded:streaming_protocol_not_allowed');
+  });
+
+  test('L1 streaming Claude Code (anthropic + claude-code + streaming candidates) can enter Canary', () => {
+    const cc = new CanaryController({ percentage: 100, allowedAgents: ['claude-code'], allowedProtocols: ['anthropic'] }, true);
+    const cands = [
+      { modelId: 'a', provider: 'p', tier: 'tier1', paid: false, capability: ['chat', 'streaming'] },
+      { modelId: 'b', provider: 'p', tier: 'tier2', paid: false, capability: ['chat', 'streaming'] },
+    ];
+    const r = cc.apply(applyArgs({
+      candidates: cands,
+      task: { ...BASE_TASK, needsStreaming: true },
+      protocol: 'anthropic',
+      agentId: 'claude-code',
+    }));
+    assert.strictEqual(r.active, true, 'streaming low-risk anthropic must sample: ' + r.reason);
+  });
+
+  test('L1 streaming request with candidates lacking streaming → excluded (defense)', () => {
+    const cc = new CanaryController({ percentage: 100, allowedAgents: ['claude-code'], allowedProtocols: ['anthropic'] }, true);
+    // 候选 capability 无 streaming（DecisionEngine 会将其 blocked；Canary 层最终防线拒绝采样）
+    const r = cc.apply(applyArgs({ task: { ...BASE_TASK, needsStreaming: true }, protocol: 'anthropic', agentId: 'claude-code' }));
+    assert.strictEqual(r.active, false);
+    assert.strictEqual(r.reason, 'excluded:streaming_candidate_unsupported');
+  });
+
+  test('L1 non-streaming request still allowed under anthropic', () => {
+    const cc = new CanaryController({ percentage: 100, allowedAgents: ['claude-code'], allowedProtocols: ['anthropic'] }, true);
+    const r = cc.apply(applyArgs({ protocol: 'anthropic', agentId: 'claude-code', candidates: candidates(['a', 'b']) }));
+    assert.strictEqual(r.active, true);
+  });
+
+  test('L1 streaming-blocked candidate never enters fallback chain', () => {
+    const cc = new CanaryController({ percentage: 100, allowedAgents: ['claude-code'], allowedProtocols: ['anthropic'] }, true);
+    // b 不支持 streaming → DecisionEngine 语义 blocked；a/c 支持 streaming 合法
+    const d = decision(['a', 'b', 'c'], 'c', { blocked: ['b'] });
+    const cands = [
+      { modelId: 'a', provider: 'p', tier: 'tier1', paid: false, capability: ['chat', 'streaming'] },
+      { modelId: 'b', provider: 'p', tier: 'tier2', paid: false, capability: ['chat'] },
+      { modelId: 'c', provider: 'p', tier: 'tier3', paid: false, capability: ['chat', 'streaming'] },
+    ];
+    const r = cc.apply(applyArgs({
+      decision: d, candidates: cands,
+      task: { ...BASE_TASK, needsStreaming: true },
+      protocol: 'anthropic', agentId: 'claude-code',
+    }));
+    assert.strictEqual(r.active, true, 'reason=' + r.reason);
+    const ids = r.orderedCandidates.map((x) => x.modelId);
+    assert.ok(!ids.includes('b'), 'streaming-blocked candidate must not enter fallback: ' + ids.join(','));
+    assert.deepStrictEqual(ids, ['c', 'a']);
   });
 
   test('S3 low-risk exclusion: strictModel budget', () => {

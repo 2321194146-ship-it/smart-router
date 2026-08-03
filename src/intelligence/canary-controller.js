@@ -144,7 +144,10 @@ export class CanaryController {
     if (t.needsVision === true) return 'vision_required';
     if (t.structuredOutputRequired === true) return 'structured_output_required';
     if (t.needsLongContext === true) return 'long_context';
-    if (t.needsStreaming === true) return 'streaming';
+    // 5% Live Pilot：流式请求【允许】进入 Canary（Claude Code Anthropic 常见），
+    // 但第一批只允许 anthropic 协议（agentId=claude-code 由 apply 的 allowedAgents 检查）。
+    // 流式硬能力仍保留：stream=true + 候选不支持 streaming → 候选 blocked（DecisionEngine）。
+    if (t.needsStreaming === true && protocol !== 'anthropic') return 'streaming_protocol_not_allowed';
     if (budget?.strictModel === true) return 'strict_model';
     if (HIGH_RISK_TASK_TYPES.has(t.taskType)) return 'high_risk_task';
     if (typeof t.complexity === 'number' && t.complexity >= HIGH_RISK_COMPLEXITY) return 'high_complexity';
@@ -194,6 +197,15 @@ export class CanaryController {
       const legalIds = new Set(ranked.filter((r) => !r.blocked).map((r) => this._identity(r)));
       const legalCandidates = orig.filter((c) => legalIds.has(this._identity(c)));
       if (legalCandidates.length === 0) return { orderedCandidates: orig, active: false, reason: 'no_legal_candidate' };
+
+      // 5% Live Pilot：流式请求所有执行候选必须明确支持 streaming（Canary 层最终防线；
+      // 不支持 streaming 的候选已在 DecisionEngine 被 blocked，此处若仍出现则拒绝采样）
+      if (task?.needsStreaming === true) {
+        const unsupported = legalCandidates.filter((c) => !this._supportsStreaming(c));
+        if (unsupported.length > 0) {
+          return { orderedCandidates: orig, active: false, reason: 'excluded:streaming_candidate_unsupported' };
+        }
+      }
 
       const primary = decision?.recommendation || null;
       const primaryId = primary?.modelId || null;
@@ -258,6 +270,22 @@ export class CanaryController {
   _identity(c) {
     if (!c) return 'null@null';
     return `${c.modelId ?? ''}@${c.provider ?? ''}`;
+  }
+
+  /**
+   * 候选是否明确支持 streaming：
+   *   - capabilities.streaming >= 1（0-1/0-100 规范化）
+   *   - capability 数组包含 'streaming'（legacy 兼容）
+   */
+  _supportsStreaming(c) {
+    if (!c) return false;
+    if (c.capabilities && typeof c.capabilities.streaming !== 'undefined') {
+      return Number(c.capabilities.streaming) >= 1;
+    }
+    if (Array.isArray(c.capability)) {
+      return c.capability.includes('streaming');
+    }
+    return false;
   }
 
   /**

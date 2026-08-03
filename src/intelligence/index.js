@@ -16,6 +16,7 @@
 //   确保 suggestion 已落库后 Execution 才可能 Finalize（不出现已 Finalize 但建议未创建）。
 //   观察者钩子失败不影响用户请求与 Phase1 执行结果（Finalizer 内部已隔离异常）。
 
+import { log } from '../config/loader.js';
 import { DecisionEngine } from './decision-engine.js';
 import { ShadowRecorder } from './shadow-recorder.js';
 import { CanaryController } from './canary-controller.js';
@@ -86,6 +87,8 @@ export class IntelligenceLayer {
         budget: params.budget,
         requestedModel: params.body?.model || null,
       });
+      // 5% Live Pilot：apply 阶段自动停止（budget_violation 等）→ 返回前立即持久化
+      await this._persistIfStopped();
     }
     if (params.requestId) {
       await this.recorder.recordSuggestion({
@@ -117,6 +120,10 @@ export class IntelligenceLayer {
         cost: auditRecord.cost?.totalCost,
         latencyMs: auditRecord.latencyMs,
       });
+      // 5% Live Pilot：Finalize 阶段自动停止（incomplete_rise / consecutive_provider_errors /
+      // first_byte_switch / budget_exceeded / repeated_tool / consecutive_no_candidate）
+      // → 返回前立即持久化（持久化失败不影响用户请求）
+      await this._persistIfStopped();
     }
     await this.recorder.recordFinalized(auditRecord);
   }
@@ -193,7 +200,24 @@ export class IntelligenceLayer {
       if (this.mode !== 'active_canary') {
         await this._store.setAppState('intelligence.mode', this.mode);
       }
-    } catch { /* 持久化失败不影响进程内状态 */ }
+    } catch (err) {
+      // 持久化失败：进程内 killed 状态已生效（立即停止采样），仅输出明确错误日志
+      log(`[canary] persistCanaryState failed: ${err?.message || err}`);
+    }
+  }
+
+  /**
+   * 5% Live Pilot：检测 Canary 是否已自动停止（apply / Finalize 阶段触发），
+   * 若是则立即持久化。持久化失败不影响用户原始请求（内部已隔离异常）。
+   */
+  async _persistIfStopped() {
+    if (this.canary && this.canary.stopped) {
+      try {
+        await this.persistCanaryState();
+      } catch (err) {
+        log(`[canary] persist auto-stop state failed: ${err?.message || err}`);
+      }
+    }
   }
 
   /**

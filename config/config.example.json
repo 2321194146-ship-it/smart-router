@@ -13,6 +13,7 @@
     "activeCanary": {
       "percentage": 5,
       "allowedAgents": ["claude-code"],
+      "allowedProtocols": ["anthropic"],
       "allowedTaskTypes": [
         "general_chat",
         "writing",

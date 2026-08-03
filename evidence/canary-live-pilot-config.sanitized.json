@@ -1,0 +1,118 @@
+{
+  "server": {
+    "host": "127.0.0.1",
+    "port": 28788,
+    "data_dir": "/var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/canary-live-pilot-KZchh5/data",
+    "request_timeout_ms": 30000
+  },
+  "data_dir": "/var/folders/79/x7jg0lwx0xx9wbmrth687brh0000gn/T/canary-live-pilot-KZchh5/data",
+  "intelligence": {
+    "mode": "active_canary",
+    "fallback_to_routing": true,
+    "activeCanary": {
+      "percentage": 5,
+      "allowedAgents": [
+        "claude-code"
+      ],
+      "allowedProtocols": [
+        "anthropic"
+      ],
+      "allowedTaskTypes": [
+        "general_chat",
+        "writing",
+        "summarization",
+        "translation",
+        "extraction"
+      ]
+    },
+    "shadow": {
+      "retentionDays": 30
+    }
+  },
+  "routing": {
+    "strategy": "tier_weighted",
+    "tier_weights": {
+      "tier1": 10,
+      "tier2": 5,
+      "tier3": 1
+    },
+    "max_concurrent": 8,
+    "max_retries": 1,
+    "retry_backoff_ms": 20,
+    "cooldown_default_sec": 60,
+    "health_check_interval_sec": 999999,
+    "failover_on_error": true
+  },
+  "budget": {
+    "allowPaid": true,
+    "maxRequestCost": 1,
+    "allowedModels": [],
+    "allowedProviders": [],
+    "strictModel": false
+  },
+  "providers": [
+    {
+      "name": "mock",
+      "base_url": "http://127.0.0.1:64467/v1",
+      "api_key": "<REDACTED-LOW-LIMIT-TEST-KEY>",
+      "auth_header": "Authorization",
+      "auth_prefix": "Bearer "
+    }
+  ],
+  "models": [
+    {
+      "id": "phase1-first",
+      "provider": "mock",
+      "apiModel": "phase1-first",
+      "tier": "tier1",
+      "paid": false,
+      "enabled": true,
+      "capabilities": {
+        "chat": 100,
+        "streaming": 100
+      },
+      "capability": [
+        "chat",
+        "streaming"
+      ],
+      "context_window": 32000,
+      "reliability": 0.5
+    },
+    {
+      "id": "canary-best",
+      "provider": "mock",
+      "apiModel": "canary-best",
+      "tier": "tier1",
+      "paid": false,
+      "enabled": true,
+      "capabilities": {
+        "chat": 100,
+        "reasoning": 100,
+        "streaming": 100
+      },
+      "capability": [
+        "chat",
+        "streaming",
+        "reasoning"
+      ],
+      "context_window": 64000,
+      "reliability": 0.95
+    }
+  ],
+  "agent_bindings": {
+    "claude-code": {
+      "model_ids": [
+        "phase1-first",
+        "canary-best"
+      ]
+    }
+  },
+  "circuit_breaker": {
+    "enabled": false,
+    "failure_threshold": 100,
+    "failure_window_sec": 60,
+    "open_state_sec": 120,
+    "half_open_max_calls": 2,
+    "key_disable_on_auth_invalid": true
+  }
+}

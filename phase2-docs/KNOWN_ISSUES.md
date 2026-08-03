@@ -1,13 +1,18 @@
-# 已知问题（Phase2-C）
+# 已知问题（Phase2-C 5% Live Pilot）
 
-## Cloud Billing Blocker（未解决，明确标记）
+## Cloud Billing Blocker（保持不变，未修改）
 `ExecutionEngine._recordCost()` 仍在 Finalize 原子事务【之前】写入成本记录。
-本阶段【不得伪装成已经解决】；成本入账的时序问题与对账方案为独立设计任务：
-- Provider 实际成本（usage 回填）与内部预估成本的对账
-- 最终状态（completed/incomplete/budget_exceeded）与成本记录的一致性
-- retry / fallback 多跳成本归属
-- Finalize 失败时的成本记录补偿
-该问题的解决涉及 Phase1 CostTracker 与 Finalizer 的时序重构，超出 Phase2-C 范围。
+5% Canary Live Pilot 阶段【明确不修改】此问题：
+- 不阻塞内部 5% Canary（本地 Mock / 低额度测试链路，成本记录时序不影响实验结论）
+- 在网站公开收费前【必须单独解决】（涉及 Phase1 CostTracker 与 Finalizer 的时序重构）
+本阶段继续标记 Cloud Billing Blocker，不伪装成已解决。
+
+## Responses 协议（进入维护清单，不阻塞本轮）
+- 非流式 Responses 仍通过 Chat Adapter 间接执行；原始 text.format / json_schema 结构
+  可能在转换前后丢失。
+- 第一批真实 Canary 严格限制 Anthropic：Responses / Chat 暂不进入真实 Active Canary，
+  继续使用 Shadow 或 Phase1 顺序。
+- 本轮不修 Responses；进入后续维护清单，不阻塞 Claude Code Anthropic Canary。
 
 ## 其他已知限制
 - `responses.js`（非流式 Responses 适配器）未接入 Shadow/Canary 3b 钩子
@@ -20,3 +25,5 @@
   预算与上下文判定倾向安全侧。
 - 分类器为关键词+正则启发式；极冷门的同义表达可能回落 general_chat（Holdout 208 任务
   当前 100% 覆盖，但不能保证任意输入）。
+- 5% Live Pilot 使用本地 Mock Anthropic Provider（真实 HTTP + SSE + SQLite 全链路），
+  非真实外部 Provider；真实外部 Provider Pilot 仍待独立执行（不含任何 Key）。
