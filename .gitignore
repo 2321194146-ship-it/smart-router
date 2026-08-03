@@ -17,3 +17,5 @@ coverage/
 *.sqlite3
 *.sqlite-wal
 *.sqlite-shm
+active-readiness-eval-data/
+shadow-eval-data/
