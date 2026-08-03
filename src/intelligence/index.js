@@ -18,6 +18,7 @@
 
 import { DecisionEngine } from './decision-engine.js';
 import { ShadowRecorder } from './shadow-recorder.js';
+import { CanaryController } from './canary-controller.js';
 
 export class IntelligenceLayer {
   /**
@@ -27,12 +28,17 @@ export class IntelligenceLayer {
   constructor(config, deps = null) {
     this.config = config || {};
     const intel = this.config.intelligence || {};
-    this.mode = intel.mode === 'shadow' ? 'shadow' : 'off';
-    this.enabled = this.mode === 'shadow';
+    // Phase2-C：off / shadow / active_canary（Active 默认关闭）
+    this.mode = intel.mode === 'active_canary' ? 'active_canary'
+      : intel.mode === 'shadow' ? 'shadow'
+        : 'off';
+    this.enabled = this.mode !== 'off';
 
     const store = deps?.store || null;
     const health = deps?.health || null;
     const shadowCfg = intel.shadow || {};
+    // Active Canary 控制器（仅 active_canary 模式启用；其余模式 disabled）
+    this.canary = new CanaryController(intel.activeCanary || {}, this.mode === 'active_canary');
 
     this.decisionEngine = new DecisionEngine(this.config, {
       policy: shadowCfg.policy,
@@ -64,6 +70,18 @@ export class IntelligenceLayer {
       candidates: params.candidates || [],
       protocol: params.protocol,
     });
+    // Phase2-C：Active Canary 采样与重排（仅 active_canary 模式；Fail Open → 原顺序）
+    if (this.canary && this.canary.enabled) {
+      decision.canary = this.canary.apply({
+        decision,
+        candidates: params.candidates || [],
+        requestId: params.requestId || null,
+        agentId: params.agentId || 'generic',
+        taskType: decision.task?.taskType || null,
+        protocol: params.protocol,
+        budget: params.budget,
+      });
+    }
     if (params.requestId) {
       await this.recorder.recordSuggestion({
         requestId: params.requestId,
@@ -83,6 +101,18 @@ export class IntelligenceLayer {
   /** 记录真实最终结果（Finalize 原子事务成功后由观察者调用）。 */
   async recordFinalized(auditRecord) {
     if (!this.enabled) return;
+    // Canary 指标与自动停止（仅 active_canary 模式生效）
+    if (this.canary && this.canary.enabled) {
+      this.canary.recordFinalized({
+        requestId: auditRecord.requestId,
+        outcome: auditRecord.outcome,
+        finalModel: auditRecord.finalModel,
+        finalProvider: auditRecord.finalProvider,
+        attempts: auditRecord.attempts,
+        cost: auditRecord.cost?.totalCost,
+        latencyMs: auditRecord.latencyMs,
+      });
+    }
     await this.recorder.recordFinalized(auditRecord);
   }
 
@@ -115,7 +145,14 @@ export class IntelligenceLayer {
       enabled: this.enabled,
       records: this.recorder.size,
       retentionDays: this.recorder.retentionDays,
+      canary: this.canary ? this.canary.snapshot() : null,
     };
+  }
+
+  /** Kill Switch：无需改代码即可停止 Active Canary（回退 shadow 行为）。 */
+  killCanary(reason = 'kill_switch') {
+    if (this.canary) this.canary.stop(reason);
+    return this.status();
   }
 }
 

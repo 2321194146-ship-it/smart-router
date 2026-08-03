@@ -9,7 +9,18 @@
   },
   "intelligence": {
     "mode": "off",
-    "fallback_to_routing": true
+    "fallback_to_routing": true,
+    "activeCanary": {
+      "percentage": 5,
+      "allowedAgents": ["test-agent-1"],
+      "allowedTaskTypes": [
+        "general_chat",
+        "writing",
+        "summarization",
+        "translation",
+        "extraction"
+      ]
+    }
   },
   "routing": {
     "strategy": "tier_weighted",

@@ -16,6 +16,9 @@
 //
 // 仅使用 Node.js 内置模块，无第三方依赖。
 
+// Phase2-C：统一能力数据源（Capability Registry）
+import { extractCapabilities, BINARY_CAPABILITY_THRESHOLD } from '../intelligence/capability-registry.js';
+
 // ----------------------------------------------------------------------------
 // 日志（避免与 config/loader 产生静态循环依赖）
 // ----------------------------------------------------------------------------
@@ -51,17 +54,20 @@ function tierValue(tier) {
 }
 
 /**
- * 判断模型是否具备请求所需能力。
+ * 判断模型是否具备请求所需能力（Phase2-C：统一数据源）。
+ * 兼容两种配置形态：
+ *   - legacy：capability: ["vision", "chat"]
+ *   - 新：capabilities: { vision: 100, chat: 95 }
+ * 阈值与 Phase2 Policy 的 binaryThreshold 一致（默认 0.9）。
  * @param {object} model 模型配置
  * @param {string} capability 请求能力（如 'vision'）
  * @returns {boolean}
  */
 function hasCapability(model, capability) {
   if (!capability) return true;
-  if (!model || !Array.isArray(model.capability)) return false;
-  return model.capability.some(
-    (c) => String(c).toLowerCase() === String(capability).toLowerCase()
-  );
+  if (!model || typeof model !== 'object') return false;
+  const caps = extractCapabilities(model);
+  return (caps[capability] || 0) >= BINARY_CAPABILITY_THRESHOLD;
 }
 
 /**

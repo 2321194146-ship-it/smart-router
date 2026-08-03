@@ -782,10 +782,10 @@
     "details": []
   },
   "acceptable_recommendation": {
-    "total": 86,
-    "in_acceptable": 86,
+    "total": 87,
+    "in_acceptable": 87,
     "rate": "100%",
-    "null_allowed": 1,
+    "null_allowed": 0,
     "details": []
   },
   "outcome": {
@@ -1540,7 +1540,12 @@
       "taskType": "general_chat",
       "expectedType": "general_chat",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 564 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -1566,7 +1571,12 @@
       "taskType": "general_chat",
       "expectedType": "general_chat",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 560 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -1592,7 +1602,12 @@
       "taskType": "general_chat",
       "expectedType": "general_chat",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -1618,7 +1633,12 @@
       "taskType": "general_chat",
       "expectedType": "general_chat",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 561 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -1644,7 +1664,12 @@
       "taskType": "general_chat",
       "expectedType": "general_chat",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -1670,7 +1695,12 @@
       "taskType": "general_chat",
       "expectedType": "general_chat",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 560 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -1696,7 +1726,12 @@
       "taskType": "writing",
       "expectedType": "writing",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 566 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -1722,7 +1757,12 @@
       "taskType": "writing",
       "expectedType": "writing",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 566 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -1748,7 +1788,12 @@
       "taskType": "writing",
       "expectedType": "writing",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 569 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -1774,7 +1819,12 @@
       "taskType": "writing",
       "expectedType": "writing",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 566 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -1800,7 +1850,12 @@
       "taskType": "writing",
       "expectedType": "writing",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 567 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -1826,7 +1881,12 @@
       "taskType": "summarization",
       "expectedType": "summarization",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 567 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -1852,7 +1912,12 @@
       "taskType": "summarization",
       "expectedType": "summarization",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 569 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -1878,7 +1943,12 @@
       "taskType": "summarization",
       "expectedType": "summarization",
       "suggested": "mock/M-nostream",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -1904,7 +1974,12 @@
       "taskType": "summarization",
       "expectedType": "summarization",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 563 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -1930,7 +2005,12 @@
       "taskType": "summarization",
       "expectedType": "summarization",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 563 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -1955,12 +2035,17 @@
       "httpStatus": 200,
       "taskType": "translation",
       "expectedType": "translation",
-      "suggested": "mock/M-chat-t1",
-      "hardBlocks": [],
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
-      "comparisonStatus": "exact_match",
+      "comparisonStatus": "different",
       "acceptable": [
         "M-chat-t1",
         "M-cheap",
@@ -1981,12 +2066,17 @@
       "httpStatus": 200,
       "taskType": "translation",
       "expectedType": "translation",
-      "suggested": "mock/M-chat-t1",
-      "hardBlocks": [],
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 571 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
-      "comparisonStatus": "exact_match",
+      "comparisonStatus": "different",
       "acceptable": [
         "M-chat-t1",
         "M-cheap",
@@ -2007,12 +2097,17 @@
       "httpStatus": 200,
       "taskType": "translation",
       "expectedType": "translation",
-      "suggested": "mock/M-chat-t1",
-      "hardBlocks": [],
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 566 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
-      "comparisonStatus": "exact_match",
+      "comparisonStatus": "different",
       "acceptable": [
         "M-chat-t1",
         "M-cheap",
@@ -2033,12 +2128,17 @@
       "httpStatus": 200,
       "taskType": "translation",
       "expectedType": "translation",
-      "suggested": "mock/M-chat-t1",
-      "hardBlocks": [],
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 570 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
-      "comparisonStatus": "exact_match",
+      "comparisonStatus": "different",
       "acceptable": [
         "M-chat-t1",
         "M-cheap",
@@ -2059,12 +2159,17 @@
       "httpStatus": 200,
       "taskType": "translation",
       "expectedType": "translation",
-      "suggested": "mock/M-chat-t1",
-      "hardBlocks": [],
+      "suggested": "mock/M-coding",
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 567 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
-      "comparisonStatus": "exact_match",
+      "comparisonStatus": "different",
       "acceptable": [
         "M-chat-t1",
         "M-cheap",
@@ -2086,7 +2191,12 @@
       "taskType": "extraction",
       "expectedType": "extraction",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 566 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -2112,7 +2222,12 @@
       "taskType": "extraction",
       "expectedType": "extraction",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -2138,7 +2253,12 @@
       "taskType": "extraction",
       "expectedType": "extraction",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -2164,7 +2284,12 @@
       "taskType": "extraction",
       "expectedType": "extraction",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -2190,7 +2315,12 @@
       "taskType": "extraction",
       "expectedType": "extraction",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -2216,8 +2346,13 @@
       "taskType": "analysis",
       "expectedType": "analysis",
       "suggested": "mock/M-reason",
-      "hardBlocks": [],
-      "predictedCost": 0.00442,
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0.00444,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
       "comparisonStatus": "different",
@@ -2241,8 +2376,13 @@
       "taskType": "analysis",
       "expectedType": "analysis",
       "suggested": "mock/M-reason",
-      "hardBlocks": [],
-      "predictedCost": 0.00441,
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 566 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0.00443,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
       "comparisonStatus": "different",
@@ -2266,8 +2406,13 @@
       "taskType": "analysis",
       "expectedType": "analysis",
       "suggested": "mock/M-reason",
-      "hardBlocks": [],
-      "predictedCost": 0.00442,
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0.00444,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
       "comparisonStatus": "different",
@@ -2291,8 +2436,13 @@
       "taskType": "analysis",
       "expectedType": "analysis",
       "suggested": "mock/M-reason",
-      "hardBlocks": [],
-      "predictedCost": 0.00441,
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 566 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0.00443,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
       "comparisonStatus": "different",
@@ -2316,8 +2466,13 @@
       "taskType": "analysis",
       "expectedType": "analysis",
       "suggested": "mock/M-reason",
-      "hardBlocks": [],
-      "predictedCost": 0.00446,
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 577 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0.00448,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
       "comparisonStatus": "different",
@@ -2341,8 +2496,13 @@
       "taskType": "analysis",
       "expectedType": "analysis",
       "suggested": "mock/M-reason",
-      "hardBlocks": [],
-      "predictedCost": 0.004425,
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 569 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0.004445,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
       "comparisonStatus": "different",
@@ -2361,8 +2521,13 @@
       "taskType": "analysis",
       "expectedType": "analysis",
       "suggested": "mock/M-reason",
-      "hardBlocks": [],
-      "predictedCost": 0.00443,
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 570 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0.00445,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
       "comparisonStatus": "different",
@@ -2381,8 +2546,13 @@
       "taskType": "analysis",
       "expectedType": "analysis",
       "suggested": "mock/M-reason",
-      "hardBlocks": [],
-      "predictedCost": 0.00442,
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0.00444,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
       "comparisonStatus": "different",
@@ -2401,8 +2571,13 @@
       "taskType": "analysis",
       "expectedType": "analysis",
       "suggested": "mock/M-reason",
-      "hardBlocks": [],
-      "predictedCost": 0.00446,
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 577 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0.00448,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
       "comparisonStatus": "different",
@@ -2421,8 +2596,13 @@
       "taskType": "analysis",
       "expectedType": "analysis",
       "suggested": "mock/M-reason",
-      "hardBlocks": [],
-      "predictedCost": 0.004435,
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 571 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0.004455,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
       "comparisonStatus": "different",
@@ -2443,44 +2623,8 @@
       "suggested": "mock/M-coding",
       "hardBlocks": [
         {
-          "modelId": "M-chat-t1",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-tool",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-eof",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-slow",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-nostream",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-struct",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-reason",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-vision",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-cheap",
-          "reason": "missing coding (required)"
-        },
-        {
           "modelId": "M-smallctx",
-          "reason": "missing coding (required)"
+          "reason": "input tokens 568 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -2506,44 +2650,8 @@
       "suggested": "mock/M-coding",
       "hardBlocks": [
         {
-          "modelId": "M-chat-t1",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-tool",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-eof",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-slow",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-nostream",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-struct",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-reason",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-vision",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-cheap",
-          "reason": "missing coding (required)"
-        },
-        {
           "modelId": "M-smallctx",
-          "reason": "missing coding (required)"
+          "reason": "input tokens 567 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -2569,44 +2677,8 @@
       "suggested": "mock/M-coding",
       "hardBlocks": [
         {
-          "modelId": "M-chat-t1",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-tool",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-eof",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-slow",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-nostream",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-struct",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-reason",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-vision",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-cheap",
-          "reason": "missing coding (required)"
-        },
-        {
           "modelId": "M-smallctx",
-          "reason": "missing coding (required)"
+          "reason": "input tokens 567 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -2632,44 +2704,8 @@
       "suggested": "mock/M-coding",
       "hardBlocks": [
         {
-          "modelId": "M-chat-t1",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-tool",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-eof",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-slow",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-nostream",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-struct",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-reason",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-vision",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-cheap",
-          "reason": "missing coding (required)"
-        },
-        {
           "modelId": "M-smallctx",
-          "reason": "missing coding (required)"
+          "reason": "input tokens 568 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -2695,44 +2731,8 @@
       "suggested": "mock/M-coding",
       "hardBlocks": [
         {
-          "modelId": "M-chat-t1",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-tool",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-eof",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-slow",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-nostream",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-struct",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-reason",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-vision",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-cheap",
-          "reason": "missing coding (required)"
-        },
-        {
           "modelId": "M-smallctx",
-          "reason": "missing coding (required)"
+          "reason": "input tokens 569 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -2758,44 +2758,8 @@
       "suggested": "mock/M-coding",
       "hardBlocks": [
         {
-          "modelId": "M-chat-t1",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-tool",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-eof",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-slow",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-nostream",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-struct",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-reason",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-vision",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-cheap",
-          "reason": "missing coding (required)"
-        },
-        {
           "modelId": "M-smallctx",
-          "reason": "missing coding (required)"
+          "reason": "input tokens 570 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -2821,44 +2785,8 @@
       "suggested": "mock/M-stream",
       "hardBlocks": [
         {
-          "modelId": "M-chat-t1",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-tool",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-eof",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-slow",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-nostream",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-struct",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-reason",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-vision",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-cheap",
-          "reason": "missing coding (required)"
-        },
-        {
           "modelId": "M-smallctx",
-          "reason": "missing coding (required)"
+          "reason": "input tokens 579 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -2884,44 +2812,8 @@
       "suggested": "mock/M-stream",
       "hardBlocks": [
         {
-          "modelId": "M-chat-t1",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-tool",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-eof",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-slow",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-nostream",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-struct",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-reason",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-vision",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-cheap",
-          "reason": "missing coding (required)"
-        },
-        {
           "modelId": "M-smallctx",
-          "reason": "missing coding (required)"
+          "reason": "input tokens 568 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -2947,44 +2839,8 @@
       "suggested": "mock/M-stream",
       "hardBlocks": [
         {
-          "modelId": "M-chat-t1",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-tool",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-eof",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-slow",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-nostream",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-struct",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-reason",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-vision",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-cheap",
-          "reason": "missing coding (required)"
-        },
-        {
           "modelId": "M-smallctx",
-          "reason": "missing coding (required)"
+          "reason": "input tokens 571 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -3010,44 +2866,8 @@
       "suggested": "mock/M-stream",
       "hardBlocks": [
         {
-          "modelId": "M-chat-t1",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-tool",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-eof",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-slow",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-nostream",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-struct",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-reason",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-vision",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-cheap",
-          "reason": "missing coding (required)"
-        },
-        {
           "modelId": "M-smallctx",
-          "reason": "missing coding (required)"
+          "reason": "input tokens 569 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -3073,44 +2893,8 @@
       "suggested": "mock/M-stream",
       "hardBlocks": [
         {
-          "modelId": "M-chat-t1",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-tool",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-eof",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-slow",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-nostream",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-struct",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-reason",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-vision",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-cheap",
-          "reason": "missing coding (required)"
-        },
-        {
           "modelId": "M-smallctx",
-          "reason": "missing coding (required)"
+          "reason": "input tokens 570 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -3134,7 +2918,12 @@
       "taskType": "architecture",
       "expectedType": "architecture",
       "suggested": "mock/M-nostream",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 570 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -3158,7 +2947,12 @@
       "taskType": "architecture",
       "expectedType": "architecture",
       "suggested": "mock/M-nostream",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 566 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -3182,7 +2976,12 @@
       "taskType": "architecture",
       "expectedType": "architecture",
       "suggested": "mock/M-nostream",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 570 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -3206,7 +3005,12 @@
       "taskType": "architecture",
       "expectedType": "architecture",
       "suggested": "mock/M-nostream",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 571 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -3269,7 +3073,7 @@
         },
         {
           "modelId": "M-smallctx",
-          "reason": "missing tool_use (required); missing tool_use (required)"
+          "reason": "missing tool_use (required); missing tool_use (required); input tokens 613 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -3333,7 +3137,7 @@
         },
         {
           "modelId": "M-smallctx",
-          "reason": "missing tool_use (required); missing tool_use (required)"
+          "reason": "missing tool_use (required); missing tool_use (required); input tokens 613 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -3397,7 +3201,7 @@
         },
         {
           "modelId": "M-smallctx",
-          "reason": "missing tool_use (required); missing tool_use (required)"
+          "reason": "missing tool_use (required); missing tool_use (required); input tokens 614 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -3461,7 +3265,7 @@
         },
         {
           "modelId": "M-smallctx",
-          "reason": "missing tool_use (required); missing tool_use (required)"
+          "reason": "missing tool_use (required); missing tool_use (required); input tokens 613 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -3525,7 +3329,7 @@
         },
         {
           "modelId": "M-smallctx",
-          "reason": "missing tool_use (required); missing tool_use (required)"
+          "reason": "missing tool_use (required); missing tool_use (required); input tokens 612 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -3551,7 +3355,7 @@
       "expectedType": "vision",
       "suggested": "mock/M-vision",
       "hardBlocks": [],
-      "predictedCost": 0.00536,
+      "predictedCost": 0.00946,
       "realOutcome": "completed",
       "real": "mock/M-vision",
       "comparisonStatus": "exact_match",
@@ -3572,7 +3376,7 @@
       "expectedType": "vision",
       "suggested": "mock/M-vision",
       "hardBlocks": [],
-      "predictedCost": 0.00537,
+      "predictedCost": 0.009465,
       "realOutcome": "completed",
       "real": "mock/M-vision",
       "comparisonStatus": "exact_match",
@@ -3593,7 +3397,7 @@
       "expectedType": "vision",
       "suggested": "mock/M-vision",
       "hardBlocks": [],
-      "predictedCost": 0.005385,
+      "predictedCost": 0.009485,
       "realOutcome": "completed",
       "real": "mock/M-vision",
       "comparisonStatus": "exact_match",
@@ -3614,7 +3418,7 @@
       "expectedType": "vision",
       "suggested": "mock/M-vision",
       "hardBlocks": [],
-      "predictedCost": 0.00537,
+      "predictedCost": 0.009465,
       "realOutcome": "completed",
       "real": "mock/M-vision",
       "comparisonStatus": "exact_match",
@@ -3677,7 +3481,7 @@
         },
         {
           "modelId": "M-smallctx",
-          "reason": "missing structured_output (required); missing structured_output (required)"
+          "reason": "missing structured_output (required); missing structured_output (required); input tokens 567 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -3740,7 +3544,7 @@
         },
         {
           "modelId": "M-smallctx",
-          "reason": "missing structured_output (required); missing structured_output (required)"
+          "reason": "missing structured_output (required); missing structured_output (required); input tokens 565 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -3803,7 +3607,7 @@
         },
         {
           "modelId": "M-smallctx",
-          "reason": "missing structured_output (required); missing structured_output (required)"
+          "reason": "missing structured_output (required); missing structured_output (required); input tokens 570 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -3866,7 +3670,7 @@
         },
         {
           "modelId": "M-smallctx",
-          "reason": "missing structured_output (required); missing structured_output (required)"
+          "reason": "missing structured_output (required); missing structured_output (required); input tokens 564 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -3929,7 +3733,7 @@
         },
         {
           "modelId": "M-smallctx",
-          "reason": "missing structured_output (required); missing structured_output (required)"
+          "reason": "missing structured_output (required); missing structured_output (required); input tokens 568 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -3968,7 +3772,7 @@
         },
         {
           "modelId": "M-smallctx",
-          "reason": "missing streaming (required); missing streaming (required)"
+          "reason": "missing streaming (required); missing streaming (required); input tokens 2216 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -4011,7 +3815,7 @@
         },
         {
           "modelId": "M-smallctx",
-          "reason": "missing streaming (required); missing streaming (required)"
+          "reason": "missing streaming (required); missing streaming (required); input tokens 2216 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -4054,7 +3858,7 @@
         },
         {
           "modelId": "M-smallctx",
-          "reason": "missing streaming (required); missing streaming (required)"
+          "reason": "missing streaming (required); missing streaming (required); input tokens 2216 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -4097,7 +3901,7 @@
         },
         {
           "modelId": "M-smallctx",
-          "reason": "missing streaming (required); missing streaming (required)"
+          "reason": "missing streaming (required); missing streaming (required); input tokens 2216 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -4140,7 +3944,7 @@
         },
         {
           "modelId": "M-smallctx",
-          "reason": "missing streaming (required); missing streaming (required)"
+          "reason": "missing streaming (required); missing streaming (required); input tokens 2216 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -4183,7 +3987,7 @@
         },
         {
           "modelId": "M-smallctx",
-          "reason": "missing streaming (required); missing streaming (required)"
+          "reason": "missing streaming (required); missing streaming (required); input tokens 2215 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -4210,10 +4014,10 @@
       "hardBlocks": [
         {
           "modelId": "M-smallctx",
-          "reason": "input tokens 5732 > contextWindow 500"
+          "reason": "input tokens 6860 > contextWindow 500"
         }
       ],
-      "predictedCost": 0.0336,
+      "predictedCost": 0.03362,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
       "comparisonStatus": "different",
@@ -4239,10 +4043,10 @@
       "hardBlocks": [
         {
           "modelId": "M-smallctx",
-          "reason": "input tokens 5007 > contextWindow 500"
+          "reason": "input tokens 6063 > contextWindow 500"
         }
       ],
-      "predictedCost": 0.029905,
+      "predictedCost": 0.029925,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
       "comparisonStatus": "different",
@@ -4266,44 +4070,8 @@
       "suggested": "mock/M-coding",
       "hardBlocks": [
         {
-          "modelId": "M-chat-t1",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-tool",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-eof",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-slow",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-nostream",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-struct",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-reason",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-vision",
-          "reason": "missing coding (required)"
-        },
-        {
-          "modelId": "M-cheap",
-          "reason": "missing coding (required)"
-        },
-        {
           "modelId": "M-smallctx",
-          "reason": "missing coding (required); input tokens 2329 > contextWindow 500"
+          "reason": "input tokens 3117 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -4325,58 +4093,26 @@
       "httpStatus": 200,
       "taskType": "summarization",
       "expectedType": "summarization",
-      "suggested": null,
+      "suggested": "mock/M-coding",
       "hardBlocks": [
         {
-          "modelId": "M-chat-t1",
-          "reason": "missing long_context (required)"
-        },
-        {
-          "modelId": "M-coding",
-          "reason": "missing long_context (required)"
-        },
-        {
-          "modelId": "M-stream",
-          "reason": "missing long_context (required)"
-        },
-        {
-          "modelId": "M-tool",
-          "reason": "missing long_context (required)"
-        },
-        {
           "modelId": "M-eof",
-          "reason": "missing long_context (required)"
+          "reason": "input tokens 8421 > contextWindow 8000"
         },
         {
           "modelId": "M-slow",
-          "reason": "missing long_context (required)"
-        },
-        {
-          "modelId": "M-nostream",
-          "reason": "missing long_context (required)"
-        },
-        {
-          "modelId": "M-struct",
-          "reason": "missing long_context (required)"
-        },
-        {
-          "modelId": "M-reason",
-          "reason": "missing long_context (required)"
-        },
-        {
-          "modelId": "M-vision",
-          "reason": "missing long_context (required)"
+          "reason": "input tokens 8421 > contextWindow 8000"
         },
         {
           "modelId": "M-cheap",
-          "reason": "missing long_context (required)"
+          "reason": "input tokens 8421 > contextWindow 8000"
         },
         {
           "modelId": "M-smallctx",
-          "reason": "missing long_context (required); input tokens 7151 > contextWindow 500"
+          "reason": "input tokens 8421 > contextWindow 500"
         }
       ],
-      "predictedCost": null,
+      "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
       "comparisonStatus": "different",
@@ -4464,6 +4200,10 @@
         {
           "modelId": "M-vision",
           "reason": "paid model blocked by allowPaid=false"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 564 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -4498,6 +4238,10 @@
         {
           "modelId": "M-vision",
           "reason": "paid model blocked by allowPaid=false"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 564 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -4532,6 +4276,10 @@
         {
           "modelId": "M-vision",
           "reason": "paid model blocked by allowPaid=false"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 564 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -4566,6 +4314,10 @@
         {
           "modelId": "M-vision",
           "reason": "paid model blocked by allowPaid=false"
+        },
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 561 > contextWindow 500"
         }
       ],
       "predictedCost": 0,
@@ -4595,11 +4347,11 @@
       "hardBlocks": [
         {
           "modelId": "M-reason",
-          "reason": "request_cost_exceeded (estimated 0.004405 > maxRequestCost 0.000001)"
+          "reason": "request_cost_exceeded (estimated 0.004425 > maxRequestCost 0.000001)"
         },
         {
           "modelId": "M-vision",
-          "reason": "request_cost_exceeded (estimated 0.004405 > maxRequestCost 0.000001)"
+          "reason": "request_cost_exceeded (estimated 0.004425 > maxRequestCost 0.000001)"
         }
       ],
       "predictedCost": null,
@@ -4622,11 +4374,11 @@
       "hardBlocks": [
         {
           "modelId": "M-reason",
-          "reason": "request_cost_exceeded (estimated 0.004415 > maxRequestCost 0.000001)"
+          "reason": "request_cost_exceeded (estimated 0.004435 > maxRequestCost 0.000001)"
         },
         {
           "modelId": "M-vision",
-          "reason": "request_cost_exceeded (estimated 0.004415 > maxRequestCost 0.000001)"
+          "reason": "request_cost_exceeded (estimated 0.004435 > maxRequestCost 0.000001)"
         }
       ],
       "predictedCost": null,
@@ -4649,11 +4401,11 @@
       "hardBlocks": [
         {
           "modelId": "M-reason",
-          "reason": "request_cost_exceeded (estimated 0.004410 > maxRequestCost 0.000001)"
+          "reason": "request_cost_exceeded (estimated 0.004430 > maxRequestCost 0.000001)"
         },
         {
           "modelId": "M-vision",
-          "reason": "request_cost_exceeded (estimated 0.004410 > maxRequestCost 0.000001)"
+          "reason": "request_cost_exceeded (estimated 0.004430 > maxRequestCost 0.000001)"
         }
       ],
       "predictedCost": null,
@@ -4676,11 +4428,11 @@
       "hardBlocks": [
         {
           "modelId": "M-reason",
-          "reason": "request_cost_exceeded (estimated 0.004405 > maxRequestCost 0.000001)"
+          "reason": "request_cost_exceeded (estimated 0.004425 > maxRequestCost 0.000001)"
         },
         {
           "modelId": "M-vision",
-          "reason": "request_cost_exceeded (estimated 0.004405 > maxRequestCost 0.000001)"
+          "reason": "request_cost_exceeded (estimated 0.004425 > maxRequestCost 0.000001)"
         }
       ],
       "predictedCost": null,
@@ -4760,7 +4512,12 @@
       "taskType": "general_chat",
       "expectedType": "general_chat",
       "suggested": "mock-fail/M-fail",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 561 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -4780,7 +4537,12 @@
       "taskType": "general_chat",
       "expectedType": "general_chat",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 559 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -4800,7 +4562,12 @@
       "taskType": "general_chat",
       "expectedType": "general_chat",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 559 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -4820,7 +4587,12 @@
       "taskType": "general_chat",
       "expectedType": "general_chat",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 559 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -4930,7 +4702,12 @@
       "taskType": "general_chat",
       "expectedType": "general_chat",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 563 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -4955,7 +4732,12 @@
       "taskType": "general_chat",
       "expectedType": "general_chat",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 566 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -4980,7 +4762,12 @@
       "taskType": "general_chat",
       "expectedType": "general_chat",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 560 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",
@@ -5005,7 +4792,12 @@
       "taskType": "general_chat",
       "expectedType": "general_chat",
       "suggested": "mock/M-coding",
-      "hardBlocks": [],
+      "hardBlocks": [
+        {
+          "modelId": "M-smallctx",
+          "reason": "input tokens 563 > contextWindow 500"
+        }
+      ],
       "predictedCost": 0,
       "realOutcome": "completed",
       "real": "mock/M-chat-t1",

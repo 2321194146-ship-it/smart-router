@@ -13,7 +13,7 @@
 // 仅使用 Node.js 内置模块。
 
 import { createServer } from '../src/server.js';
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import http from 'node:http';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -319,6 +319,7 @@ for (const t of ['Explain the solar system', 'Write a short paragraph about rain
 
 const mock = await createMockProvider();
 const tmpRoot = join(OUT_DIR, '..', 'active-readiness-eval-data');
+rmSync(tmpRoot, { recursive: true, force: true });
 mkdirSync(tmpRoot, { recursive: true });
 
 const PHASES = {

@@ -19,3 +19,5 @@ coverage/
 *.sqlite-shm
 active-readiness-eval-data/
 shadow-eval-data/
+holdout-eval-data/
+

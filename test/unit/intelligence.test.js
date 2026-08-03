@@ -67,6 +67,225 @@ const TEST_CONFIG = {
   agent_bindings: {},
 };
 
+describe('Phase2-C 能力数据源统一（Phase1 buildCandidates 复用 Registry）', () => {
+  let buildCandidatesFn = null;
+  let extractCaps = null;
+  let hasCaps = null;
+
+  test('C5 setup: dynamic imports', async () => {
+    const mod = await import('../../src/router/candidates.js');
+    buildCandidatesFn = mod.buildCandidates;
+    const reg = await import('../../src/intelligence/capability-registry.js');
+    extractCaps = reg.extractCapabilities;
+    hasCaps = reg.hasCapability;
+  });
+
+  test('C5 capabilities-only model (no legacy array) yields candidates for vision', async () => {
+    const config = {
+      models: [
+        { id: 'v1', provider: 'p1', tier: 'tier1', paid: false, enabled: true, capabilities: { chat: 100, vision: 100, tool_use: 0, coding: 0, reasoning: 0, structured_output: 0, long_context: 0, streaming: 0 }, context_window: 32000 },
+        { id: 'c1', provider: 'p1', tier: 'tier1', paid: false, enabled: true, capabilities: { chat: 100, vision: 0, tool_use: 0, coding: 0, reasoning: 0, structured_output: 0, long_context: 0, streaming: 0 }, context_window: 32000 },
+      ],
+      budget: { allowPaid: true },
+      agent_bindings: {},
+    };
+    const cands = buildCandidatesFn('auto', config, { capability: 'vision', budget: config.budget });
+    const ids = cands.map((cc) => cc.modelId);
+    assert.ok(ids.includes('v1'), 'capabilities-only vision model must be a candidate');
+    assert.ok(!ids.includes('c1'), 'non-vision model must be filtered out');
+  });
+
+  test('C5 capabilities vision=95 counts as supported (threshold 0.9)', async () => {
+    const config = {
+      models: [
+        { id: 'v95', provider: 'p1', tier: 'tier1', paid: false, enabled: true, capabilities: { chat: 100, vision: 95 }, context_window: 32000 },
+        { id: 'v60', provider: 'p1', tier: 'tier1', paid: false, enabled: true, capabilities: { chat: 100, vision: 60 }, context_window: 32000 },
+      ],
+      budget: { allowPaid: true },
+      agent_bindings: {},
+    };
+    const cands = buildCandidatesFn('auto', config, { capability: 'vision', budget: config.budget });
+    const ids = cands.map((cc) => cc.modelId);
+    assert.ok(ids.includes('v95'), 'vision=95 must be supported (>= 0.9)');
+    assert.ok(!ids.includes('v60'), 'vision=60 must NOT be supported (< 0.9)');
+  });
+
+  test('C5 legacy capability array still works', async () => {
+    const config = {
+      models: [
+        { id: 'legacy', provider: 'p1', tier: 'tier1', paid: false, enabled: true, capability: ['chat', 'vision'], context_window: 32000 },
+      ],
+      budget: { allowPaid: true },
+      agent_bindings: {},
+    };
+    const cands = buildCandidatesFn('auto', config, { capability: 'vision', budget: config.budget });
+    assert.strictEqual(cands.length, 1);
+    assert.strictEqual(cands[0].modelId, 'legacy');
+  });
+
+  test('C5 extractCapabilities merges object + legacy (max semantics)', () => {
+    const caps = extractCaps({ capability: ['chat', 'vision'], capabilities: { vision: 95, chat: 100 } });
+    assert.strictEqual(caps.vision, 1.0); // legacy array => full support (max)
+    assert.strictEqual(caps.chat, 1.0);
+  });
+
+  test('C5 registry hasCapability aligned with threshold', () => {
+    assert.strictEqual(hasCaps({ capabilities: { vision: 100 } }, 'vision'), true);
+    assert.strictEqual(hasCaps({ capabilities: { vision: 95 } }, 'vision'), true);
+    assert.strictEqual(hasCaps({ capabilities: { vision: 60 } }, 'vision'), false);
+  });
+});
+
+describe('Phase2-C Task Analyzer（协议级结构化输出检测）', () => {
+  test('C3 OpenAI Chat response_format=json_object → structuredOutputRequired', () => {
+    const t = analyzeTask({
+      model: 'auto',
+      messages: [{ role: 'user', content: 'Extract the names from this list' }],
+      response_format: { type: 'json_object' },
+    }, { protocol: 'chat' });
+    assert.strictEqual(t.structuredOutputRequired, true);
+    assert.strictEqual(t.needsStructuredOutput, true);
+    assert.strictEqual(t.taskType, TaskType.STRUCTURED_OUTPUT);
+    assert.ok(t.hardCapabilities.includes('structured_output'));
+  });
+
+  test('C3 OpenAI Chat response_format=json_schema (with schema) → structuredOutputRequired', () => {
+    const t = analyzeTask({
+      messages: [{ role: 'user', content: 'Summarize the meeting' }],
+      response_format: { type: 'json_schema', json_schema: { name: 'summary', schema: { type: 'object' } } },
+    }, { protocol: 'chat' });
+    assert.strictEqual(t.structuredOutputRequired, true);
+  });
+
+  test('C3 Responses text.format=json_object → structuredOutputRequired', () => {
+    const t = analyzeTask({
+      model: 'auto',
+      input: 'Return the result as structured data',
+      text: { format: 'json_object' },
+    }, { protocol: 'responses' });
+    assert.strictEqual(t.structuredOutputRequired, true);
+  });
+
+  test('C3 Responses text.json_schema object → structuredOutputRequired', () => {
+    const t = analyzeTask({
+      input: 'List products',
+      text: { json_schema: { name: 'products', schema: { type: 'object' } } },
+    }, { protocol: 'responses' });
+    assert.strictEqual(t.structuredOutputRequired, true);
+  });
+
+  test('C3 Anthropic output_config → structuredOutputRequired', () => {
+    const t = analyzeTask({
+      model: 'auto',
+      messages: [{ role: 'user', content: 'Produce a JSON summary' }],
+      output_config: { structured: { enabled: true } },
+    }, { protocol: 'anthropic' });
+    assert.strictEqual(t.structuredOutputRequired, true);
+  });
+
+  test('C3 plain JSON mention without protocol field → NOT structuredOutputRequired', () => {
+    const t = analyzeTask({
+      messages: [{ role: 'user', content: 'Tell me about JSON format and its uses' }],
+    });
+    assert.strictEqual(t.structuredOutputRequired, false, 'keyword alone must not count as protocol requirement');
+  });
+
+});
+
+describe('Phase2-C Task Analyzer（工具可用 vs 工具必需）', () => {
+  const toolDefs = [{ type: 'function', function: { name: 'calculator', parameters: { type: 'object', properties: {} } } }];
+  const readTool = [{ type: 'function', function: { name: 'read_file', parameters: { type: 'object', properties: { path: { type: 'string' } } } } }];
+
+  test('C2 tools present + normal explanation → NOT tool_orchestration, toolsRequired=false', () => {
+    const t = analyzeTask({
+      messages: [{ role: 'user', content: 'Please explain how web search works' }],
+      tools: readTool,
+    });
+    assert.strictEqual(t.toolsAvailable, true);
+    assert.strictEqual(t.toolsRequired, false, 'tools present alone must not force tool use');
+    assert.strictEqual(t.needsToolUse, false);
+    assert.notStrictEqual(t.taskType, TaskType.TOOL_ORCHESTRATION);
+  });
+
+  test('C2 Claude Code style: tools present, natural code review request → general flow', () => {
+    const t = analyzeTask({
+      messages: [{ role: 'user', content: 'Please review this code for style issues and explain your suggestions' }],
+      tools: readTool,
+    });
+    assert.strictEqual(t.toolsRequired, false);
+    assert.strictEqual(t.needsToolUse, false);
+    assert.notStrictEqual(t.taskType, TaskType.TOOL_ORCHESTRATION);
+  });
+
+  test('C2 Codex style: tools present, no tool_choice, question → analysis, not tool task', () => {
+    const t = analyzeTask({
+      messages: [{ role: 'user', content: 'Why does this test fail intermittently? Explain the possible causes.' }],
+      tools: readTool,
+    });
+    assert.strictEqual(t.toolsRequired, false);
+    assert.notStrictEqual(t.taskType, TaskType.TOOL_ORCHESTRATION);
+  });
+
+  test('C2 tools present + explicit tool request → toolsRequired=true, tool_orchestration', () => {
+    const t = analyzeTask({
+      messages: [{ role: 'user', content: 'Use the calculator tool to add 15 and 27' }],
+      tools: toolDefs,
+    });
+    assert.strictEqual(t.toolsRequired, true);
+    assert.strictEqual(t.needsToolUse, true);
+    assert.strictEqual(t.taskType, TaskType.TOOL_ORCHESTRATION);
+    assert.ok(t.hardCapabilities.includes('tool_use'));
+  });
+
+  test('C2 imperative pattern: Call the weather tool → toolsRequired=true', () => {
+    const t = analyzeTask({
+      messages: [{ role: 'user', content: 'Call the weather tool to check conditions' }],
+      tools: toolDefs,
+    });
+    assert.strictEqual(t.toolsRequired, true);
+    assert.strictEqual(t.taskType, TaskType.TOOL_ORCHESTRATION);
+  });
+
+  test('C2 tool_choice=required forces toolsRequired', () => {
+    const t = analyzeTask({
+      messages: [{ role: 'user', content: 'What is the weather?' }],
+      tools: toolDefs,
+      tool_choice: 'required',
+    });
+    assert.strictEqual(t.toolsRequired, true);
+    assert.strictEqual(t.needsToolUse, true);
+  });
+
+  test('C2 tool_choice={type:function,name:...} forces toolsRequired (OpenAI style)', () => {
+    const t = analyzeTask({
+      messages: [{ role: 'user', content: 'Add 1 and 2' }],
+      tools: toolDefs,
+      tool_choice: { type: 'function', function: { name: 'calculator' } },
+    });
+    assert.strictEqual(t.toolsRequired, true);
+  });
+
+  test('C2 tool_choice=auto / none does NOT force toolsRequired', () => {
+    for (const tc of ['auto', 'none', { type: 'auto' }, { type: 'none' }]) {
+      const t = analyzeTask({
+        messages: [{ role: 'user', content: 'Hi there' }],
+        tools: toolDefs,
+        tool_choice: tc,
+      });
+      assert.strictEqual(t.toolsRequired, false, 'tool_choice ' + JSON.stringify(tc) + ' must not force');
+    }
+  });
+
+  test('C2 natural "what is a calculator" question does NOT trigger toolsRequired', () => {
+    const t = analyzeTask({
+      messages: [{ role: 'user', content: 'What is a calculator and how does it work?' }],
+    });
+    assert.strictEqual(t.toolsRequired, false);
+    assert.strictEqual(t.toolsAvailable, false);
+  });
+
+});
+
 describe('Phase2-B Task Analyzer（统一能力需求画像）', () => {
   test('13 task types produce distinct requiredCapabilities', () => {
     const cases = [
@@ -125,6 +344,21 @@ describe('Phase2-B Task Analyzer（统一能力需求画像）', () => {
     assert.ok(!t.hardCapabilities.includes('streaming'));
   });
 
+  // ---- Phase2-C 回归：hardCapabilities 只含二元能力，不含等级能力 ----
+  test('C2 general chat hardCapabilities excludes graded chat/coding/reasoning', () => {
+    const t = analyzeTask({ messages: [{ role: 'user', content: 'Hello, how are you?' }] });
+    assert.ok(!t.hardCapabilities.includes('chat'), 'chat is graded, must not be hard');
+    assert.ok(!t.hardCapabilities.includes('coding'));
+    assert.ok(!t.hardCapabilities.includes('reasoning'));
+  });
+
+  test('C2 coding task keeps coding requirement=1.0 but NOT in hardCapabilities', () => {
+    const t = analyzeTask({ messages: [{ role: 'user', content: 'Write a JavaScript function to debounce' }] });
+    assert.strictEqual(t.taskType, TaskType.CODING);
+    assert.strictEqual(t.requiredCapabilities.coding, 1.0, 'graded requirement still 1.0 for scoring');
+    assert.ok(!t.hardCapabilities.includes('coding'));
+  });
+
   test('vision task requires vision; structured output requires structured_output', () => {
     const v = analyzeTask({ messages: [{ role: 'user', content: [{ type: 'image_url', image_url: { url: 'x' } }, { type: 'text', text: 'desc' }] }] });
     assert.strictEqual(v.requiredCapabilities.vision, 1.0);
@@ -180,6 +414,80 @@ describe('Phase2-B Policy（能力评分 + 硬约束）', () => {
   const baseCaps = { chat: 1, coding: 1, reasoning: 1, tool_use: 1, vision: 0, structured_output: 0, long_context: 1, streaming: 1 };
   const base = { modelId: 'm', provider: 'p', tier: 'tier1', paid: false, capabilities: baseCaps, contextWindow: 100000, price: {}, protocols: ['chat'] };
   const BUDGET = { allowPaid: true, allowedModels: [], allowedProviders: [], maxRequestCost: 100 };
+
+  // ---- Phase2-C 回归：等级能力（chat/coding/reasoning）不得因 >=1.0 需求被硬阻断 ----
+  test('C2 chat=95 executes general chat (no false block)', () => {
+    const model = { ...base, capabilities: { ...baseCaps, chat: 0.95 } };
+    const task = { requiredCapabilities: { chat: 1 }, hardCapabilities: ['chat'], complexity: 0.3 };
+    const r = scoreCandidate(model, task, POLICY, BUDGET, 'chat');
+    assert.strictEqual(r.blocked, null, 'chat=95 must not be blocked as missing chat');
+    assert.ok(r.score > 0);
+  });
+
+  test('C2 coding=95 executes coding task (no false block)', () => {
+    const model = { ...base, capabilities: { ...baseCaps, coding: 0.95 } };
+    const task = { requiredCapabilities: { chat: 1, coding: 1 }, hardCapabilities: ['coding'], complexity: 0.7 };
+    const r = scoreCandidate(model, task, POLICY, BUDGET, 'chat');
+    assert.strictEqual(r.blocked, null, 'coding=95 must not be blocked as missing coding');
+    assert.ok(r.score > 0);
+  });
+
+  test('C2 reasoning=80 participates in reasoning task (no false block)', () => {
+    const model = { ...base, capabilities: { ...baseCaps, reasoning: 0.8 } };
+    const task = { requiredCapabilities: { chat: 1, reasoning: 0.85 }, hardCapabilities: ['chat'], complexity: 0.8 };
+    const r = scoreCandidate(model, task, POLICY, BUDGET, 'chat');
+    assert.strictEqual(r.blocked, null, 'reasoning=80 must not be blocked');
+    assert.ok(r.score > 0);
+  });
+
+  test('C2 vision=95 (graded-style score) is NOT treated as unsupported', () => {
+    const model = { ...base, capabilities: { ...baseCaps, vision: 0.95 } };
+    const task = { requiredCapabilities: { chat: 1, vision: 1 }, hardCapabilities: ['vision'], needsVision: true, complexity: 0.5 };
+    const r = scoreCandidate(model, task, POLICY, BUDGET, 'chat');
+    assert.strictEqual(r.blocked, null, 'vision=95 (0.95 >= 0.9 threshold) must count as supported');
+    assert.ok(r.score > 0);
+  });
+
+  test('C2 vision=60 below binary threshold → blocked (still hard capability)', () => {
+    const model = { ...base, capabilities: { ...baseCaps, vision: 0.6 } };
+    const task = { requiredCapabilities: { chat: 1, vision: 1 }, hardCapabilities: ['vision'], needsVision: true, complexity: 0.5 };
+    const r = scoreCandidate(model, task, POLICY, BUDGET, 'chat');
+    assert.strictEqual(r.score, 0);
+    assert.ok(r.blocked.includes('vision'));
+  });
+
+  test('C2 gradedSafetyThreshold explicit: coding below threshold blocked', () => {
+    const model = { ...base, capabilities: { ...baseCaps, coding: 0.5 } };
+    const task = { requiredCapabilities: { chat: 1, coding: 1 }, hardCapabilities: ['coding'], complexity: 0.7 };
+    const p = normalizePolicy({ gradedSafetyThreshold: 0.6 });
+    const r = scoreCandidate(model, task, p, BUDGET, 'chat');
+    assert.strictEqual(r.score, 0);
+    assert.ok(r.blocked.includes('safety threshold'));
+  });
+
+  test('C3 structuredOutputRequired blocks models below binary threshold', () => {
+    const noStruct = { modelId: 'm', provider: 'p', tier: 'tier1', paid: false, capabilities: { chat: 1, coding: 1, reasoning: 1, tool_use: 1, vision: 0, structured_output: 0.5, long_context: 1, streaming: 1 }, contextWindow: 100000, price: {}, protocols: ['chat'] };
+    const task = { requiredCapabilities: { chat: 1, structured_output: 1 }, hardCapabilities: ['structured_output'], needsStructuredOutput: true, structuredOutputRequired: true, complexity: 0.6 };
+    const r = scoreCandidate(noStruct, task, POLICY, BUDGET, 'chat');
+    assert.strictEqual(r.score, 0);
+    assert.ok(r.blocked.includes('structured_output'));
+  });
+
+  test('C3 structuredOutputRequired + strong model → not blocked', () => {
+    const struct = { modelId: 'm', provider: 'p', tier: 'tier1', paid: false, capabilities: { chat: 1, coding: 1, reasoning: 1, tool_use: 1, vision: 0, structured_output: 1, long_context: 1, streaming: 1 }, contextWindow: 100000, price: {}, protocols: ['chat'] };
+    const task = { requiredCapabilities: { chat: 1, structured_output: 1 }, hardCapabilities: ['structured_output'], needsStructuredOutput: true, structuredOutputRequired: true, complexity: 0.6 };
+    const r = scoreCandidate(struct, task, POLICY, BUDGET, 'chat');
+    assert.strictEqual(r.blocked, null);
+    assert.ok(r.score > 0);
+  });
+
+  test('C2 toolsAvailable only → non-tool candidate NOT blocked by tool_use', () => {
+    const noTool = { modelId: 'm', provider: 'p', tier: 'tier1', paid: false, capabilities: { ...{ chat: 1, coding: 1, reasoning: 1, tool_use: 1, vision: 0, structured_output: 0, long_context: 1, streaming: 1 }, tool_use: 0 }, contextWindow: 100000, price: {}, protocols: ['chat'] };
+    const task = { requiredCapabilities: { chat: 1 }, hardCapabilities: [], needsToolUse: false, toolsAvailable: true, toolsRequired: false, complexity: 0.3 };
+    const r = scoreCandidate(noTool, task, POLICY, BUDGET, 'chat');
+    assert.strictEqual(r.blocked, null, 'tool_use only required when toolsRequired');
+    assert.ok(r.score > 0);
+  });
 
   test('streaming hard constraint: stream=true + no streaming → blocked', () => {
     const noStream = { ...base, capabilities: { ...baseCaps, streaming: 0 } };

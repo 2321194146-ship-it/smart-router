@@ -19,7 +19,7 @@
 //
 // 仅使用 Node.js 内置模块，无第三方依赖。
 
-import { CAPABILITY_KEYS } from './task-analyzer.js';
+import { CAPABILITY_KEYS, HARD_CAPABILITY_KEYS, SOFT_CAPABILITY_KEYS } from './task-analyzer.js';
 
 const DEFAULT_POLICY = Object.freeze({
   tierPreference: true,
@@ -29,6 +29,10 @@ const DEFAULT_POLICY = Object.freeze({
   tierWeight: 0.06,
   paidPenalty: 0.2,
   reliabilityWeight: 0.08,
+  // Phase2-C：二元能力判定阈值（0-1，默认 0.9，vision=95 视为支持）
+  binaryThreshold: 0.9,
+  // Phase2-C：等级软能力显式安全阈值（0 = 不启用；>0 且需求=1.0 且低于阈值 → blocked）
+  gradedSafetyThreshold: 0,
 });
 
 export function normalizePolicy(raw) {
@@ -41,6 +45,8 @@ export function normalizePolicy(raw) {
     tierWeight: typeof p.tierWeight === 'number' ? p.tierWeight : DEFAULT_POLICY.tierWeight,
     paidPenalty: typeof p.paidPenalty === 'number' ? p.paidPenalty : DEFAULT_POLICY.paidPenalty,
     reliabilityWeight: typeof p.reliabilityWeight === 'number' ? p.reliabilityWeight : DEFAULT_POLICY.reliabilityWeight,
+    binaryThreshold: typeof p.binaryThreshold === 'number' ? p.binaryThreshold : DEFAULT_POLICY.binaryThreshold,
+    gradedSafetyThreshold: typeof p.gradedSafetyThreshold === 'number' ? p.gradedSafetyThreshold : DEFAULT_POLICY.gradedSafetyThreshold,
   };
 }
 
@@ -56,31 +62,45 @@ export function normalizePolicy(raw) {
  * @param {string|null} protocol 请求协议
  * @returns {string|null}
  */
-export function hardConstraintBlock(candidate, task, protocol) {
+export function hardConstraintBlock(candidate, task, protocol, thresholds = null) {
+  const binaryTh = thresholds && typeof thresholds.binary === 'number' ? thresholds.binary : 0.9;
+  const gradedTh = thresholds && typeof thresholds.graded === 'number' ? thresholds.graded : 0;
   const caps = candidate?.capabilities || {};
   const blocks = [];
 
-  // 硬能力：需求=1.0 的能力，模型必须 >= 1.0
+  // Phase2-C：二元硬能力（仅 HARD_CAPABILITY_KEYS：streaming/vision/tool_use/structured_output）。
+  // 需求>=1.0 且模型能力分 < binaryThreshold（默认 0.9）→ blocked。
+  // chat/coding/reasoning 等等级能力即使需求=1.0 也不会出现在这里（analyzeTask 已过滤）。
   const hard = Array.isArray(task?.hardCapabilities) ? task.hardCapabilities : [];
   for (const k of hard) {
-    if ((caps[k] || 0) < 1.0) {
+    if (!HARD_CAPABILITY_KEYS.includes(k)) continue; // 等级能力跳过硬性判定
+    if ((caps[k] || 0) < binaryTh) {
       blocks.push(`missing ${k} (required)`);
     }
   }
   // 兼容旧字段（task.needsToolUse / needsVision / needsStreaming）
-  if (task?.needsToolUse && (caps.tool_use || 0) < 1.0) blocks.push('missing tool_use (required)');
-  if (task?.needsVision && (caps.vision || 0) < 1.0) blocks.push('missing vision (required)');
-  if (task?.needsStreaming && (caps.streaming || 0) < 1.0) blocks.push('missing streaming (required)');
-  if (task?.needsStructuredOutput && (caps.structured_output || 0) < 1.0) {
+  if (task?.needsToolUse && (caps.tool_use || 0) < binaryTh) blocks.push('missing tool_use (required)');
+  if (task?.needsVision && (caps.vision || 0) < binaryTh) blocks.push('missing vision (required)');
+  if (task?.needsStreaming && (caps.streaming || 0) < binaryTh) blocks.push('missing streaming (required)');
+  if (task?.needsStructuredOutput && (caps.structured_output || 0) < binaryTh) {
     blocks.push('missing structured_output (required)');
   }
-  if (task?.hasLongContext && (caps.long_context || 0) < 1.0 && candidate?.contextWindow > 0
-    && task?.estimatedInputTokens > candidate.contextWindow) {
-    blocks.push(`input tokens ${task.estimatedInputTokens} > contextWindow ${candidate.contextWindow}`);
-  } else if (task?.estimatedInputTokens && candidate?.contextWindow
-    && task.estimatedInputTokens > candidate.contextWindow) {
-    blocks.push(`input tokens ${task.estimatedInputTokens} > contextWindow ${candidate.contextWindow}`);
+  // 等级软能力：仅显式安全阈值阻断（gradedSafetyThreshold > 0 才生效；默认 0 = 不阻断）
+  if (gradedTh > 0) {
+    const req = task?.requiredCapabilities || {};
+    for (const k of SOFT_CAPABILITY_KEYS) {
+      if ((req[k] || 0) >= 1.0 && (caps[k] || 0) < gradedTh) {
+        blocks.push(`missing ${k} (below safety threshold ${gradedTh})`);
+      }
+    }
   }
+  // 上下文窗口溢出（contextWindow 硬约束）：
+  // Phase2-C 优先用 input+output 总量（含安全余量）；未提供时回退 input。
+  const estCtxTokens = task?.estimatedTotalTokens || task?.estimatedInputTokens;
+  if (estCtxTokens && candidate?.contextWindow && estCtxTokens > candidate.contextWindow) {
+    blocks.push(`input tokens ${estCtxTokens} > contextWindow ${candidate.contextWindow}`);
+  }
+  // 协议兼容
   if (protocol) {
     const protocols = Array.isArray(candidate?.protocols) ? candidate.protocols : [];
     if (!protocols.includes(protocol)) {
@@ -149,8 +169,11 @@ export function scoreCandidate(candidate, task, policy, budget, protocol, health
     return { score: 0, reasons, blocked: budgetBlocked };
   }
 
-  // 1. 硬性能力约束（streaming/tool_use/vision/contextWindow/protocol）
-  const hardBlock = hardConstraintBlock(candidate, task, protocol);
+  // 1. 硬性能力约束（仅二元能力 + contextWindow/protocol；阈值可配置）
+  const hardBlock = hardConstraintBlock(candidate, task, protocol, {
+    binary: policy.binaryThreshold ?? 0.9,
+    graded: policy.gradedSafetyThreshold ?? 0,
+  });
   if (hardBlock) {
     return { score: 0, reasons, blocked: hardBlock };
   }
@@ -179,11 +202,14 @@ export function scoreCandidate(candidate, task, policy, budget, protocol, health
   if ((req.coding || 0) > 0.5 && (caps.coding || 0) >= 1.0) reasons.push('has coding');
 
   // 3. tier 分（低权重，不当作唯一质量替代品）
+  //    Phase2-C：tierPreference=false → tier 权重置 0（tier 不参与排序）
   const tierRank = { tier1: 1.0, tier2: 0.7, tier3: 0.4 };
   const tierScore = tierRank[candidate.tier] ?? 0.5;
+  const tierWeightEff = policy.tierPreference ? policy.tierWeight : 0;
 
   // 4. 付费分
-  const paidScore = candidate.paid ? 1 - policy.paidPenalty : 1.0;
+  //    Phase2-C：preferFree=false → 免费/付费无差别（paidPenalty 不生效）
+  const paidScore = candidate.paid && policy.preferFree ? 1 - policy.paidPenalty : 1.0;
 
   // 5. 成本分（复杂任务降低成本权重，简单任务成本优先）
   const complexityEff = typeof task?.complexity === 'number' ? task.complexity : 0.3;
@@ -196,6 +222,12 @@ export function scoreCandidate(candidate, task, policy, budget, protocol, health
     costScore = Math.max(0, 1 - (inCost + outCost * 3) / 0.05);
     costScore = Number(costScore.toFixed(3));
   }
+  // Phase2-C：preferFree=true → 免费候选成本分下限提升。
+  // 仅当任务【无强 soft 需求】（coding/reasoning 需求 < 0.7）时生效 —— "质量达标后优先免费"：
+  // 复杂推理/编码任务仍以能力为主，不允许免费奖励压过明显的能力差距。
+  const reqCaps = task?.requiredCapabilities || {};
+  const strongSoftNeed = SOFT_CAPABILITY_KEYS.some((k) => k !== 'chat' && (reqCaps[k] || 0) >= 0.7);
+  if (policy.preferFree && !candidate.paid && !strongSoftNeed) costScore = Math.max(costScore, 0.6);
 
   // 6. Provider 可靠性分（配置 reliability + 健康统计）
   let relScore = 0.7;
@@ -215,15 +247,61 @@ export function scoreCandidate(candidate, task, policy, budget, protocol, health
   }
   relScore = Number(Math.min(1, Math.max(0.1, relScore)).toFixed(3));
 
+  // Phase2-C：权重归一化（避免配置调整导致总分失衡）
+  const wSum =
+    policy.capabilityWeight + tierWeightEff + 0.1 + costWeightEff + policy.reliabilityWeight;
+  const wNorm = wSum > 0 ? 1 / wSum : 1;
+
   const total =
-    capScore * policy.capabilityWeight +
-    tierScore * policy.tierWeight +
-    paidScore * 0.1 +
-    costScore * costWeightEff +
-    relScore * policy.reliabilityWeight;
+    (capScore * policy.capabilityWeight +
+      tierScore * tierWeightEff +
+      paidScore * 0.1 +
+      costScore * costWeightEff +
+      relScore * policy.reliabilityWeight) * wNorm;
   const score = Math.min(1, Math.max(0, total));
 
-  return { score: Number(score.toFixed(3)), reasons, blocked: null };
+  return {
+    score: Number(score.toFixed(3)),
+    reasons,
+    blocked: null,
+    tiebreak: {
+      tier: tierRank[candidate.tier] ?? 0.5,
+      capability: capScore,
+      reliability: relScore,
+      cost: costScore,
+      latency: candidate.latencyPriorMs || 0,
+      phase1Order: candidate._phase1Index ?? 0,
+    },
+  };
+}
+
+/**
+ * Phase2-C：确定性 Tie-Breaker（用于推荐选择，保持可复现）。
+ * 顺序：分数 → tier → capability → reliability → cost → latency → Phase1 顺序。
+ * 输入 ranked 项需含 score 与 tiebreak 元数据。
+ */
+export function pickBest(ranked) {
+  const list = Array.isArray(ranked) ? ranked.filter((r) => !r.blocked) : [];
+  if (list.length === 0) return null;
+  let best = list[0];
+  for (const r of list) {
+    if (compareTiebreak(r, best) < 0) best = r;
+  }
+  return best;
+}
+
+function compareTiebreak(a, b) {
+  if (a.score !== b.score) return b.score - a.score;
+  const ta = a.tiebreak || {};
+  const tb = b.tiebreak || {};
+  // 用户指定顺序（Phase2-C 第6节）：capability → reliability → cost → latency → Phase1 order
+  const capA = ta.capability ?? 0;
+  const capB = tb.capability ?? 0;
+  if (capA !== capB) return capB - capA;
+  if (ta.reliability !== tb.reliability) return tb.reliability - ta.reliability;
+  if (ta.cost !== tb.cost) return ta.cost - tb.cost;
+  if (ta.latency !== tb.latency) return ta.latency - tb.latency;
+  return (ta.phase1Order ?? 0) - (tb.phase1Order ?? 0);
 }
 
 // ----------------------------------------------------------------------------
@@ -290,6 +368,7 @@ export default {
   hardConstraintBlock,
   budgetBlock,
   scoreCandidate,
+  pickBest,
   estimateCost,
   predictQuality,
   predictLatency,

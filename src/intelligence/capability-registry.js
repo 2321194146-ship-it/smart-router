@@ -23,6 +23,10 @@ export const Capability = Object.freeze({
   REASONING: 'reasoning',
 });
 
+// 二元能力统一判定阈值（与 policy.binaryThreshold 默认一致：0.9）
+// vision=95（0.95）视为支持；vision=60（0.6）视为不支持。
+export const BINARY_CAPABILITY_THRESHOLD = 0.9;
+
 /** 旧字符串能力数组 → 能力对象（字符串=1.0） */
 const LEGACY_STRING_CAPS = new Set(['chat', 'coding', 'reasoning', 'tool_use', 'vision', 'structured_output', 'long_context', 'streaming']);
 
@@ -66,10 +70,29 @@ export function extractCapabilities(model) {
   return out;
 }
 
+/**
+ * 布尔支持视图：能力分 >= threshold 视为支持（二元能力判定用，默认 0.9）。
+ * 例如 vision=95（0.95）→ true，不得误作"不支持视觉"。
+ */
+export function buildSupportsView(capabilities, threshold = 0.9) {
+  const out = {};
+  for (const k of CAPABILITY_KEYS) out[k] = (capabilities[k] || 0) >= threshold;
+  return out;
+}
+
+/**
+ * 0-100 等级分视图（展示/报告用）。
+ */
+export function buildScoresView(capabilities) {
+  const out = {};
+  for (const k of CAPABILITY_KEYS) out[k] = Math.round((capabilities[k] || 0) * 100);
+  return out;
+}
+
 export function hasCapability(model, capability) {
   if (!capability) return true;
   const caps = extractCapabilities(model);
-  return (caps[capability] || 0) >= 1.0;
+  return (caps[capability] || 0) >= BINARY_CAPABILITY_THRESHOLD;
 }
 
 export function isEnabled(model) {
@@ -154,6 +177,8 @@ export class CapabilityRegistry {
       modelId: entry.id,
       provider: entry.provider,
       capabilities,
+      supports: buildSupportsView(capabilities),
+      scores: buildScoresView(capabilities),
       contextWindow,
       price: entry.price && typeof entry.price === 'object' ? { ...entry.price } : null,
       tier: entry.tier || 'tier3',
@@ -198,4 +223,7 @@ export default {
   deriveProtocols,
   extractCapabilities,
   normalizeCapabilityScore,
+  buildSupportsView,
+  buildScoresView,
+  BINARY_CAPABILITY_THRESHOLD,
 };

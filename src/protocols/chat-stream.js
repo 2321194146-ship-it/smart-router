@@ -596,7 +596,7 @@ export async function handleChatCompletionStream(req, res, body, context) {
     const budget = getAgentBudget(agentId, config);
     const capability = detectCapability(patchedBody);
 
-    const candidates = buildCandidates(requestedModel, config, {
+    let candidates = buildCandidates(requestedModel, config, {
       agentId,
       agentModels,
       budget,
@@ -612,7 +612,7 @@ export async function handleChatCompletionStream(req, res, body, context) {
     //     异步异常隔离（方案A）：await + try/catch + log shadow_error
     if (context.intelligence && typeof context.intelligence.suggest === 'function') {
       try {
-        await context.intelligence.suggest({
+        const decision = await context.intelligence.suggest({
           requestId,
           body: patchedBody,
           agentId,
@@ -620,6 +620,12 @@ export async function handleChatCompletionStream(req, res, body, context) {
           candidates,
           protocol: context.protocol || 'chat',
         });
+        // Phase2-C：Active Canary 重排（仅 active_canary 模式；Fail Open → 保持 Phase1 顺序）
+        if (decision && decision.canary && decision.canary.active
+          && Array.isArray(decision.canary.orderedCandidates)
+          && decision.canary.orderedCandidates.length > 0) {
+          candidates = decision.canary.orderedCandidates;
+        }
       } catch (_e) {
         // Shadow 层失败不影响主流程；错误必须有明确日志
         if (context.log && typeof context.log === 'function') {

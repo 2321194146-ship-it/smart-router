@@ -22,6 +22,7 @@ import { CapabilityRegistry } from './capability-registry.js';
 import {
   normalizePolicy,
   scoreCandidate,
+  pickBest,
   estimateCost,
   predictQuality,
   predictLatency,
@@ -113,7 +114,7 @@ export class DecisionEngine {
     });
 
     // 候选评分（保持 Phase1 候选顺序；Provider 健康只读）
-    const ranked = rawCandidates.map((c) => {
+    const ranked = rawCandidates.map((c, idx) => {
       const profile = this._buildProfile(c);
       const health = this._providerHealth(profile.provider);
       const scored = scoreCandidate(profile, task, this.policy, budget, protocol, health);
@@ -126,14 +127,12 @@ export class DecisionEngine {
         reasons: scored.reasons,
         blocked: scored.blocked,
         estimatedCost: estimateCost(profile, task),
+        tiebreak: { ...(scored.tiebreak || {}), phase1Order: idx },
       };
     });
 
-    // 只有未被硬约束/预算阻止的候选才可成为 recommendation
-    const available = ranked.filter((r) => !r.blocked);
-    const recommendation = available.length > 0
-      ? available.reduce((best, r) => (r.score > best.score ? r : best))
-      : null;
+    // Phase2-C：确定性 Tie-Breaker（分数 → tier → capability → reliability → cost → latency → Phase1 顺序）
+    const recommendation = pickBest(ranked);
 
     // 预测：仅针对推荐候选（modelId + provider 对应）
     let predictions = { cost: null, quality: null, latency: null };

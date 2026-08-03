@@ -1,0 +1,7223 @@
+{
+  "mode": "shadow",
+  "runtime": "deterministic local mock providers (reproducible, offline)",
+  "honesty": "Holdout 对抗评测：独立任务集（≥200），不复制 Phase2-B 105 回归模板；未开启 Active",
+  "tasks_total": 208,
+  "categories": {
+    "syn_summarization": 8,
+    "syn_summarization_zh": 6,
+    "syn_translation": 5,
+    "syn_translation_zh": 5,
+    "syn_extraction": 5,
+    "syn_extraction_zh": 5,
+    "syn_writing": 5,
+    "syn_writing_zh": 5,
+    "syn_analysis": 5,
+    "syn_analysis_zh": 5,
+    "no_keyword_chat": 10,
+    "implicit_reasoning": 5,
+    "tools_present_unneeded": 5,
+    "tools_present_unneeded_analysis": 1,
+    "tools_present_unneeded_coding": 1,
+    "tool_required_explicit": 6,
+    "tool_choice_required": 3,
+    "tool_choice_auto": 2,
+    "protocol_response_format": 3,
+    "protocol_json_schema": 2,
+    "protocol_text_format": 2,
+    "protocol_output_config": 2,
+    "json_mention_only": 2,
+    "cjk_long_context": 1,
+    "cjk_long_context2": 1,
+    "large_tool_schema": 1,
+    "multi_turn_tool": 1,
+    "graded_chat95": 3,
+    "graded_coding95": 4,
+    "graded_vision95": 2,
+    "policy_prefer_free": 3,
+    "policy_no_prefer_free": 3,
+    "policy_no_tier": 3,
+    "mixed_lang_translate_zh": 1,
+    "mixed_lang_summary": 1,
+    "mixed_lang_coding": 1,
+    "mixed_lang_translate": 1,
+    "ambiguous_chat": 3,
+    "null_safe_strict": 3,
+    "provider_health_holdout": 3,
+    "budget_boundary": 2,
+    "no_paid_holdout": 2,
+    "strict_holdout": 2,
+    "fallback_holdout": 2,
+    "zh_coding": 6,
+    "zh_debugging": 6,
+    "syn_debugging": 6,
+    "syn_research": 4,
+    "syn_research_zh": 4,
+    "tools_present_unneeded2": 4,
+    "protocol_response_format2": 2,
+    "protocol_text_format2": 2,
+    "mixed_lang2": 3,
+    "ambiguous_chat2": 4,
+    "policy_prefer_free2": 2,
+    "policy_no_prefer_free2": 2,
+    "policy_no_tier2": 2,
+    "no_keyword_chat2": 6,
+    "graded_reasoning80": 4,
+    "caps_only_coding": 3,
+    "legacy_only_vision": 3,
+    "budget_boundary2": 2,
+    "no_paid_holdout2": 2
+  },
+  "classification": {
+    "correct": 208,
+    "wrong": 0,
+    "accuracy": "100%",
+    "details": [
+      {
+        "taskId": "h001",
+        "category": "syn_summarization",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h002",
+        "category": "syn_summarization",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h003",
+        "category": "syn_summarization",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h004",
+        "category": "syn_summarization",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h005",
+        "category": "syn_summarization",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h006",
+        "category": "syn_summarization",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h007",
+        "category": "syn_summarization",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h008",
+        "category": "syn_summarization",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h009",
+        "category": "syn_summarization_zh",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h010",
+        "category": "syn_summarization_zh",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h011",
+        "category": "syn_summarization_zh",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h012",
+        "category": "syn_summarization_zh",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h013",
+        "category": "syn_summarization_zh",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h014",
+        "category": "syn_summarization_zh",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h015",
+        "category": "syn_translation",
+        "expected": "translation",
+        "actual": "translation",
+        "ok": true
+      },
+      {
+        "taskId": "h016",
+        "category": "syn_translation",
+        "expected": "translation",
+        "actual": "translation",
+        "ok": true
+      },
+      {
+        "taskId": "h017",
+        "category": "syn_translation",
+        "expected": "translation",
+        "actual": "translation",
+        "ok": true
+      },
+      {
+        "taskId": "h018",
+        "category": "syn_translation",
+        "expected": "translation",
+        "actual": "translation",
+        "ok": true
+      },
+      {
+        "taskId": "h019",
+        "category": "syn_translation",
+        "expected": "translation",
+        "actual": "translation",
+        "ok": true
+      },
+      {
+        "taskId": "h020",
+        "category": "syn_translation_zh",
+        "expected": "translation",
+        "actual": "translation",
+        "ok": true
+      },
+      {
+        "taskId": "h021",
+        "category": "syn_translation_zh",
+        "expected": "translation",
+        "actual": "translation",
+        "ok": true
+      },
+      {
+        "taskId": "h022",
+        "category": "syn_translation_zh",
+        "expected": "translation",
+        "actual": "translation",
+        "ok": true
+      },
+      {
+        "taskId": "h023",
+        "category": "syn_translation_zh",
+        "expected": "translation",
+        "actual": "translation",
+        "ok": true
+      },
+      {
+        "taskId": "h024",
+        "category": "syn_translation_zh",
+        "expected": "translation",
+        "actual": "translation",
+        "ok": true
+      },
+      {
+        "taskId": "h025",
+        "category": "syn_extraction",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "h026",
+        "category": "syn_extraction",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "h027",
+        "category": "syn_extraction",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "h028",
+        "category": "syn_extraction",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "h029",
+        "category": "syn_extraction",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "h030",
+        "category": "syn_extraction_zh",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "h031",
+        "category": "syn_extraction_zh",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "h032",
+        "category": "syn_extraction_zh",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "h033",
+        "category": "syn_extraction_zh",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "h034",
+        "category": "syn_extraction_zh",
+        "expected": "extraction",
+        "actual": "extraction",
+        "ok": true
+      },
+      {
+        "taskId": "h035",
+        "category": "syn_writing",
+        "expected": "writing",
+        "actual": "writing",
+        "ok": true
+      },
+      {
+        "taskId": "h036",
+        "category": "syn_writing",
+        "expected": "writing",
+        "actual": "writing",
+        "ok": true
+      },
+      {
+        "taskId": "h037",
+        "category": "syn_writing",
+        "expected": "writing",
+        "actual": "writing",
+        "ok": true
+      },
+      {
+        "taskId": "h038",
+        "category": "syn_writing",
+        "expected": "writing",
+        "actual": "writing",
+        "ok": true
+      },
+      {
+        "taskId": "h039",
+        "category": "syn_writing",
+        "expected": "writing",
+        "actual": "writing",
+        "ok": true
+      },
+      {
+        "taskId": "h040",
+        "category": "syn_writing_zh",
+        "expected": "writing",
+        "actual": "writing",
+        "ok": true
+      },
+      {
+        "taskId": "h041",
+        "category": "syn_writing_zh",
+        "expected": "writing",
+        "actual": "writing",
+        "ok": true
+      },
+      {
+        "taskId": "h042",
+        "category": "syn_writing_zh",
+        "expected": "writing",
+        "actual": "writing",
+        "ok": true
+      },
+      {
+        "taskId": "h043",
+        "category": "syn_writing_zh",
+        "expected": "writing",
+        "actual": "writing",
+        "ok": true
+      },
+      {
+        "taskId": "h044",
+        "category": "syn_writing_zh",
+        "expected": "writing",
+        "actual": "writing",
+        "ok": true
+      },
+      {
+        "taskId": "h045",
+        "category": "syn_analysis",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h046",
+        "category": "syn_analysis",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h047",
+        "category": "syn_analysis",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h048",
+        "category": "syn_analysis",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h049",
+        "category": "syn_analysis",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h050",
+        "category": "syn_analysis_zh",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h051",
+        "category": "syn_analysis_zh",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h052",
+        "category": "syn_analysis_zh",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h053",
+        "category": "syn_analysis_zh",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h054",
+        "category": "syn_analysis_zh",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h055",
+        "category": "no_keyword_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h056",
+        "category": "no_keyword_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h057",
+        "category": "no_keyword_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h058",
+        "category": "no_keyword_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h059",
+        "category": "no_keyword_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h060",
+        "category": "no_keyword_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h061",
+        "category": "no_keyword_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h062",
+        "category": "no_keyword_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h063",
+        "category": "no_keyword_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h064",
+        "category": "no_keyword_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h065",
+        "category": "implicit_reasoning",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h066",
+        "category": "implicit_reasoning",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h067",
+        "category": "implicit_reasoning",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h068",
+        "category": "implicit_reasoning",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h069",
+        "category": "implicit_reasoning",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h070",
+        "category": "tools_present_unneeded",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h071",
+        "category": "tools_present_unneeded",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h072",
+        "category": "tools_present_unneeded",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h073",
+        "category": "tools_present_unneeded",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h074",
+        "category": "tools_present_unneeded",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h075",
+        "category": "tools_present_unneeded_analysis",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h076",
+        "category": "tools_present_unneeded_coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "h077",
+        "category": "tool_required_explicit",
+        "expected": "tool_orchestration",
+        "actual": "tool_orchestration",
+        "ok": true
+      },
+      {
+        "taskId": "h078",
+        "category": "tool_required_explicit",
+        "expected": "tool_orchestration",
+        "actual": "tool_orchestration",
+        "ok": true
+      },
+      {
+        "taskId": "h079",
+        "category": "tool_required_explicit",
+        "expected": "tool_orchestration",
+        "actual": "tool_orchestration",
+        "ok": true
+      },
+      {
+        "taskId": "h080",
+        "category": "tool_required_explicit",
+        "expected": "tool_orchestration",
+        "actual": "tool_orchestration",
+        "ok": true
+      },
+      {
+        "taskId": "h081",
+        "category": "tool_required_explicit",
+        "expected": "tool_orchestration",
+        "actual": "tool_orchestration",
+        "ok": true
+      },
+      {
+        "taskId": "h082",
+        "category": "tool_required_explicit",
+        "expected": "tool_orchestration",
+        "actual": "tool_orchestration",
+        "ok": true
+      },
+      {
+        "taskId": "h083",
+        "category": "tool_choice_required",
+        "expected": "tool_orchestration",
+        "actual": "tool_orchestration",
+        "ok": true
+      },
+      {
+        "taskId": "h084",
+        "category": "tool_choice_required",
+        "expected": "tool_orchestration",
+        "actual": "tool_orchestration",
+        "ok": true
+      },
+      {
+        "taskId": "h085",
+        "category": "tool_choice_required",
+        "expected": "tool_orchestration",
+        "actual": "tool_orchestration",
+        "ok": true
+      },
+      {
+        "taskId": "h086",
+        "category": "tool_choice_auto",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h087",
+        "category": "tool_choice_auto",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h088",
+        "category": "protocol_response_format",
+        "expected": "structured_output",
+        "actual": "structured_output",
+        "ok": true
+      },
+      {
+        "taskId": "h089",
+        "category": "protocol_response_format",
+        "expected": "structured_output",
+        "actual": "structured_output",
+        "ok": true
+      },
+      {
+        "taskId": "h090",
+        "category": "protocol_response_format",
+        "expected": "structured_output",
+        "actual": "structured_output",
+        "ok": true
+      },
+      {
+        "taskId": "h091",
+        "category": "protocol_json_schema",
+        "expected": "structured_output",
+        "actual": "structured_output",
+        "ok": true
+      },
+      {
+        "taskId": "h092",
+        "category": "protocol_json_schema",
+        "expected": "structured_output",
+        "actual": "structured_output",
+        "ok": true
+      },
+      {
+        "taskId": "h093",
+        "category": "protocol_text_format",
+        "expected": "structured_output",
+        "actual": "structured_output",
+        "ok": true
+      },
+      {
+        "taskId": "h094",
+        "category": "protocol_text_format",
+        "expected": "structured_output",
+        "actual": "structured_output",
+        "ok": true
+      },
+      {
+        "taskId": "h095",
+        "category": "protocol_output_config",
+        "expected": "structured_output",
+        "actual": "structured_output",
+        "ok": true
+      },
+      {
+        "taskId": "h096",
+        "category": "protocol_output_config",
+        "expected": "structured_output",
+        "actual": "structured_output",
+        "ok": true
+      },
+      {
+        "taskId": "h097",
+        "category": "json_mention_only",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h098",
+        "category": "json_mention_only",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h099",
+        "category": "cjk_long_context",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h100",
+        "category": "cjk_long_context2",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h101",
+        "category": "large_tool_schema",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h102",
+        "category": "multi_turn_tool",
+        "expected": "tool_orchestration",
+        "actual": "tool_orchestration",
+        "ok": true
+      },
+      {
+        "taskId": "h103",
+        "category": "graded_chat95",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h104",
+        "category": "graded_chat95",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h105",
+        "category": "graded_chat95",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h106",
+        "category": "graded_coding95",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "h107",
+        "category": "graded_coding95",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "h108",
+        "category": "graded_coding95",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "h109",
+        "category": "graded_coding95",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "h110",
+        "category": "graded_vision95",
+        "expected": "vision",
+        "actual": "vision",
+        "ok": true
+      },
+      {
+        "taskId": "h111",
+        "category": "graded_vision95",
+        "expected": "vision",
+        "actual": "vision",
+        "ok": true
+      },
+      {
+        "taskId": "h112",
+        "category": "policy_prefer_free",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h113",
+        "category": "policy_prefer_free",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h114",
+        "category": "policy_prefer_free",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h115",
+        "category": "policy_no_prefer_free",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h116",
+        "category": "policy_no_prefer_free",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h117",
+        "category": "policy_no_prefer_free",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h118",
+        "category": "policy_no_tier",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h119",
+        "category": "policy_no_tier",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h120",
+        "category": "policy_no_tier",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h121",
+        "category": "mixed_lang_translate_zh",
+        "expected": "translation",
+        "actual": "translation",
+        "ok": true
+      },
+      {
+        "taskId": "h122",
+        "category": "mixed_lang_summary",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h123",
+        "category": "mixed_lang_coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "h124",
+        "category": "mixed_lang_translate",
+        "expected": "translation",
+        "actual": "translation",
+        "ok": true
+      },
+      {
+        "taskId": "h125",
+        "category": "ambiguous_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h126",
+        "category": "ambiguous_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h127",
+        "category": "ambiguous_chat",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h128",
+        "category": "null_safe_strict",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h129",
+        "category": "null_safe_strict",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h130",
+        "category": "null_safe_strict",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h131",
+        "category": "provider_health_holdout",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h132",
+        "category": "provider_health_holdout",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h133",
+        "category": "provider_health_holdout",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h134",
+        "category": "budget_boundary",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h135",
+        "category": "budget_boundary",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h136",
+        "category": "no_paid_holdout",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h137",
+        "category": "no_paid_holdout",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h138",
+        "category": "strict_holdout",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h139",
+        "category": "strict_holdout",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h140",
+        "category": "fallback_holdout",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h141",
+        "category": "fallback_holdout",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h142",
+        "category": "zh_coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "h143",
+        "category": "zh_coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "h144",
+        "category": "zh_coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "h145",
+        "category": "zh_coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "h146",
+        "category": "zh_coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "h147",
+        "category": "zh_coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "h148",
+        "category": "zh_debugging",
+        "expected": "debugging",
+        "actual": "debugging",
+        "ok": true
+      },
+      {
+        "taskId": "h149",
+        "category": "zh_debugging",
+        "expected": "debugging",
+        "actual": "debugging",
+        "ok": true
+      },
+      {
+        "taskId": "h150",
+        "category": "zh_debugging",
+        "expected": "debugging",
+        "actual": "debugging",
+        "ok": true
+      },
+      {
+        "taskId": "h151",
+        "category": "zh_debugging",
+        "expected": "debugging",
+        "actual": "debugging",
+        "ok": true
+      },
+      {
+        "taskId": "h152",
+        "category": "zh_debugging",
+        "expected": "debugging",
+        "actual": "debugging",
+        "ok": true
+      },
+      {
+        "taskId": "h153",
+        "category": "zh_debugging",
+        "expected": "debugging",
+        "actual": "debugging",
+        "ok": true
+      },
+      {
+        "taskId": "h154",
+        "category": "syn_debugging",
+        "expected": "debugging",
+        "actual": "debugging",
+        "ok": true
+      },
+      {
+        "taskId": "h155",
+        "category": "syn_debugging",
+        "expected": "debugging",
+        "actual": "debugging",
+        "ok": true
+      },
+      {
+        "taskId": "h156",
+        "category": "syn_debugging",
+        "expected": "debugging",
+        "actual": "debugging",
+        "ok": true
+      },
+      {
+        "taskId": "h157",
+        "category": "syn_debugging",
+        "expected": "debugging",
+        "actual": "debugging",
+        "ok": true
+      },
+      {
+        "taskId": "h158",
+        "category": "syn_debugging",
+        "expected": "debugging",
+        "actual": "debugging",
+        "ok": true
+      },
+      {
+        "taskId": "h159",
+        "category": "syn_debugging",
+        "expected": "debugging",
+        "actual": "debugging",
+        "ok": true
+      },
+      {
+        "taskId": "h160",
+        "category": "syn_research",
+        "expected": "research",
+        "actual": "research",
+        "ok": true
+      },
+      {
+        "taskId": "h161",
+        "category": "syn_research",
+        "expected": "research",
+        "actual": "research",
+        "ok": true
+      },
+      {
+        "taskId": "h162",
+        "category": "syn_research",
+        "expected": "research",
+        "actual": "research",
+        "ok": true
+      },
+      {
+        "taskId": "h163",
+        "category": "syn_research",
+        "expected": "research",
+        "actual": "research",
+        "ok": true
+      },
+      {
+        "taskId": "h164",
+        "category": "syn_research_zh",
+        "expected": "research",
+        "actual": "research",
+        "ok": true
+      },
+      {
+        "taskId": "h165",
+        "category": "syn_research_zh",
+        "expected": "research",
+        "actual": "research",
+        "ok": true
+      },
+      {
+        "taskId": "h166",
+        "category": "syn_research_zh",
+        "expected": "research",
+        "actual": "research",
+        "ok": true
+      },
+      {
+        "taskId": "h167",
+        "category": "syn_research_zh",
+        "expected": "research",
+        "actual": "research",
+        "ok": true
+      },
+      {
+        "taskId": "h168",
+        "category": "tools_present_unneeded2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h169",
+        "category": "tools_present_unneeded2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h170",
+        "category": "tools_present_unneeded2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h171",
+        "category": "tools_present_unneeded2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h172",
+        "category": "protocol_response_format2",
+        "expected": "structured_output",
+        "actual": "structured_output",
+        "ok": true
+      },
+      {
+        "taskId": "h173",
+        "category": "protocol_response_format2",
+        "expected": "structured_output",
+        "actual": "structured_output",
+        "ok": true
+      },
+      {
+        "taskId": "h174",
+        "category": "protocol_text_format2",
+        "expected": "structured_output",
+        "actual": "structured_output",
+        "ok": true
+      },
+      {
+        "taskId": "h175",
+        "category": "protocol_text_format2",
+        "expected": "structured_output",
+        "actual": "structured_output",
+        "ok": true
+      },
+      {
+        "taskId": "h176",
+        "category": "mixed_lang2",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h177",
+        "category": "mixed_lang2",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h178",
+        "category": "mixed_lang2",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h179",
+        "category": "ambiguous_chat2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h180",
+        "category": "ambiguous_chat2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h181",
+        "category": "ambiguous_chat2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h182",
+        "category": "ambiguous_chat2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h183",
+        "category": "policy_prefer_free2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h184",
+        "category": "policy_prefer_free2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h185",
+        "category": "policy_no_prefer_free2",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h186",
+        "category": "policy_no_prefer_free2",
+        "expected": "summarization",
+        "actual": "summarization",
+        "ok": true
+      },
+      {
+        "taskId": "h187",
+        "category": "policy_no_tier2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h188",
+        "category": "policy_no_tier2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h189",
+        "category": "no_keyword_chat2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h190",
+        "category": "no_keyword_chat2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h191",
+        "category": "no_keyword_chat2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h192",
+        "category": "no_keyword_chat2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h193",
+        "category": "no_keyword_chat2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h194",
+        "category": "no_keyword_chat2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h195",
+        "category": "graded_reasoning80",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h196",
+        "category": "graded_reasoning80",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h197",
+        "category": "graded_reasoning80",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h198",
+        "category": "graded_reasoning80",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h199",
+        "category": "caps_only_coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "h200",
+        "category": "caps_only_coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "h201",
+        "category": "caps_only_coding",
+        "expected": "coding",
+        "actual": "coding",
+        "ok": true
+      },
+      {
+        "taskId": "h202",
+        "category": "legacy_only_vision",
+        "expected": "vision",
+        "actual": "vision",
+        "ok": true
+      },
+      {
+        "taskId": "h203",
+        "category": "legacy_only_vision",
+        "expected": "vision",
+        "actual": "vision",
+        "ok": true
+      },
+      {
+        "taskId": "h204",
+        "category": "legacy_only_vision",
+        "expected": "vision",
+        "actual": "vision",
+        "ok": true
+      },
+      {
+        "taskId": "h205",
+        "category": "budget_boundary2",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h206",
+        "category": "budget_boundary2",
+        "expected": "analysis",
+        "actual": "analysis",
+        "ok": true
+      },
+      {
+        "taskId": "h207",
+        "category": "no_paid_holdout2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      },
+      {
+        "taskId": "h208",
+        "category": "no_paid_holdout2",
+        "expected": "general_chat",
+        "actual": "general_chat",
+        "ok": true
+      }
+    ]
+  },
+  "hard_violations": {
+    "streaming": 0,
+    "vision": 0,
+    "tool_use": 0,
+    "context_window": 0,
+    "budget": 0,
+    "no_paid": 0,
+    "strict": 0,
+    "total": 0,
+    "details": []
+  },
+  "soft_match": {
+    "total": 199,
+    "matched": 199,
+    "rate": "100%",
+    "details": []
+  },
+  "acceptable_recommendation": {
+    "total": 199,
+    "in_acceptable": 199,
+    "rate": "100%",
+    "null_allowed": 0,
+    "details": []
+  },
+  "cost_reasonableness": {
+    "total": 4,
+    "ok": 4,
+    "rate": "100%",
+    "details": []
+  },
+  "policy_execution": {
+    "total": 15,
+    "ok": 15,
+    "rate": "100%",
+    "details": []
+  },
+  "null_safe_rejection": {
+    "violations": 0,
+    "details": []
+  },
+  "outcome": {
+    "correct": 208,
+    "wrong": 0,
+    "accuracy": "100%",
+    "details": [
+      {
+        "taskId": "h001",
+        "category": "syn_summarization",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h002",
+        "category": "syn_summarization",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h003",
+        "category": "syn_summarization",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h004",
+        "category": "syn_summarization",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h005",
+        "category": "syn_summarization",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h006",
+        "category": "syn_summarization",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h007",
+        "category": "syn_summarization",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h008",
+        "category": "syn_summarization",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h009",
+        "category": "syn_summarization_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h010",
+        "category": "syn_summarization_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h011",
+        "category": "syn_summarization_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h012",
+        "category": "syn_summarization_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h013",
+        "category": "syn_summarization_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h014",
+        "category": "syn_summarization_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h015",
+        "category": "syn_translation",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h016",
+        "category": "syn_translation",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h017",
+        "category": "syn_translation",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h018",
+        "category": "syn_translation",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h019",
+        "category": "syn_translation",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h020",
+        "category": "syn_translation_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h021",
+        "category": "syn_translation_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h022",
+        "category": "syn_translation_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h023",
+        "category": "syn_translation_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h024",
+        "category": "syn_translation_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h025",
+        "category": "syn_extraction",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h026",
+        "category": "syn_extraction",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h027",
+        "category": "syn_extraction",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h028",
+        "category": "syn_extraction",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h029",
+        "category": "syn_extraction",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h030",
+        "category": "syn_extraction_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h031",
+        "category": "syn_extraction_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h032",
+        "category": "syn_extraction_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h033",
+        "category": "syn_extraction_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h034",
+        "category": "syn_extraction_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h035",
+        "category": "syn_writing",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h036",
+        "category": "syn_writing",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h037",
+        "category": "syn_writing",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h038",
+        "category": "syn_writing",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h039",
+        "category": "syn_writing",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h040",
+        "category": "syn_writing_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h041",
+        "category": "syn_writing_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h042",
+        "category": "syn_writing_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h043",
+        "category": "syn_writing_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h044",
+        "category": "syn_writing_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h045",
+        "category": "syn_analysis",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h046",
+        "category": "syn_analysis",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h047",
+        "category": "syn_analysis",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h048",
+        "category": "syn_analysis",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h049",
+        "category": "syn_analysis",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h050",
+        "category": "syn_analysis_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h051",
+        "category": "syn_analysis_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h052",
+        "category": "syn_analysis_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h053",
+        "category": "syn_analysis_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h054",
+        "category": "syn_analysis_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h055",
+        "category": "no_keyword_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h056",
+        "category": "no_keyword_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h057",
+        "category": "no_keyword_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h058",
+        "category": "no_keyword_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h059",
+        "category": "no_keyword_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h060",
+        "category": "no_keyword_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h061",
+        "category": "no_keyword_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h062",
+        "category": "no_keyword_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h063",
+        "category": "no_keyword_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h064",
+        "category": "no_keyword_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h065",
+        "category": "implicit_reasoning",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h066",
+        "category": "implicit_reasoning",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h067",
+        "category": "implicit_reasoning",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h068",
+        "category": "implicit_reasoning",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h069",
+        "category": "implicit_reasoning",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h070",
+        "category": "tools_present_unneeded",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h071",
+        "category": "tools_present_unneeded",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h072",
+        "category": "tools_present_unneeded",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h073",
+        "category": "tools_present_unneeded",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h074",
+        "category": "tools_present_unneeded",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h075",
+        "category": "tools_present_unneeded_analysis",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h076",
+        "category": "tools_present_unneeded_coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h077",
+        "category": "tool_required_explicit",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h078",
+        "category": "tool_required_explicit",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h079",
+        "category": "tool_required_explicit",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h080",
+        "category": "tool_required_explicit",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h081",
+        "category": "tool_required_explicit",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h082",
+        "category": "tool_required_explicit",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h083",
+        "category": "tool_choice_required",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h084",
+        "category": "tool_choice_required",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h085",
+        "category": "tool_choice_required",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h086",
+        "category": "tool_choice_auto",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h087",
+        "category": "tool_choice_auto",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h088",
+        "category": "protocol_response_format",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h089",
+        "category": "protocol_response_format",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h090",
+        "category": "protocol_response_format",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h091",
+        "category": "protocol_json_schema",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h092",
+        "category": "protocol_json_schema",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h093",
+        "category": "protocol_text_format",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h094",
+        "category": "protocol_text_format",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h095",
+        "category": "protocol_output_config",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h096",
+        "category": "protocol_output_config",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h097",
+        "category": "json_mention_only",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h098",
+        "category": "json_mention_only",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h099",
+        "category": "cjk_long_context",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h100",
+        "category": "cjk_long_context2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h101",
+        "category": "large_tool_schema",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h102",
+        "category": "multi_turn_tool",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h103",
+        "category": "graded_chat95",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h104",
+        "category": "graded_chat95",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h105",
+        "category": "graded_chat95",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h106",
+        "category": "graded_coding95",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h107",
+        "category": "graded_coding95",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h108",
+        "category": "graded_coding95",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h109",
+        "category": "graded_coding95",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h110",
+        "category": "graded_vision95",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h111",
+        "category": "graded_vision95",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h112",
+        "category": "policy_prefer_free",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h113",
+        "category": "policy_prefer_free",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h114",
+        "category": "policy_prefer_free",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h115",
+        "category": "policy_no_prefer_free",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h116",
+        "category": "policy_no_prefer_free",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h117",
+        "category": "policy_no_prefer_free",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h118",
+        "category": "policy_no_tier",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h119",
+        "category": "policy_no_tier",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h120",
+        "category": "policy_no_tier",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h121",
+        "category": "mixed_lang_translate_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h122",
+        "category": "mixed_lang_summary",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h123",
+        "category": "mixed_lang_coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h124",
+        "category": "mixed_lang_translate",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h125",
+        "category": "ambiguous_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h126",
+        "category": "ambiguous_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h127",
+        "category": "ambiguous_chat",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h128",
+        "category": "null_safe_strict",
+        "expected": "no_candidate",
+        "actual": "no_candidate",
+        "ok": true
+      },
+      {
+        "taskId": "h129",
+        "category": "null_safe_strict",
+        "expected": "no_candidate",
+        "actual": "no_candidate",
+        "ok": true
+      },
+      {
+        "taskId": "h130",
+        "category": "null_safe_strict",
+        "expected": "no_candidate",
+        "actual": "no_candidate",
+        "ok": true
+      },
+      {
+        "taskId": "h131",
+        "category": "provider_health_holdout",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h132",
+        "category": "provider_health_holdout",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h133",
+        "category": "provider_health_holdout",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h134",
+        "category": "budget_boundary",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h135",
+        "category": "budget_boundary",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h136",
+        "category": "no_paid_holdout",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h137",
+        "category": "no_paid_holdout",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h138",
+        "category": "strict_holdout",
+        "expected": "no_candidate",
+        "actual": "no_candidate",
+        "ok": true
+      },
+      {
+        "taskId": "h139",
+        "category": "strict_holdout",
+        "expected": "no_candidate",
+        "actual": "no_candidate",
+        "ok": true
+      },
+      {
+        "taskId": "h140",
+        "category": "fallback_holdout",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h141",
+        "category": "fallback_holdout",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h142",
+        "category": "zh_coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h143",
+        "category": "zh_coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h144",
+        "category": "zh_coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h145",
+        "category": "zh_coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h146",
+        "category": "zh_coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h147",
+        "category": "zh_coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h148",
+        "category": "zh_debugging",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h149",
+        "category": "zh_debugging",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h150",
+        "category": "zh_debugging",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h151",
+        "category": "zh_debugging",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h152",
+        "category": "zh_debugging",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h153",
+        "category": "zh_debugging",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h154",
+        "category": "syn_debugging",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h155",
+        "category": "syn_debugging",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h156",
+        "category": "syn_debugging",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h157",
+        "category": "syn_debugging",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h158",
+        "category": "syn_debugging",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h159",
+        "category": "syn_debugging",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h160",
+        "category": "syn_research",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h161",
+        "category": "syn_research",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h162",
+        "category": "syn_research",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h163",
+        "category": "syn_research",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h164",
+        "category": "syn_research_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h165",
+        "category": "syn_research_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h166",
+        "category": "syn_research_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h167",
+        "category": "syn_research_zh",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h168",
+        "category": "tools_present_unneeded2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h169",
+        "category": "tools_present_unneeded2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h170",
+        "category": "tools_present_unneeded2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h171",
+        "category": "tools_present_unneeded2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h172",
+        "category": "protocol_response_format2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h173",
+        "category": "protocol_response_format2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h174",
+        "category": "protocol_text_format2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h175",
+        "category": "protocol_text_format2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h176",
+        "category": "mixed_lang2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h177",
+        "category": "mixed_lang2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h178",
+        "category": "mixed_lang2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h179",
+        "category": "ambiguous_chat2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h180",
+        "category": "ambiguous_chat2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h181",
+        "category": "ambiguous_chat2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h182",
+        "category": "ambiguous_chat2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h183",
+        "category": "policy_prefer_free2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h184",
+        "category": "policy_prefer_free2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h185",
+        "category": "policy_no_prefer_free2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h186",
+        "category": "policy_no_prefer_free2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h187",
+        "category": "policy_no_tier2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h188",
+        "category": "policy_no_tier2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h189",
+        "category": "no_keyword_chat2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h190",
+        "category": "no_keyword_chat2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h191",
+        "category": "no_keyword_chat2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h192",
+        "category": "no_keyword_chat2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h193",
+        "category": "no_keyword_chat2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h194",
+        "category": "no_keyword_chat2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h195",
+        "category": "graded_reasoning80",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h196",
+        "category": "graded_reasoning80",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h197",
+        "category": "graded_reasoning80",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h198",
+        "category": "graded_reasoning80",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h199",
+        "category": "caps_only_coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h200",
+        "category": "caps_only_coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h201",
+        "category": "caps_only_coding",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h202",
+        "category": "legacy_only_vision",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h203",
+        "category": "legacy_only_vision",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h204",
+        "category": "legacy_only_vision",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h205",
+        "category": "budget_boundary2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h206",
+        "category": "budget_boundary2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h207",
+        "category": "no_paid_holdout2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      },
+      {
+        "taskId": "h208",
+        "category": "no_paid_holdout2",
+        "expected": "completed",
+        "actual": "completed",
+        "ok": true
+      }
+    ]
+  },
+  "confusion_matrix": {
+    "summarization": {
+      "summarization": 24
+    },
+    "translation": {
+      "translation": 12
+    },
+    "extraction": {
+      "extraction": 10
+    },
+    "writing": {
+      "writing": 10
+    },
+    "analysis": {
+      "analysis": 25
+    },
+    "general_chat": {
+      "general_chat": 64
+    },
+    "coding": {
+      "coding": 15
+    },
+    "tool_orchestration": {
+      "tool_orchestration": 10
+    },
+    "structured_output": {
+      "structured_output": 13
+    },
+    "vision": {
+      "vision": 5
+    },
+    "debugging": {
+      "debugging": 12
+    },
+    "research": {
+      "research": 8
+    }
+  },
+  "rows": [
+    {
+      "id": "h001",
+      "category": "syn_summarization",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 567 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h002",
+      "category": "syn_summarization",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h003",
+      "category": "syn_summarization",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 570 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h004",
+      "category": "syn_summarization",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 566 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h005",
+      "category": "syn_summarization",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 569 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h006",
+      "category": "syn_summarization",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 564 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h007",
+      "category": "syn_summarization",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h008",
+      "category": "syn_summarization",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h009",
+      "category": "syn_summarization_zh",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 571 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h010",
+      "category": "syn_summarization_zh",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 574 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h011",
+      "category": "syn_summarization_zh",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 574 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h012",
+      "category": "syn_summarization_zh",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 575 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h013",
+      "category": "syn_summarization_zh",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 570 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h014",
+      "category": "syn_summarization_zh",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 571 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h015",
+      "category": "syn_translation",
+      "httpStatus": 200,
+      "taskType": "translation",
+      "expectedType": "translation",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 567 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h016",
+      "category": "syn_translation",
+      "httpStatus": 200,
+      "taskType": "translation",
+      "expectedType": "translation",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 564 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h017",
+      "category": "syn_translation",
+      "httpStatus": 200,
+      "taskType": "translation",
+      "expectedType": "translation",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h018",
+      "category": "syn_translation",
+      "httpStatus": 200,
+      "taskType": "translation",
+      "expectedType": "translation",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 564 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h019",
+      "category": "syn_translation",
+      "httpStatus": 200,
+      "taskType": "translation",
+      "expectedType": "translation",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 563 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h020",
+      "category": "syn_translation_zh",
+      "httpStatus": 200,
+      "taskType": "translation",
+      "expectedType": "translation",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h021",
+      "category": "syn_translation_zh",
+      "httpStatus": 200,
+      "taskType": "translation",
+      "expectedType": "translation",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 571 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h022",
+      "category": "syn_translation_zh",
+      "httpStatus": 200,
+      "taskType": "translation",
+      "expectedType": "translation",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 571 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h023",
+      "category": "syn_translation_zh",
+      "httpStatus": 200,
+      "taskType": "translation",
+      "expectedType": "translation",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 570 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h024",
+      "category": "syn_translation_zh",
+      "httpStatus": 200,
+      "taskType": "translation",
+      "expectedType": "translation",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 574 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h025",
+      "category": "syn_extraction",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "expectedType": "extraction",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 567 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h026",
+      "category": "syn_extraction",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "expectedType": "extraction",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h027",
+      "category": "syn_extraction",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "expectedType": "extraction",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 569 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h028",
+      "category": "syn_extraction",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "expectedType": "extraction",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 567 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h029",
+      "category": "syn_extraction",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "expectedType": "extraction",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h030",
+      "category": "syn_extraction_zh",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "expectedType": "extraction",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 570 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h031",
+      "category": "syn_extraction_zh",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "expectedType": "extraction",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 575 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h032",
+      "category": "syn_extraction_zh",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "expectedType": "extraction",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 571 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h033",
+      "category": "syn_extraction_zh",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "expectedType": "extraction",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 577 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h034",
+      "category": "syn_extraction_zh",
+      "httpStatus": 200,
+      "taskType": "extraction",
+      "expectedType": "extraction",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 571 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h035",
+      "category": "syn_writing",
+      "httpStatus": 200,
+      "taskType": "writing",
+      "expectedType": "writing",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h036",
+      "category": "syn_writing",
+      "httpStatus": 200,
+      "taskType": "writing",
+      "expectedType": "writing",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h037",
+      "category": "syn_writing",
+      "httpStatus": 200,
+      "taskType": "writing",
+      "expectedType": "writing",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 567 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h038",
+      "category": "syn_writing",
+      "httpStatus": 200,
+      "taskType": "writing",
+      "expectedType": "writing",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 567 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h039",
+      "category": "syn_writing",
+      "httpStatus": 200,
+      "taskType": "writing",
+      "expectedType": "writing",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 566 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h040",
+      "category": "syn_writing_zh",
+      "httpStatus": 200,
+      "taskType": "writing",
+      "expectedType": "writing",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 574 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h041",
+      "category": "syn_writing_zh",
+      "httpStatus": 200,
+      "taskType": "writing",
+      "expectedType": "writing",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h042",
+      "category": "syn_writing_zh",
+      "httpStatus": 200,
+      "taskType": "writing",
+      "expectedType": "writing",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 567 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h043",
+      "category": "syn_writing_zh",
+      "httpStatus": 200,
+      "taskType": "writing",
+      "expectedType": "writing",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 574 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h044",
+      "category": "syn_writing_zh",
+      "httpStatus": 200,
+      "taskType": "writing",
+      "expectedType": "writing",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 571 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h045",
+      "category": "syn_analysis",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 569 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h046",
+      "category": "syn_analysis",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 566 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h047",
+      "category": "syn_analysis",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 571 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h048",
+      "category": "syn_analysis",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 570 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h049",
+      "category": "syn_analysis",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 575 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h050",
+      "category": "syn_analysis_zh",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 574 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h051",
+      "category": "syn_analysis_zh",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 574 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h052",
+      "category": "syn_analysis_zh",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 577 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h053",
+      "category": "syn_analysis_zh",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 571 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h054",
+      "category": "syn_analysis_zh",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 581 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h055",
+      "category": "no_keyword_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 567 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h056",
+      "category": "no_keyword_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h057",
+      "category": "no_keyword_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h058",
+      "category": "no_keyword_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h059",
+      "category": "no_keyword_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 564 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h060",
+      "category": "no_keyword_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h061",
+      "category": "no_keyword_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 563 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h062",
+      "category": "no_keyword_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 564 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h063",
+      "category": "no_keyword_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 563 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h064",
+      "category": "no_keyword_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 561 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h065",
+      "category": "implicit_reasoning",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 579 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h066",
+      "category": "implicit_reasoning",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 578 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h067",
+      "category": "implicit_reasoning",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 587 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h068",
+      "category": "implicit_reasoning",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 576 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h069",
+      "category": "implicit_reasoning",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 580 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h070",
+      "category": "tools_present_unneeded",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 619 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h071",
+      "category": "tools_present_unneeded",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 620 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h072",
+      "category": "tools_present_unneeded",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 620 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h073",
+      "category": "tools_present_unneeded",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 613 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h074",
+      "category": "tools_present_unneeded",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 619 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h075",
+      "category": "tools_present_unneeded_analysis",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 625 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h076",
+      "category": "tools_present_unneeded_coding",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 623 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h077",
+      "category": "tool_required_explicit",
+      "httpStatus": 200,
+      "taskType": "tool_orchestration",
+      "expectedType": "tool_orchestration",
+      "suggested": "mock/H-tool",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-struct",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-reason",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing tool_use (required); missing tool_use (required); input tokens 630 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h078",
+      "category": "tool_required_explicit",
+      "httpStatus": 200,
+      "taskType": "tool_orchestration",
+      "expectedType": "tool_orchestration",
+      "suggested": "mock/H-tool",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-struct",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-reason",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing tool_use (required); missing tool_use (required); input tokens 634 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h079",
+      "category": "tool_required_explicit",
+      "httpStatus": 200,
+      "taskType": "tool_orchestration",
+      "expectedType": "tool_orchestration",
+      "suggested": "mock/H-tool",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-struct",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-reason",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing tool_use (required); missing tool_use (required); input tokens 629 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h080",
+      "category": "tool_required_explicit",
+      "httpStatus": 200,
+      "taskType": "tool_orchestration",
+      "expectedType": "tool_orchestration",
+      "suggested": "mock/H-tool",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-struct",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-reason",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing tool_use (required); missing tool_use (required); input tokens 629 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h081",
+      "category": "tool_required_explicit",
+      "httpStatus": 200,
+      "taskType": "tool_orchestration",
+      "expectedType": "tool_orchestration",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-struct",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-reason",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing tool_use (required); missing tool_use (required); input tokens 637 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h082",
+      "category": "tool_required_explicit",
+      "httpStatus": 200,
+      "taskType": "tool_orchestration",
+      "expectedType": "tool_orchestration",
+      "suggested": "mock/H-tool",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-struct",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-reason",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing tool_use (required); missing tool_use (required); input tokens 640 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h083",
+      "category": "tool_choice_required",
+      "httpStatus": 200,
+      "taskType": "tool_orchestration",
+      "expectedType": "tool_orchestration",
+      "suggested": "mock/H-tool",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-struct",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-reason",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing tool_use (required); missing tool_use (required); input tokens 623 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h084",
+      "category": "tool_choice_required",
+      "httpStatus": 200,
+      "taskType": "tool_orchestration",
+      "expectedType": "tool_orchestration",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-struct",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-reason",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing tool_use (required); missing tool_use (required); input tokens 624 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h085",
+      "category": "tool_choice_required",
+      "httpStatus": 200,
+      "taskType": "tool_orchestration",
+      "expectedType": "tool_orchestration",
+      "suggested": "mock/H-tool",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-struct",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-reason",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing tool_use (required); missing tool_use (required); input tokens 623 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h086",
+      "category": "tool_choice_auto",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 623 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h087",
+      "category": "tool_choice_auto",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 620 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h088",
+      "category": "protocol_response_format",
+      "httpStatus": 200,
+      "taskType": "structured_output",
+      "expectedType": "structured_output",
+      "suggested": "mock/H-struct",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-coding95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-tool",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing structured_output (required); missing structured_output (required); input tokens 592 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h089",
+      "category": "protocol_response_format",
+      "httpStatus": 200,
+      "taskType": "structured_output",
+      "expectedType": "structured_output",
+      "suggested": "mock/H-reason",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-coding95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-tool",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing structured_output (required); missing structured_output (required); input tokens 588 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0.00405,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h090",
+      "category": "protocol_response_format",
+      "httpStatus": 200,
+      "taskType": "structured_output",
+      "expectedType": "structured_output",
+      "suggested": "mock/H-struct",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-coding95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-tool",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing structured_output (required); missing structured_output (required); input tokens 587 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h091",
+      "category": "protocol_json_schema",
+      "httpStatus": 200,
+      "taskType": "structured_output",
+      "expectedType": "structured_output",
+      "suggested": "mock/H-struct",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-coding95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-tool",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing structured_output (required); missing structured_output (required); input tokens 608 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h092",
+      "category": "protocol_json_schema",
+      "httpStatus": 200,
+      "taskType": "structured_output",
+      "expectedType": "structured_output",
+      "suggested": "mock/H-struct",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-coding95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-tool",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing structured_output (required); missing structured_output (required); input tokens 610 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h093",
+      "category": "protocol_text_format",
+      "httpStatus": 200,
+      "taskType": "structured_output",
+      "expectedType": "structured_output",
+      "suggested": "mock/H-struct",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-coding95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-tool",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing structured_output (required); missing structured_output (required); input tokens 590 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h094",
+      "category": "protocol_text_format",
+      "httpStatus": 200,
+      "taskType": "structured_output",
+      "expectedType": "structured_output",
+      "suggested": "mock/H-struct",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-coding95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-tool",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing structured_output (required); missing structured_output (required); input tokens 590 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h095",
+      "category": "protocol_output_config",
+      "httpStatus": 200,
+      "taskType": "structured_output",
+      "expectedType": "structured_output",
+      "suggested": "mock/H-struct",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-coding95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-tool",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing structured_output (required); missing structured_output (required); input tokens 591 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h096",
+      "category": "protocol_output_config",
+      "httpStatus": 200,
+      "taskType": "structured_output",
+      "expectedType": "structured_output",
+      "suggested": "mock/H-struct",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-coding95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-tool",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing structured_output (required); missing structured_output (required); input tokens 593 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h097",
+      "category": "json_mention_only",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 564 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h098",
+      "category": "json_mention_only",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h099",
+      "category": "cjk_long_context",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "input tokens 50451 > contextWindow 32000"
+        },
+        {
+          "modelId": "H-tool",
+          "reason": "input tokens 50451 > contextWindow 32000"
+        },
+        {
+          "modelId": "H-struct",
+          "reason": "input tokens 50451 > contextWindow 32000"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "input tokens 50451 > contextWindow 32000"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "input tokens 50451 > contextWindow 8000"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 50451 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h100",
+      "category": "cjk_long_context2",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "input tokens 53015 > contextWindow 32000"
+        },
+        {
+          "modelId": "H-tool",
+          "reason": "input tokens 53015 > contextWindow 32000"
+        },
+        {
+          "modelId": "H-struct",
+          "reason": "input tokens 53015 > contextWindow 32000"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "input tokens 53015 > contextWindow 32000"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "input tokens 53015 > contextWindow 8000"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 53015 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h101",
+      "category": "large_tool_schema",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-cheap",
+          "reason": "input tokens 12275 > contextWindow 8000"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 12275 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h102",
+      "category": "multi_turn_tool",
+      "httpStatus": 200,
+      "taskType": "tool_orchestration",
+      "expectedType": "tool_orchestration",
+      "suggested": "mock/H-tool",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-struct",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-reason",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing tool_use (required); missing tool_use (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing tool_use (required); missing tool_use (required); input tokens 669 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h103",
+      "category": "graded_chat95",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 561 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h104",
+      "category": "graded_chat95",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h105",
+      "category": "graded_chat95",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 560 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h106",
+      "category": "graded_coding95",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 566 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h107",
+      "category": "graded_coding95",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 567 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h108",
+      "category": "graded_coding95",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 567 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h109",
+      "category": "graded_coding95",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 564 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h110",
+      "category": "graded_vision95",
+      "httpStatus": 200,
+      "taskType": "vision",
+      "expectedType": "vision",
+      "suggested": "mock/H-vision95",
+      "hardBlocks": [],
+      "predictedCost": 0.009475,
+      "realOutcome": "completed",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "id": "h111",
+      "category": "graded_vision95",
+      "httpStatus": 200,
+      "taskType": "vision",
+      "expectedType": "vision",
+      "suggested": "mock/H-vision95",
+      "hardBlocks": [],
+      "predictedCost": 0.009465,
+      "realOutcome": "completed",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "id": "h112",
+      "category": "policy_prefer_free",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 564 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h113",
+      "category": "policy_prefer_free",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 561 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h114",
+      "category": "policy_prefer_free",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 561 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h115",
+      "category": "policy_no_prefer_free",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 567 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h116",
+      "category": "policy_no_prefer_free",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 566 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h117",
+      "category": "policy_no_prefer_free",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 563 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h118",
+      "category": "policy_no_tier",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 559 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h119",
+      "category": "policy_no_tier",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 559 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h120",
+      "category": "policy_no_tier",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 560 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h121",
+      "category": "mixed_lang_translate_zh",
+      "httpStatus": 200,
+      "taskType": "translation",
+      "expectedType": "translation",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 580 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h122",
+      "category": "mixed_lang_summary",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 574 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h123",
+      "category": "mixed_lang_coding",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 579 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h124",
+      "category": "mixed_lang_translate",
+      "httpStatus": 200,
+      "taskType": "translation",
+      "expectedType": "translation",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 574 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h125",
+      "category": "ambiguous_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h126",
+      "category": "ambiguous_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h127",
+      "category": "ambiguous_chat",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 561 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h128",
+      "category": "null_safe_strict",
+      "httpStatus": 503,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": null,
+      "hardBlocks": [],
+      "predictedCost": null,
+      "realOutcome": "no_candidate",
+      "comparisonStatus": "policy_agreement"
+    },
+    {
+      "id": "h129",
+      "category": "null_safe_strict",
+      "httpStatus": 503,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": null,
+      "hardBlocks": [],
+      "predictedCost": null,
+      "realOutcome": "no_candidate",
+      "comparisonStatus": "policy_agreement"
+    },
+    {
+      "id": "h130",
+      "category": "null_safe_strict",
+      "httpStatus": 503,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": null,
+      "hardBlocks": [],
+      "predictedCost": null,
+      "realOutcome": "no_candidate",
+      "comparisonStatus": "policy_agreement"
+    },
+    {
+      "id": "h131",
+      "category": "provider_health_holdout",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 563 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h132",
+      "category": "provider_health_holdout",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 563 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h133",
+      "category": "provider_health_holdout",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 560 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h134",
+      "category": "budget_boundary",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": null,
+      "hardBlocks": [
+        {
+          "modelId": "H-reason",
+          "reason": "request_cost_exceeded (estimated 0.004425 > maxRequestCost 0.000001)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "request_cost_exceeded (estimated 0.004425 > maxRequestCost 0.000001)"
+        }
+      ],
+      "predictedCost": null,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h135",
+      "category": "budget_boundary",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": null,
+      "hardBlocks": [
+        {
+          "modelId": "H-reason",
+          "reason": "request_cost_exceeded (estimated 0.004435 > maxRequestCost 0.000001)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "request_cost_exceeded (estimated 0.004435 > maxRequestCost 0.000001)"
+        }
+      ],
+      "predictedCost": null,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h136",
+      "category": "no_paid_holdout",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-reason",
+          "reason": "paid model blocked by allowPaid=false"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "paid model blocked by allowPaid=false"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 563 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h137",
+      "category": "no_paid_holdout",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-reason",
+          "reason": "paid model blocked by allowPaid=false"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "paid model blocked by allowPaid=false"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 566 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h138",
+      "category": "strict_holdout",
+      "httpStatus": 503,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": null,
+      "hardBlocks": [],
+      "predictedCost": null,
+      "realOutcome": "no_candidate",
+      "comparisonStatus": "policy_agreement"
+    },
+    {
+      "id": "h139",
+      "category": "strict_holdout",
+      "httpStatus": 503,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": null,
+      "hardBlocks": [],
+      "predictedCost": null,
+      "realOutcome": "no_candidate",
+      "comparisonStatus": "policy_agreement"
+    },
+    {
+      "id": "h140",
+      "category": "fallback_holdout",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 564 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h141",
+      "category": "fallback_holdout",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 563 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h142",
+      "category": "zh_coding",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 567 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h143",
+      "category": "zh_coding",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 574 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h144",
+      "category": "zh_coding",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 571 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h145",
+      "category": "zh_coding",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 572 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h146",
+      "category": "zh_coding",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 577 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h147",
+      "category": "zh_coding",
+      "httpStatus": 200,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 577 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h148",
+      "category": "zh_debugging",
+      "httpStatus": 200,
+      "taskType": "debugging",
+      "expectedType": "debugging",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 570 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h149",
+      "category": "zh_debugging",
+      "httpStatus": 200,
+      "taskType": "debugging",
+      "expectedType": "debugging",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 577 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h150",
+      "category": "zh_debugging",
+      "httpStatus": 200,
+      "taskType": "debugging",
+      "expectedType": "debugging",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 570 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h151",
+      "category": "zh_debugging",
+      "httpStatus": 200,
+      "taskType": "debugging",
+      "expectedType": "debugging",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 580 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h152",
+      "category": "zh_debugging",
+      "httpStatus": 200,
+      "taskType": "debugging",
+      "expectedType": "debugging",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 574 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h153",
+      "category": "zh_debugging",
+      "httpStatus": 200,
+      "taskType": "debugging",
+      "expectedType": "debugging",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 580 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h154",
+      "category": "syn_debugging",
+      "httpStatus": 200,
+      "taskType": "debugging",
+      "expectedType": "debugging",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 570 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h155",
+      "category": "syn_debugging",
+      "httpStatus": 200,
+      "taskType": "debugging",
+      "expectedType": "debugging",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h156",
+      "category": "syn_debugging",
+      "httpStatus": 200,
+      "taskType": "debugging",
+      "expectedType": "debugging",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h157",
+      "category": "syn_debugging",
+      "httpStatus": 200,
+      "taskType": "debugging",
+      "expectedType": "debugging",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 572 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h158",
+      "category": "syn_debugging",
+      "httpStatus": 200,
+      "taskType": "debugging",
+      "expectedType": "debugging",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 566 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h159",
+      "category": "syn_debugging",
+      "httpStatus": 200,
+      "taskType": "debugging",
+      "expectedType": "debugging",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h160",
+      "category": "syn_research",
+      "httpStatus": 200,
+      "taskType": "research",
+      "expectedType": "research",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 572 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h161",
+      "category": "syn_research",
+      "httpStatus": 200,
+      "taskType": "research",
+      "expectedType": "research",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 570 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h162",
+      "category": "syn_research",
+      "httpStatus": 200,
+      "taskType": "research",
+      "expectedType": "research",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 569 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h163",
+      "category": "syn_research",
+      "httpStatus": 200,
+      "taskType": "research",
+      "expectedType": "research",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h164",
+      "category": "syn_research_zh",
+      "httpStatus": 200,
+      "taskType": "research",
+      "expectedType": "research",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 580 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h165",
+      "category": "syn_research_zh",
+      "httpStatus": 200,
+      "taskType": "research",
+      "expectedType": "research",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 578 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h166",
+      "category": "syn_research_zh",
+      "httpStatus": 200,
+      "taskType": "research",
+      "expectedType": "research",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 571 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h167",
+      "category": "syn_research_zh",
+      "httpStatus": 200,
+      "taskType": "research",
+      "expectedType": "research",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 578 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h168",
+      "category": "tools_present_unneeded2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 613 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h169",
+      "category": "tools_present_unneeded2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 619 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h170",
+      "category": "tools_present_unneeded2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 615 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h171",
+      "category": "tools_present_unneeded2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 615 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h172",
+      "category": "protocol_response_format2",
+      "httpStatus": 200,
+      "taskType": "structured_output",
+      "expectedType": "structured_output",
+      "suggested": "mock/H-struct",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-coding95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-tool",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing structured_output (required); missing structured_output (required); input tokens 592 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h173",
+      "category": "protocol_response_format2",
+      "httpStatus": 200,
+      "taskType": "structured_output",
+      "expectedType": "structured_output",
+      "suggested": "mock/H-struct",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-coding95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-tool",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing structured_output (required); missing structured_output (required); input tokens 592 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h174",
+      "category": "protocol_text_format2",
+      "httpStatus": 200,
+      "taskType": "structured_output",
+      "expectedType": "structured_output",
+      "suggested": "mock/H-reason",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-coding95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-tool",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing structured_output (required); missing structured_output (required); input tokens 597 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0.0041,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h175",
+      "category": "protocol_text_format2",
+      "httpStatus": 200,
+      "taskType": "structured_output",
+      "expectedType": "structured_output",
+      "suggested": "mock/H-struct",
+      "hardBlocks": [
+        {
+          "modelId": "H-chat",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-coding95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-tool",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-bigctx",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-cheap",
+          "reason": "missing structured_output (required); missing structured_output (required)"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "missing structured_output (required); missing structured_output (required); input tokens 592 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h176",
+      "category": "mixed_lang2",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 577 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h177",
+      "category": "mixed_lang2",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 575 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h178",
+      "category": "mixed_lang2",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 576 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h179",
+      "category": "ambiguous_chat2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 559 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h180",
+      "category": "ambiguous_chat2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 564 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h181",
+      "category": "ambiguous_chat2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 561 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h182",
+      "category": "ambiguous_chat2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 564 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h183",
+      "category": "policy_prefer_free2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 563 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h184",
+      "category": "policy_prefer_free2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 563 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h185",
+      "category": "policy_no_prefer_free2",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 563 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h186",
+      "category": "policy_no_prefer_free2",
+      "httpStatus": 200,
+      "taskType": "summarization",
+      "expectedType": "summarization",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 561 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h187",
+      "category": "policy_no_tier2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 559 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h188",
+      "category": "policy_no_tier2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 559 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h189",
+      "category": "no_keyword_chat2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h190",
+      "category": "no_keyword_chat2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 567 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h191",
+      "category": "no_keyword_chat2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h192",
+      "category": "no_keyword_chat2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 567 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h193",
+      "category": "no_keyword_chat2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 564 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h194",
+      "category": "no_keyword_chat2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 564 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h195",
+      "category": "graded_reasoning80",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h196",
+      "category": "graded_reasoning80",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 570 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h197",
+      "category": "graded_reasoning80",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 569 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h198",
+      "category": "graded_reasoning80",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 569 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h199",
+      "category": "caps_only_coding",
+      "httpStatus": null,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 568 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h200",
+      "category": "caps_only_coding",
+      "httpStatus": null,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 566 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h201",
+      "category": "caps_only_coding",
+      "httpStatus": null,
+      "taskType": "coding",
+      "expectedType": "coding",
+      "suggested": "mock/H-coding95",
+      "hardBlocks": [
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 567 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h202",
+      "category": "legacy_only_vision",
+      "httpStatus": null,
+      "taskType": "vision",
+      "expectedType": "vision",
+      "suggested": "mock/H-vision95",
+      "hardBlocks": [],
+      "predictedCost": 0.00946,
+      "realOutcome": "completed",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "id": "h203",
+      "category": "legacy_only_vision",
+      "httpStatus": null,
+      "taskType": "vision",
+      "expectedType": "vision",
+      "suggested": "mock/H-vision95",
+      "hardBlocks": [],
+      "predictedCost": 0.00947,
+      "realOutcome": "completed",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "id": "h204",
+      "category": "legacy_only_vision",
+      "httpStatus": null,
+      "taskType": "vision",
+      "expectedType": "vision",
+      "suggested": "mock/H-vision95",
+      "hardBlocks": [],
+      "predictedCost": 0.009465,
+      "realOutcome": "completed",
+      "comparisonStatus": "exact_match"
+    },
+    {
+      "id": "h205",
+      "category": "budget_boundary2",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": null,
+      "hardBlocks": [
+        {
+          "modelId": "H-reason",
+          "reason": "request_cost_exceeded (estimated 0.004440 > maxRequestCost 0.000001)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "request_cost_exceeded (estimated 0.004440 > maxRequestCost 0.000001)"
+        }
+      ],
+      "predictedCost": null,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h206",
+      "category": "budget_boundary2",
+      "httpStatus": 200,
+      "taskType": "analysis",
+      "expectedType": "analysis",
+      "suggested": null,
+      "hardBlocks": [
+        {
+          "modelId": "H-reason",
+          "reason": "request_cost_exceeded (estimated 0.004445 > maxRequestCost 0.000001)"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "request_cost_exceeded (estimated 0.004445 > maxRequestCost 0.000001)"
+        }
+      ],
+      "predictedCost": null,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h207",
+      "category": "no_paid_holdout2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-reason",
+          "reason": "paid model blocked by allowPaid=false"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "paid model blocked by allowPaid=false"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    },
+    {
+      "id": "h208",
+      "category": "no_paid_holdout2",
+      "httpStatus": 200,
+      "taskType": "general_chat",
+      "expectedType": "general_chat",
+      "suggested": "mock/H-bigctx",
+      "hardBlocks": [
+        {
+          "modelId": "H-reason",
+          "reason": "paid model blocked by allowPaid=false"
+        },
+        {
+          "modelId": "H-vision95",
+          "reason": "paid model blocked by allowPaid=false"
+        },
+        {
+          "modelId": "H-smallctx",
+          "reason": "input tokens 565 > contextWindow 500"
+        }
+      ],
+      "predictedCost": 0,
+      "realOutcome": "completed",
+      "comparisonStatus": "different"
+    }
+  ],
+  "gates": {
+    "classification_ge_92": true,
+    "hard_violations_zero": true,
+    "streaming_zero": true,
+    "vision_zero": true,
+    "tool_zero": true,
+    "context_zero": true,
+    "budget_zero": true,
+    "no_paid_zero": true,
+    "strict_zero": true,
+    "policy_execution_100": true,
+    "acceptable_ge_90": true,
+    "null_safe_zero": true,
+    "cost_reasonable": true
+  },
+  "gates_passed": true
+}
