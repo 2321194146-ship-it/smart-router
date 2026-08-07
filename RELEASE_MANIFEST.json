@@ -3,14 +3,14 @@
   "version": "1.0.0-phase2c-active-canary",
   "branch": "phase2-shadow",
   "base_commit": "c5f182ad75104b325dfb1d631d6209a052cf2218",
-  "date": "2026-08-07T15:41:59.350Z",
+  "date": "2026-08-07T17:25:08.640Z",
   "description": "Smart Router Mainline Phase 2-C Active Canary 安全控制与决策语义收口 + Safety Sealed + 5% Canary Live Pilot - binary vs graded capability, toolsAvailable vs toolsRequired, protocol-level structured output detection, conservative token estimator, capability source unification, effective policy with deterministic tie-breaker, 208-task holdout eval (all gates PASS), Active Canary controller (SHA-256 sampling, Phase1-legal reorder, Fail Open, Kill Switch, auto-stop); Safety Sealed (blocked never in fallback, Active-only metrics, budget defense maxRequestCost/strictModel/estimatedCost + low-risk eligibility, local admin API with SQLite persisted kill, allowedAgents=[claude-code], truly-consecutive errors, version 1.0.0-phase2c-active-canary); 5% Live Pilot (Claude Code low-risk streaming allowed with anthropic-only + streaming-capable candidates, auto-stop immediate persistence on apply/finalize, 127.0.0.1:28788 internal pilot 456 requests -> 20 active all reordered, Kill Switch restart-persisted, resume-shadow only)",
-  "commit": "f6ee32d1eb9413f75fbbddcd983cc22ce6de3a87",
+  "commit": "f3ef6b0e10226ed9bf4d92090ce89a119bbb8634",
   "pilot_summary": {
-    "status": "failed_after_current_changes",
+    "status": "failed_before_current_changes",
     "total": 3,
     "passed": 0,
-    "note": "Post-fix targeted real pilot attempted 3 requests; 0 completed. Both configured providers returned incomplete responses at max_tokens=256; traffic stopped after the threshold. A third local Qwen fallback is now configured but has not been re-tested with external traffic."
+    "note": "The previous targeted real pilot attempted 3 requests and completed 0 before this UI and admin-control change set. No real external provider traffic was sent for the current changes; validation used localhost mocks only."
   },
   "phase2b_summary": {
     "mode": "shadow (no Active)",
@@ -174,7 +174,7 @@
       "failures": 0
     },
     "integration": {
-      "tests": 100,
+      "tests": 102,
       "suites": 27,
       "failures": 0
     },
@@ -184,7 +184,7 @@
       "failures": 0
     },
     "total": {
-      "tests": 629,
+      "tests": 631,
       "suites": 136,
       "failures": 0
     }
@@ -312,14 +312,14 @@
     "phase2-docs/TOOL_AVAILABLE_VS_REQUIRED_REPORT.md": "74dccf7970e517d39f18bb9a7df902e6404ad9a7746b8f0b25541dc57eb841f7",
     "scripts/active-readiness-eval.mjs": "8f2caf0d96936f1d3316e65db735ffdd9b005e3d6eda07e09ee828b15df29dc5",
     "scripts/canary-live-pilot.mjs": "c9e95541e2fff89979ea076347dac2dc40a0ac754555080ab7d3d5edcbdff7ee",
-    "scripts/generate-release-manifest.mjs": "a9fcba2bacb6ba7c950d655a1e93a27a312851d767c12497c1c418fb56d9e607",
+    "scripts/generate-release-manifest.mjs": "99eff3c4f86e0a3a1f13e3fb789bb852a7a32560bd5f5005c0b1a7236057292b",
     "scripts/holdout-eval.mjs": "d34f2aedb081ee74c29b2cec55a74d9b2d8281373352e03ff7c1ea29743df7fb",
     "scripts/holdout-tasks.mjs": "93bc502296682e33d87add673cae034f4c2587680561973de8344d92a98d4f66",
     "scripts/pilot-sanitized.mjs": "1699a261e416d885abe60e26f65039745d527397eeb6cecbae997dcf12380042",
     "scripts/real-claude-pilot.mjs": "754d89a43a745ed31a3aa29f6b03de3283dadbf6c5a99a3e6aaf44705d53196c",
     "scripts/real-daily-report.mjs": "0cb8c147d24937f74681897946e21273fd2a7ac0e5226de6567f92d2e8a83e7f",
     "scripts/release-evidence-check.mjs": "47eb61875c194f561efc311c1ef894ceaeeda1e8847b007c6080bf5a0b8d8a75",
-    "scripts/run-acceptance.mjs": "b568b8b3a5d366f020a6eba705dd8f9b67dedf7237ca9c263e24884250c17fdc",
+    "scripts/run-acceptance.mjs": "9f88e2f62a0af28cf3c208309585f85ba48ae735c296794098d2eebd326b78cc",
     "scripts/safety-proof.mjs": "ee9b49177236987c257795bec31a53255355f6251efd601d73cbad980fb14766",
     "scripts/shadow-eval.mjs": "0669a992ee5a7be723d5a0015dbd155c3825373970583ff502d2877707f000aa",
     "src/agent/compatibility.js": "9ae2bf023796af50cb6eb234310fd5ce3c5d8287731ff41f6783a450a76ce91a",
@@ -357,7 +357,7 @@
     "src/runtime/finalization.js": "5e9eddfdf1ce1a12d3b9e9a83e6825b1f4ab45cb9bfe5572733f797986a26f46",
     "src/runtime/outcomes.js": "6d476e8b7d68c9d53c138f1f339902959c04010f65233eedc841891584cb87bd",
     "src/runtime/request-controls.js": "a5c4cddff360c5a976a27fbb60ddf6aea8f6c83cb53a1a4df99a3cf46c74fd40",
-    "src/server.js": "d00361a7df2dd1b7dd0c91e6227225a068b0da32768a95af386b1a8ee32ab350",
+    "src/server.js": "150d2db598e3101e9ff1010359993b415c7f37197876ede52874699cb045b3d5",
     "src/storage/index.js": "146b1e4e61a880d65b08e33e24af109ac656d979c1f9452fdf1d4778b91af7d2",
     "src/storage/interface.js": "4ec042402eb7e0eaedd4bd48026d2d652f1314d69b0b51f0e2b52a048aebf183",
     "src/storage/memory-store.js": "d957f40335636c2771eecdebdf0bb8629314e6a5b7abf3d3b9aad51c0a150d8f",
@@ -365,11 +365,11 @@
     "test/audit/release-gate.test.js": "3e2bd8285284748773bb0b1f9aeefe27070f530247e9cf16c6300ad68fd886d7",
     "test/integration/anthropic-integration.test.js": "3bc27cf622f6a822beed7e02ba0b0eb3a38541bee0b34ac881d0859876006a10",
     "test/integration/canary-active.test.js": "afebb2788bcdbd8a9d0a14a1abe8551baffbfb096e39a7160d291af283557e37",
-    "test/integration/canary-admin.test.js": "7f8175072015544040ba220f4af8a5f13885333a3c9ef08e969116a6fb5ec1b0",
+    "test/integration/canary-admin.test.js": "2c0f5a29f778756c02de20e54120ebb20f7cf4b861d79982d40e5d714b6e25b7",
     "test/integration/canary-auto-stop-persist.test.js": "177f070b12115b78b5a68714481e43ef23730fe2c13b0d87c41141e736fde1d8",
     "test/integration/chat-integration.test.js": "2acc00f909cc622f750ea65072b15dd4cce7252bf5064662b5e0b07c9880c53b",
     "test/integration/concurrent-transaction.test.js": "70736e755009c272acb97eef0529f7eed28f2b401efca7a8a9323d4080bd4c9a",
-    "test/integration/dashboard.test.js": "b4795e2fc331cb9a9b0b9f371cae3ce06b2f7b0c0ac94fdc3ef154068a2a1418",
+    "test/integration/dashboard.test.js": "555da7ecf5fe13d94502b4e23aef9fccf3cef45b903fc82a54ce476586dc9b66",
     "test/integration/helpers.js": "525c4d39c28314a6ad99337a966532b6e2658a4e5947987bf2308e588d27c57e",
     "test/integration/key-cooldown-recovery.test.js": "b52ac19930710dc08a357608db3b62e9c9d5e5619c55884ab99095f3a5c67c0e",
     "test/integration/native-anthropic.test.js": "a135f426ae36be7249c8f8ee90bd1692fa27ccb0c76e865177ef6bcb3835050b",
@@ -401,9 +401,9 @@
     "test/unit/request-controls.test.js": "e3f3144a1de570bffb708959ec839319d8cc9f886566ba07df76dc73f04d80b5",
     "test/unit/response-normalization.test.js": "814016bc8663579624810da8217a5037c121325ae1e877e419a1aa26eb9e3246",
     "test/unit/token-estimator.test.js": "c4bb632e833d7d4eef9fa851a4222f2c8468c0e70a5fffc90271f45054c29029",
-    "web/app.js": "ec11672616750826ed45237e8063efb585657572bcac65962a2d72ff66321472",
-    "web/index.html": "8274fc7186f9c1dc7367684363cc47e9c78f700d05c5ca92b47b4e87b07601d9",
-    "web/styles.css": "96b1f0a361d0995f6fef24bc9dc9275f252ae48d1063f836c7e0d0a4f5fac266"
+    "web/app.js": "0994a48bdb64053f0104fd5d473317af71306efc62c932bc3e840d2c819d5082",
+    "web/index.html": "85de86a1a0b5b6b0115664c26048aab25e8a987eab954234dc311a9530f011e5",
+    "web/styles.css": "f4f751a2898fb9fe1f0bee740b40f1f7ea5d950ffdfb4595c5e065d1c91184fd"
   },
   "reports": [
     "phase2-docs/DECISION_SEMANTICS_FIX_REPORT.md",
@@ -437,11 +437,11 @@
   },
   "release_status": {
     "status": "release_candidate_source_snapshot",
-    "source_commit": "f6ee32d1eb9413f75fbbddcd983cc22ce6de3a87",
+    "source_commit": "f3ef6b0e10226ed9bf4d92090ce89a119bbb8634",
     "branch": "phase2-shadow",
-    "generated_at": "2026-08-07T15:41:59.350Z",
-    "tests": 629,
-    "real_external_provider_pilot": "failed_after_current_changes",
+    "generated_at": "2026-08-07T17:25:08.640Z",
+    "tests": 631,
+    "real_external_provider_pilot": "failed_before_current_changes",
     "production_deploy": "not_performed",
     "excluded_local_paths": [
       "deliver/",
