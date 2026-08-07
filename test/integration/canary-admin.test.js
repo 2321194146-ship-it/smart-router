@@ -78,6 +78,9 @@ describe('Phase2-C 本地管理接口（Safety Sealed）', () => {
       assert.strictEqual(ok.body.ok, true);
       assert.strictEqual(ok.body.mode, 'active_canary');
       assert.ok(ok.body.canary, 'status must include canary snapshot');
+      assert.ok(ok.body.config, 'status must include safe config summary');
+      assert.ok(ok.body.config.providers.every((provider) => !('api_key' in provider)), 'config summary must not expose api_key');
+      assert.strictEqual(ok.body.config.models[0].id, 'phase1-first');
     } finally {
       await new Promise((resolve) => server.close(() => resolve()));
       delete process.env.SMART_ROUTER_ADMIN_TOKEN;

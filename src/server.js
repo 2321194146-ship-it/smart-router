@@ -531,6 +531,65 @@ const DASHBOARD_ASSETS = new Map([
 ]);
 
 /**
+ * 生成可供本地配置中心展示的安全摘要。
+ * 绝不返回 provider api_key、adminToken 或其它凭据；管理页面只需要
+ * 了解结构、模型和策略，真正的密钥仍只由服务端配置/环境变量持有。
+ */
+function buildConfigSummary(config) {
+  const models = Array.isArray(config?.models) ? config.models.map((model) => ({
+    id: model.id,
+    provider: model.provider,
+    apiModel: model.apiModel,
+    tier: model.tier,
+    paid: model.paid === true,
+    enabled: model.enabled !== false,
+    capabilities: Array.isArray(model.capability)
+      ? [...model.capability]
+      : Object.keys(model.capabilities || {}),
+  })) : [];
+  const providers = Array.isArray(config?.providers) ? config.providers.map((provider) => ({
+    name: provider.name,
+    base_url: provider.base_url,
+    api_type: provider.api_type || 'openai_compatible',
+    auth_header: provider.auth_header,
+    hasApiKey: typeof provider.api_key === 'string' && provider.api_key.length > 0,
+  })) : [];
+  const bindings = {};
+  for (const [agent, binding] of Object.entries(config?.agent_bindings || {})) {
+    bindings[agent] = {
+      model_ids: Array.isArray(binding?.model_ids) ? [...binding.model_ids] : [],
+      budget: binding?.budget ? {
+        allowPaid: binding.budget.allowPaid,
+        maxRequestCost: binding.budget.maxRequestCost,
+        allowedModels: Array.isArray(binding.budget.allowedModels) ? [...binding.budget.allowedModels] : [],
+        allowedProviders: Array.isArray(binding.budget.allowedProviders) ? [...binding.budget.allowedProviders] : [],
+        strictModel: binding.budget.strictModel,
+      } : null,
+    };
+  }
+  return {
+    providers,
+    models,
+    routing: {
+      strategy: config?.routing?.strategy,
+      maxRetries: config?.routing?.max_retries,
+      failoverOnError: config?.routing?.failover_on_error,
+      tierWeights: config?.routing?.tier_weights,
+    },
+    intelligence: {
+      mode: config?.intelligence?.mode,
+      canaryPercentage: config?.intelligence?.activeCanary?.percentage,
+    },
+    bindings,
+    budget: {
+      allowPaid: config?.budget?.allowPaid,
+      maxRequestCost: config?.budget?.maxRequestCost,
+      strictModel: config?.budget?.strictModel,
+    },
+  };
+}
+
+/**
  * 提供本地运维 Dashboard 静态资源。
  * 页面本身不携带 Token；实际状态、Kill、Resume 请求仍走 Admin Token。
  */
@@ -674,7 +733,7 @@ async function handleIntelligenceAdmin(req, res, components, pathname) {
   try {
     if (req.method === 'GET' && pathname === ADMIN_STATUS) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ ok: true, ...intelligence.status() }));
+      res.end(JSON.stringify({ ok: true, ...intelligence.status(), config: buildConfigSummary(config) }));
       return;
     }
     if (req.method === 'POST' && pathname === ADMIN_KILL) {

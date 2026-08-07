@@ -4,98 +4,163 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Smart Router 本地运维控制台">
-    <title>Smart Router Control Room</title>
+    <title>智能路由控制台</title>
     <link rel="stylesheet" href="/dashboard/styles.css">
   </head>
   <body>
-    <main class="shell">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow">SMART ROUTER / LOCAL OPS</p>
-          <h1>Control Room</h1>
-          <p class="subtitle">路由、健康与 Canary 安全状态</p>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="主导航">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">SR</span>
+          <div>
+            <strong>智能路由</strong>
+            <span>控制台</span>
+          </div>
         </div>
-        <div class="header-actions">
-          <span id="connection-badge" class="badge badge-muted">未连接</span>
-          <button id="refresh-button" class="button button-ghost" type="button">刷新</button>
-        </div>
-      </header>
 
-      <section class="auth-card" aria-labelledby="auth-title">
-        <div>
-          <p class="eyebrow">ADMIN ACCESS</p>
-          <h2 id="auth-title">连接本地管理接口</h2>
-          <p class="muted">Token 仅保存在当前页面内存，不写入 localStorage、Cookie 或配置文件。</p>
+        <nav class="nav-list">
+          <a class="nav-item is-active" href="#overview"><span class="nav-icon">⌂</span>总览</a>
+          <a class="nav-item" href="#routing"><span class="nav-icon">↗</span>路由决策</a>
+          <a class="nav-item" href="#models"><span class="nav-icon">◈</span>模型池</a>
+          <a class="nav-item" href="#config"><span class="nav-icon">⚙</span>配置中心</a>
+          <a class="nav-item" href="#safety"><span class="nav-icon">◇</span>安全策略</a>
+          <a class="nav-item" href="#audit"><span class="nav-icon">≡</span>审计日志</a>
+        </nav>
+
+        <div class="sidebar-foot">
+          <span class="live-dot"></span>
+          <span>仅限本机访问</span>
+          <span class="version">v1.0</span>
         </div>
-        <form id="auth-form" class="auth-form">
-          <label for="admin-token">SMART_ROUTER_ADMIN_TOKEN</label>
-          <div class="token-row">
+      </aside>
+
+      <main class="main-content" id="overview">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">SMART ROUTER / LOCAL OPS</p>
+            <h1>智能路由控制台</h1>
+            <p class="subtitle">把每一次模型选择、回退和安全动作看清楚。</p>
+          </div>
+          <div class="topbar-actions">
+            <span id="connection-badge" class="status-pill status-muted"><span class="status-dot"></span>未连接</span>
+            <button id="refresh-button" class="button button-ghost" type="button"><span aria-hidden="true">↻</span>刷新</button>
+          </div>
+        </header>
+
+        <section class="auth-strip" aria-labelledby="auth-title">
+          <div class="auth-copy">
+            <span class="auth-lock" aria-hidden="true">⌁</span>
+            <div>
+              <p class="eyebrow">ADMIN ACCESS</p>
+              <h2 id="auth-title">连接本地管理接口</h2>
+              <p class="muted">Token 只保存在当前页面内存，不写入浏览器存储。</p>
+            </div>
+          </div>
+          <form id="auth-form" class="auth-form">
+            <label class="sr-only" for="admin-token">Admin Token</label>
             <input id="admin-token" type="password" minlength="16" autocomplete="off" placeholder="输入至少 16 位 Admin Token" required>
-            <button class="button button-primary" type="submit">连接</button>
-          </div>
-        </form>
-      </section>
+            <button class="button button-primary" type="submit">连接控制台</button>
+          </form>
+        </section>
 
-      <div id="message" class="message" role="status" aria-live="polite">请输入 Admin Token 后连接。</div>
+        <div id="message" class="message" role="status" aria-live="polite">请输入 Admin Token 后连接。</div>
 
-      <section class="metric-grid" aria-label="核心指标">
-        <article class="metric-card accent-blue">
-          <span class="metric-label">运行模式</span>
-          <strong id="mode-value">—</strong>
-          <span id="enabled-value" class="metric-foot">等待数据</span>
-        </article>
-        <article class="metric-card accent-purple">
-          <span class="metric-label">Canary</span>
-          <strong id="canary-value">—</strong>
-          <span id="canary-foot" class="metric-foot">等待数据</span>
-        </article>
-        <article class="metric-card accent-green">
-          <span class="metric-label">Active 请求</span>
-          <strong id="active-value">—</strong>
-          <span id="active-foot" class="metric-foot">等待数据</span>
-        </article>
-        <article class="metric-card accent-orange">
-          <span class="metric-label">累计成本</span>
-          <strong id="cost-value">—</strong>
-          <span id="cost-foot" class="metric-foot">本进程指标</span>
-        </article>
-      </section>
+        <section class="metric-grid" aria-label="核心指标">
+          <article class="metric-card metric-blue">
+            <div class="metric-heading"><span class="metric-label">运行模式</span><span class="metric-symbol">◉</span></div>
+            <strong id="mode-value">—</strong>
+            <span id="enabled-value" class="metric-foot">等待数据</span>
+          </article>
+          <article class="metric-card metric-cyan">
+            <div class="metric-heading"><span class="metric-label">Canary 采样</span><span class="metric-symbol">⌁</span></div>
+            <strong id="canary-value">—</strong>
+            <span id="canary-foot" class="metric-foot">等待数据</span>
+          </article>
+          <article class="metric-card metric-green">
+            <div class="metric-heading"><span class="metric-label">活动请求</span><span class="metric-symbol">↗</span></div>
+            <strong id="active-value">—</strong>
+            <span id="active-foot" class="metric-foot">等待数据</span>
+          </article>
+          <article class="metric-card metric-violet">
+            <div class="metric-heading"><span class="metric-label">累计成本</span><span class="metric-symbol">$</span></div>
+            <strong id="cost-value">—</strong>
+            <span id="cost-foot" class="metric-foot">本进程指标</span>
+          </article>
+        </section>
 
-      <section class="content-grid">
-        <article class="panel">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">CANARY SAFETY</p>
-              <h2>安全开关</h2>
+        <section class="dashboard-grid" id="routing">
+          <article class="panel route-panel">
+            <div class="panel-heading">
+              <div><p class="eyebrow">ROUTING DECISION</p><h2>路由运行态</h2></div>
+              <span id="stop-state" class="status-pill status-muted"><span class="status-dot"></span>未知</span>
             </div>
-            <span id="stop-state" class="badge badge-muted">未知</span>
-          </div>
-          <p id="stop-detail" class="muted">连接后显示停止原因和时间。</p>
-          <div class="button-row">
-            <button id="kill-button" class="button button-danger" type="button" disabled>停止 Active Canary</button>
-            <button id="resume-button" class="button button-secondary" type="button" disabled>恢复 Shadow</button>
-          </div>
-        </article>
-
-        <article class="panel">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">ROUTING HEALTH</p>
-              <h2>请求与回退</h2>
+            <div class="route-summary">
+              <div class="route-summary-main"><span class="section-label">当前智能层</span><strong id="route-mode">等待连接</strong><span id="route-detail" class="muted">连接后显示实时决策状态。</span></div>
+              <div class="route-health"><span class="health-ring" id="health-ring"><span>—</span></span><span><strong id="health-title">数据待接入</strong><small id="health-detail">—</small></span></div>
             </div>
-          </div>
-          <dl class="detail-list">
-            <div><dt>Eligible</dt><dd id="eligible-value">—</dd></div>
-            <div><dt>Sampled</dt><dd id="sampled-value">—</dd></div>
-            <div><dt>Fallback</dt><dd id="fallback-value">—</dd></div>
-            <div><dt>Incomplete</dt><dd id="incomplete-value">—</dd></div>
-            <div><dt>Provider Error</dt><dd id="provider-error-value">—</dd></div>
-          </dl>
-        </article>
-      </section>
+            <div class="decision-table" role="table" aria-label="候选模型状态">
+              <div class="table-row table-head" role="row"><span>候选模型</span><span>提供方</span><span>状态</span><span>可用性</span></div>
+              <div id="model-list" class="model-list"><div class="empty-state">连接后读取当前启用的模型。</div></div>
+            </div>
+          </article>
 
-      <footer class="footer">仅供本机运维使用 · Smart Router Mainline</footer>
-    </main>
+          <article class="panel safety-panel" id="safety">
+            <div class="panel-heading">
+              <div><p class="eyebrow">SAFETY SEALED</p><h2>安全开关</h2></div>
+              <span id="safety-badge" class="status-pill status-muted"><span class="status-dot"></span>未知</span>
+            </div>
+            <div class="safety-state"><span class="shield-icon" aria-hidden="true">◇</span><div><strong id="safety-title">等待状态</strong><p id="stop-detail" class="muted">连接后显示停止原因和时间。</p></div></div>
+            <div class="safety-actions">
+              <button id="kill-button" class="button button-danger" type="button" disabled>停止 Active Canary</button>
+              <button id="resume-button" class="button button-secondary" type="button" disabled>恢复 Shadow</button>
+            </div>
+            <div class="guard-list">
+              <div><span class="guard-icon guard-good">✓</span><span>回退不扩展候选集合</span><strong>已启用</strong></div>
+              <div><span class="guard-icon guard-good">✓</span><span>首字节后不切换模型</span><strong>已启用</strong></div>
+              <div><span class="guard-icon guard-muted">·</span><span>真实供应商验证</span><strong>待验证</strong></div>
+            </div>
+          </article>
+        </section>
+
+        <section class="lower-grid">
+          <article class="panel metrics-panel" id="models">
+            <div class="panel-heading"><div><p class="eyebrow">ROUTING HEALTH</p><h2>请求与回退指标</h2></div><span class="panel-caption">实时状态</span></div>
+            <div class="detail-list">
+              <div><dt>Eligible</dt><dd id="eligible-value">—</dd></div>
+              <div><dt>Sampled</dt><dd id="sampled-value">—</dd></div>
+              <div><dt>Fallback</dt><dd id="fallback-value">—</dd></div>
+              <div><dt>Incomplete</dt><dd id="incomplete-value">—</dd></div>
+              <div><dt>Provider Error</dt><dd id="provider-error-value">—</dd></div>
+              <div><dt>决策延迟</dt><dd id="decision-latency-value">—</dd></div>
+            </div>
+          </article>
+
+          <article class="panel timeline-panel" id="audit">
+            <div class="panel-heading"><div><p class="eyebrow">AUDIT SIGNALS</p><h2>近期路由信号</h2></div><span class="panel-caption">本进程</span></div>
+            <div id="timeline" class="timeline"><div class="empty-state">连接后显示实时审计信号。</div></div>
+          </article>
+        </section>
+
+        <section class="panel config-panel" id="config">
+          <div class="panel-heading">
+            <div><p class="eyebrow">CONFIG CENTER</p><h2>配置中心</h2></div>
+            <span class="status-pill status-warn"><span class="status-dot"></span>安全预览</span>
+          </div>
+          <div class="config-notice">
+            <span class="notice-icon" aria-hidden="true">i</span>
+            <div><strong>当前配置可安全查看，尚未开放直接写入。</strong><p>页面不会回显任何 Token。下一阶段再接入配置草稿、校验、备份、回滚和热加载。</p></div>
+          </div>
+          <div class="config-grid">
+            <div class="config-block"><span class="section-label">路由策略</span><strong id="config-strategy">—</strong><span id="config-routing-detail" class="muted">—</span></div>
+            <div class="config-block"><span class="section-label">预算防线</span><strong id="config-budget">—</strong><span id="config-budget-detail" class="muted">—</span></div>
+            <div class="config-block"><span class="section-label">Agent 绑定</span><strong id="config-binding-count">—</strong><span id="config-binding-detail" class="muted">—</span></div>
+          </div>
+          <div class="config-provider-list"><div class="table-row table-head"><span>Provider</span><span>接口</span><span>密钥</span><span>模型数</span></div><div id="config-provider-rows"><div class="empty-state">连接后读取安全配置摘要。</div></div></div>
+        </section>
+
+        <footer class="footer">Smart Router Mainline · 本地运维控制台 · 不展示密钥与敏感请求内容</footer>
+      </main>
+    </div>
     <script src="/dashboard/app.js" defer></script>
   </body>
 </html>
