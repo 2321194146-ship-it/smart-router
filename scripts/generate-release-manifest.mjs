@@ -46,24 +46,29 @@ const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
 const branch = git(['branch', '--show-current']);
 const commit = git(['rev-parse', 'HEAD']);
 const now = new Date().toISOString();
-const unit = argNumber('--unit', 491);
-const integration = argNumber('--integration', 95);
+const unit = argNumber('--unit', 496);
+const integration = argNumber('--integration', 98);
 const audit = argNumber('--audit', 33);
-const suites = argNumber('--suites', 134);
+const suites = argNumber('--suites', 136);
+const pilotStatus = process.env.SMART_ROUTER_REAL_PILOT_STATUS || 'pending_external_pilot';
+const pilotTotal = Number(process.env.SMART_ROUTER_REAL_PILOT_TOTAL || 0);
+const pilotPassed = Number(process.env.SMART_ROUTER_REAL_PILOT_PASSED || 0);
+const pilotNote = process.env.SMART_ROUTER_REAL_PILOT_NOTE
+  || 'This candidate was validated with local mocks only; no real external pilot was rerun after the current changes.';
 
 manifest.branch = branch;
 manifest.commit = commit;
 manifest.date = now;
 manifest.historical_pilot_summary = manifest.pilot_summary;
 manifest.pilot_summary = {
-  status: 'pending_external_pilot',
-  total: 0,
-  passed: 0,
-  note: 'This candidate was validated with local mocks only; no real external pilot was rerun after the current changes.',
+  status: pilotStatus,
+  total: pilotTotal,
+  passed: pilotPassed,
+  note: pilotNote,
 };
 manifest.test_summary = {
-  unit: { tests: unit, suites: suites - 41, failures: 0 },
-  integration: { tests: integration, suites: suites - 108, failures: 0 },
+  unit: { tests: unit, suites: suites - 42, failures: 0 },
+  integration: { tests: integration, suites: suites - 109, failures: 0 },
   audit: { tests: audit, suites: 15, failures: 0 },
   total: { tests: unit + integration + audit, suites, failures: 0 },
 };
@@ -75,9 +80,15 @@ manifest.release_status = {
   branch,
   generated_at: now,
   tests: unit + integration + audit,
-  real_external_provider_pilot: 'not_run_after_current_changes',
+  real_external_provider_pilot: pilotStatus,
   production_deploy: 'not_performed',
-  excluded_local_paths: ['deliver/', 'evidence/real-claude-pilot-evidence.json', '**/*.bak-*'],
+  excluded_local_paths: [
+    'deliver/',
+    'evidence/real-claude-pilot-evidence.json',
+    'evidence/real-provider-pilot-evidence.json',
+    'evidence/real-provider-postfix-evidence.json',
+    '**/*.bak-*',
+  ],
   next_gate: 'commit this source snapshot, then run release-evidence-check.mjs --json',
 };
 

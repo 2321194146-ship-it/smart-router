@@ -25,6 +25,8 @@ import {
   isRetriable,
   getCooldownScope,
 } from '../provider/errors.js';
+import { deriveValidatedOutcome } from '../runtime/outcomes.js';
+import { normalizeChatCompletionResponse } from '../protocols/response-normalization.js';
 import { FallbackChain, FallbackDecision } from './fallback.js';
 import { estimateTokens } from '../intelligence/token-estimator.js';
 
@@ -615,7 +617,25 @@ export class ExecutionEngine {
             try {
               const parsed = JSON.parse(bodyText);
               if (parsed && typeof parsed === 'object') {
-                bodyValid = true;
+                const normalized = normalizeChatCompletionResponse(parsed);
+                const isNativeAnthropic = protocol === 'anthropic' && result.nativeProtocol === true;
+                const isNativeResponses = protocol === 'responses'
+                  && normalized.object === 'response'
+                  && Array.isArray(normalized.output);
+                const hasProtocolShape = isNativeAnthropic
+                  ? normalized.type === 'message' && Array.isArray(normalized.content)
+                  : isNativeResponses || (Array.isArray(normalized.choices) && normalized.choices.length > 0);
+                const validatedOutcome = hasProtocolShape
+                  ? deriveValidatedOutcome(
+                    { success: true, transportOutcome: 'success', response: { ok: true } },
+                    normalized,
+                  )
+                  : 'incomplete';
+                bodyValid = validatedOutcome === 'completed';
+                if (!bodyValid) {
+                  contentInvalid = true;
+                  log('upstream returned 200 but response was incomplete or had an invalid protocol shape');
+                }
                 usage = this.providerClient.parseUsage(bodyText, provider);
                 if (usage && this.costTracker) {
                   cost = this.costTracker.calculateCost(modelConfig, usage);

@@ -16,6 +16,7 @@
 // 仅使用 Node.js 内置模块，无第三方依赖。
 
 import { handleChatCompletion } from './chat.js';
+import { normalizeChatCompletionResponse } from './response-normalization.js';
 
 // ----------------------------------------------------------------------------
 // 日志
@@ -742,6 +743,7 @@ export async function handleResponse(req, res, body, context) {
       ? interceptor.body
       : interceptor.body.toString();
     chatResponse = JSON.parse(bodyStr);
+    chatResponse = normalizeChatCompletionResponse(chatResponse);
   } catch {
     protocolLog(`[${requestId}] captured response is not valid JSON`);
     sendJsonResponse(res, 502, buildResponsesError(

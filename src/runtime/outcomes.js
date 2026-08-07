@@ -126,6 +126,11 @@ export function deriveValidatedOutcome(executionResult, responseBody) {
   }
 
   // 4. OpenAI 格式检查：choices 数组
+  // choices 字段存在但不是数组时，不能把供应商的非标准响应当成完成。
+  if (Object.prototype.hasOwnProperty.call(body, 'choices')
+    && !Array.isArray(body.choices)) {
+    return 'incomplete';
+  }
   if (Array.isArray(body.choices)) {
     // 空 choices → 不完整
     if (body.choices.length === 0) return 'incomplete';

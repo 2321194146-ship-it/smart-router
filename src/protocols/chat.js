@@ -26,6 +26,7 @@ import { AttemptLog } from '../runtime/attempts.js';
 import { Outcome, deriveValidatedOutcome } from '../runtime/outcomes.js';
 import { getAgentModels, getAgentBudget } from '../agent/identity.js';
 import { log } from '../config/loader.js';
+import { normalizeChatCompletionResponse } from './response-normalization.js';
 
 // ----------------------------------------------------------------------------
 // 日志
@@ -523,6 +524,7 @@ async function handleSuccess(
     responseBodyText = await executionResult.response.text();
     responseSize = Buffer.byteLength(responseBodyText);
     responseJson = JSON.parse(responseBodyText);
+    responseJson = normalizeChatCompletionResponse(responseJson);
   } catch {
     // 响应体非 JSON，保留原始文本
     protocolLog(`[${requestId}] response body is not valid JSON, sending raw text`);

@@ -43,6 +43,8 @@ function statusPath(line) {
 function isLocalExcluded(path) {
   return path.startsWith('deliver/') ||
     path === 'evidence/real-claude-pilot-evidence.json' ||
+    path === 'evidence/real-provider-pilot-evidence.json' ||
+    path === 'evidence/real-provider-postfix-evidence.json' ||
     path.includes('.bak-');
 }
 

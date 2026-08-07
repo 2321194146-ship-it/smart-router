@@ -92,6 +92,47 @@ describe('Chat Completions Integration', () => {
     assert.strictEqual(body.choices[0].finish_reason, 'tool_calls');
   });
 
+  test('falls back when a provider returns an incomplete non-stream response', async () => {
+    mockProvider.queueResponse({
+      once: true,
+      match: (request) => request.method === 'POST'
+        && request.url?.includes('/chat/completions')
+        && request.headers.authorization === 'Bearer test-key-a',
+      response: {
+        status: 200,
+        body: {
+          id: 'chatcmpl-incomplete',
+          object: 'chat.completion',
+          model: 'test-model-a',
+          choices: [{ index: 0, message: { role: 'assistant', content: '' }, finish_reason: 'length' }],
+        },
+      },
+    });
+    mockProvider.queueResponse({
+      once: true,
+      match: (request) => request.method === 'POST'
+        && request.url?.includes('/chat/completions')
+        && request.headers.authorization === 'Bearer test-key-b',
+      response: {
+        status: 200,
+        body: {
+          id: 'chatcmpl-fallback',
+          object: 'chat.completion',
+          model: 'test-model-b',
+          choices: [{ index: 0, message: { role: 'assistant', content: 'Fallback completed' }, finish_reason: 'stop' }],
+        },
+      },
+    });
+
+    const resp = await httpRequest(routerInfo.port, '/v1/chat/completions', {
+      body: { model: 'auto', messages: [{ role: 'user', content: 'Fallback test' }] },
+    });
+    assert.strictEqual(resp.status, 200);
+    const body = JSON.parse(resp.body);
+    assert.strictEqual(body.model, 'test-model-b');
+    assert.strictEqual(body.choices[0].message.content, 'Fallback completed');
+  });
+
   test('strict model prevents model switch', async () => {
     const config = createTestConfig(mockPort, { strictModel: true });
     const configDir = `/tmp/sr-test-strict-${Date.now()}`;

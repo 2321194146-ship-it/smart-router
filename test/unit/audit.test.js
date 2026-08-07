@@ -264,6 +264,12 @@ describe('deriveValidatedOutcome', () => {
     assert.equal(deriveValidatedOutcome(execResult, body), 'incomplete');
   });
 
+  test('returns incomplete for non-array choices shape', () => {
+    const execResult = { success: true };
+    const body = { choices: { message: { content: 'not an array' } } };
+    assert.equal(deriveValidatedOutcome(execResult, body), 'incomplete');
+  });
+
   test('returns incomplete for body with error field', () => {
     const execResult = { success: true };
     const body = { error: { message: 'something went wrong' } };
