@@ -3,9 +3,9 @@
   "version": "1.0.0-phase2c-active-canary",
   "branch": "phase2-shadow",
   "base_commit": "c5f182ad75104b325dfb1d631d6209a052cf2218",
-  "date": "2026-08-07T14:28:44.478Z",
+  "date": "2026-08-07T14:33:22.167Z",
   "description": "Smart Router Mainline Phase 2-C Active Canary 安全控制与决策语义收口 + Safety Sealed + 5% Canary Live Pilot - binary vs graded capability, toolsAvailable vs toolsRequired, protocol-level structured output detection, conservative token estimator, capability source unification, effective policy with deterministic tie-breaker, 208-task holdout eval (all gates PASS), Active Canary controller (SHA-256 sampling, Phase1-legal reorder, Fail Open, Kill Switch, auto-stop); Safety Sealed (blocked never in fallback, Active-only metrics, budget defense maxRequestCost/strictModel/estimatedCost + low-risk eligibility, local admin API with SQLite persisted kill, allowedAgents=[claude-code], truly-consecutive errors, version 1.0.0-phase2c-active-canary); 5% Live Pilot (Claude Code low-risk streaming allowed with anthropic-only + streaming-capable candidates, auto-stop immediate persistence on apply/finalize, 127.0.0.1:28788 internal pilot 456 requests -> 20 active all reordered, Kill Switch restart-persisted, resume-shadow only)",
-  "commit": "dcc18ec74ae9e4e449a0f4c46284894cfc582365",
+  "commit": "60121f282890916cf027d057f4113d59c1d294dd",
   "pilot_summary": {
     "status": "failed_after_current_changes",
     "total": 3,
@@ -375,7 +375,7 @@
     "test/integration/native-anthropic.test.js": "a135f426ae36be7249c8f8ee90bd1692fa27ccb0c76e865177ef6bcb3835050b",
     "test/integration/no-candidate-atomicity.test.js": "a1cd596880e43adaafdb7ca4fdf74aafd8d64afb6e80004ee7c5fbee8a8b3039",
     "test/integration/persistence.test.js": "3aafb2c8c3474206b369dfea06e6ce070c286e5ce278a4abf237f95c174f02c2",
-    "test/integration/provider-fallback-integration.test.js": "f7abe1791bcd7278c0ff652b56253cb07467fb83b4f91cfb3364fd991dc431d5",
+    "test/integration/provider-fallback-integration.test.js": "b07cac868d549ad2f4544a48ef607c595603047a487bd14d63e9c83582474943",
     "test/integration/responses-integration.test.js": "2b3553bd27ccfcac9278db982d2b90b6100bef16fd33e0364b18a1cc099be6b3",
     "test/integration/security-hardening.test.js": "a850ef7066c8ed1bd5734bc91d2410339856e5bb998b7251d4201728a785f0cc",
     "test/integration/shadow-b-readiness.test.js": "32c9f605b1bde5ca2db6341c990e55683cd745bb509aa835ae0c777a14238e8d",
@@ -433,13 +433,13 @@
     "status": "failed_after_current_changes",
     "total": 3,
     "passed": 0,
-    "note": "Post-fix targeted real pilot attempted 3 requests; 0 completed. Both configured providers returned incomplete responses at max_tokens=256; traffic stopped after the threshold."
+    "note": "Post-fix targeted real pilot attempted 3 requests; 0 completed. Both configured providers returned incomplete responses at max_tokens=256; traffic stopped after the threshold. A third local Qwen fallback is now configured but has not been re-tested with external traffic."
   },
   "release_status": {
     "status": "release_candidate_source_snapshot",
-    "source_commit": "dcc18ec74ae9e4e449a0f4c46284894cfc582365",
+    "source_commit": "60121f282890916cf027d057f4113d59c1d294dd",
     "branch": "phase2-shadow",
-    "generated_at": "2026-08-07T14:28:44.478Z",
+    "generated_at": "2026-08-07T14:33:22.167Z",
     "tests": 628,
     "real_external_provider_pilot": "failed_after_current_changes",
     "production_deploy": "not_performed",
