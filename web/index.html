@@ -156,6 +156,15 @@
             <div class="config-block"><span class="section-label">Agent 绑定</span><strong id="config-binding-count">—</strong><span id="config-binding-detail" class="muted">—</span></div>
           </div>
           <div class="config-provider-list"><div class="table-row table-head"><span>Provider</span><span>接口</span><span>密钥</span><span>模型数</span></div><div id="config-provider-rows"><div class="empty-state">连接后读取安全配置摘要。</div></div></div>
+          <details id="config-editor-shell" class="config-editor">
+            <summary>编辑配置草稿（不含密钥）</summary>
+            <div class="editor-toolbar">
+              <span class="muted">保存前会重新校验；现有 Provider 密钥由服务端按名称保留。</span>
+              <div class="editor-actions"><button id="config-edit-button" class="button button-secondary" type="button">开始编辑</button><button id="config-validate-button" class="button button-ghost" type="button" disabled>校验草稿</button><button id="config-apply-button" class="button button-primary" type="button" disabled>保存并备份</button></div>
+            </div>
+            <textarea id="config-editor" rows="16" spellcheck="false" readonly aria-label="配置草稿"></textarea>
+            <div id="config-editor-message" class="editor-message" role="status" aria-live="polite">当前为安全预览，点击“开始编辑”后才可修改。</div>
+          </details>
         </section>
 
         <footer class="footer">Smart Router Mainline · 本地运维控制台 · 不展示密钥与敏感请求内容</footer>

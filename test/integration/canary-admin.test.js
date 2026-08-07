@@ -8,7 +8,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert';
 import http from 'node:http';
-import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
+import { writeFileSync, mkdirSync, rmSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { createServer } from '../../src/server.js';
 
@@ -80,7 +80,54 @@ describe('Phase2-C 本地管理接口（Safety Sealed）', () => {
       assert.ok(ok.body.canary, 'status must include canary snapshot');
       assert.ok(ok.body.config, 'status must include safe config summary');
       assert.ok(ok.body.config.providers.every((provider) => !('api_key' in provider)), 'config summary must not expose api_key');
+      assert.ok(ok.body.editableConfig, 'status must include editable config draft');
+      assert.ok(ok.body.editableConfig.providers.every((provider) => !('api_key' in provider)), 'editable draft must not expose api_key');
+      assert.ok(!('adminToken' in ok.body.editableConfig.intelligence), 'editable draft must not expose adminToken');
       assert.strictEqual(ok.body.config.models[0].id, 'phase1-first');
+    } finally {
+      await new Promise((resolve) => server.close(() => resolve()));
+      delete process.env.SMART_ROUTER_ADMIN_TOKEN;
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  test('configuration draft validates, applies atomically, preserves secrets, and creates a backup', async () => {
+    process.env.SMART_ROUTER_ADMIN_TOKEN = ADMIN_TOKEN;
+    const tmp = join(process.cwd(), 'test', '.tmp-admin-config');
+    rmSync(tmp, { recursive: true, force: true });
+    mkdirSync(tmp, { recursive: true });
+    const config = baseConfig(tmp, 1);
+    const configPath = join(tmp, 'config.json');
+    writeFileSync(configPath, JSON.stringify(config, null, 2));
+    const auth = { Authorization: `Bearer ${ADMIN_TOKEN}` };
+    const server = await createServer(configPath);
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve()));
+    const port = server.address().port;
+    try {
+      const status = await httpJson(port, '/_smart-router/intelligence/status', undefined, 'GET', auth);
+      const draft = JSON.parse(JSON.stringify(status.body.editableConfig));
+      draft.routing.max_retries = 2;
+      draft.models[0].enabled = false;
+
+      const validated = await httpJson(port, '/_smart-router/config/validate', { config: draft }, 'POST', auth);
+      assert.strictEqual(validated.status, 200);
+      assert.strictEqual(validated.body.valid, true);
+
+      const invalid = JSON.parse(JSON.stringify(draft));
+      invalid.routing.max_retries = -1;
+      const rejected = await httpJson(port, '/_smart-router/config/validate', { config: invalid }, 'POST', auth);
+      assert.strictEqual(rejected.status, 422);
+      assert.strictEqual(rejected.body.valid, false);
+
+      const applied = await httpJson(port, '/_smart-router/config/apply', { config: draft }, 'POST', auth);
+      assert.strictEqual(applied.status, 200);
+      assert.strictEqual(applied.body.applied, true);
+      assert.strictEqual(applied.body.restartRequired, true);
+      assert.ok(applied.body.backupName);
+      const saved = JSON.parse(readFileSync(configPath, 'utf8'));
+      assert.strictEqual(saved.routing.max_retries, 2);
+      assert.strictEqual(saved.providers[0].api_key, 'k', 'existing provider secret must be preserved server-side');
+      assert.ok(readdirSync(tmp).some((name) => name === applied.body.backupName), 'backup file must exist');
     } finally {
       await new Promise((resolve) => server.close(() => resolve()));
       delete process.env.SMART_ROUTER_ADMIN_TOKEN;

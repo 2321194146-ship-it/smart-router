@@ -3,6 +3,7 @@
 
   let adminToken = '';
   let refreshTimer = null;
+  let configEditing = false;
   const $ = (id) => document.getElementById(id);
   const setText = (id, value) => { const node = $(id); if (node) node.textContent = String(value ?? '—'); };
   const number = (value) => Number.isFinite(Number(value)) ? Number(value).toLocaleString('zh-CN') : '—';
@@ -23,7 +24,8 @@
     try {
       const response = await fetch(path, { ...options, headers, signal: controller.signal });
       const body = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(body.error || body.hint || `HTTP ${response.status}`);
+      const detail = Array.isArray(body.errors) ? body.errors.join('；') : body.error || body.hint;
+      if (!response.ok) throw new Error(detail || `HTTP ${response.status}`);
       return body;
     } finally {
       window.clearTimeout(timer);
@@ -105,6 +107,23 @@
       </div>`).join('');
   }
 
+  function setEditorMessage(text, kind = '') {
+    const node = $('config-editor-message');
+    node.textContent = text;
+    node.className = kind ? `editor-message ${kind}` : 'editor-message';
+  }
+
+  function renderConfigEditor(editableConfig) {
+    const editor = $('config-editor');
+    if (!editor || configEditing || !editableConfig) return;
+    editor.value = JSON.stringify(editableConfig || {}, null, 2);
+    editor.readOnly = true;
+    $('config-validate-button').disabled = true;
+    $('config-apply-button').disabled = true;
+    $('config-edit-button').textContent = '开始编辑';
+    setEditorMessage('当前为安全预览，点击“开始编辑”后才可修改。');
+  }
+
   function render(data, models) {
     const canary = data.canary || {};
     const stopped = canary.stopped === true;
@@ -144,6 +163,7 @@
     renderModels(models);
     renderTimeline(canary);
     renderConfig(data.config);
+    renderConfigEditor(data.editableConfig);
   }
 
   async function refresh() {
@@ -183,18 +203,50 @@
   $('kill-button').addEventListener('click', async () => {
     if (!window.confirm('确认停止 Active Canary？系统将停止采样并持久化状态。')) return;
     try {
-      const data = await request('/_smart-router/intelligence/kill', { method: 'POST' });
-      const models = await request('/v1/models');
-      render(data, models);
+      await request('/_smart-router/intelligence/kill', { method: 'POST' });
+      await refresh();
       setMessage('Active Canary 已停止。', 'success');
     } catch (error) { setMessage(`停止失败：${error.message}`, 'error'); }
   });
   $('resume-button').addEventListener('click', async () => {
     try {
-      const data = await request('/_smart-router/intelligence/resume-shadow', { method: 'POST' });
-      const models = await request('/v1/models');
-      render(data, models);
+      await request('/_smart-router/intelligence/resume-shadow', { method: 'POST' });
+      await refresh();
       setMessage('已恢复 Shadow；不会自动恢复 Active。', 'success');
     } catch (error) { setMessage(`恢复失败：${error.message}`, 'error'); }
+  });
+
+  $('config-edit-button').addEventListener('click', () => {
+    configEditing = !configEditing;
+    const editor = $('config-editor');
+    editor.readOnly = !configEditing;
+    $('config-validate-button').disabled = !configEditing;
+    $('config-apply-button').disabled = !configEditing;
+    $('config-edit-button').textContent = configEditing ? '结束编辑' : '开始编辑';
+    setEditorMessage(configEditing ? '编辑模式：只修改路由、模型、Provider 和策略字段；保存前必须校验。' : '已退出编辑模式。');
+  });
+
+  async function submitConfig(path, successMessage) {
+    let draft;
+    try { draft = JSON.parse($('config-editor').value); } catch { setEditorMessage('JSON 格式错误，请先修正。', 'error'); return null; }
+    try {
+      const result = await request(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ config: draft }) });
+      setEditorMessage(successMessage, 'success');
+      return result;
+    } catch (error) {
+      setEditorMessage(`配置操作失败：${error.message}`, 'error');
+      return null;
+    }
+  }
+
+  $('config-validate-button').addEventListener('click', async () => {
+    const result = await submitConfig('/_smart-router/config/validate', '配置校验通过，尚未写入文件。');
+    if (result?.warnings?.length) setEditorMessage(`校验通过，但有 ${result.warnings.length} 条提醒：${result.warnings[0]}`, 'warn');
+  });
+
+  $('config-apply-button').addEventListener('click', async () => {
+    if (!window.confirm('确认写入配置？系统会先创建备份，保存后需要重启服务才会加载新配置。')) return;
+    const result = await submitConfig('/_smart-router/config/apply', '配置已保存并完成备份。请重启服务使其生效。');
+    if (result?.restartRequired) setEditorMessage(`配置已保存，备份：${result.backupName || '已创建'}；请重启服务后生效。`, 'success');
   });
 })();

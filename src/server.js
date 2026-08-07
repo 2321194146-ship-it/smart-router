@@ -20,9 +20,9 @@
 
 import http from 'node:http';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
-import { mkdir } from 'node:fs/promises';
+import { copyFile, mkdir, rename, writeFile } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadConfig, getConfig, log } from './config/loader.js';
 import { validateConfig } from './config/validator.js';
@@ -181,6 +181,7 @@ export async function createServer(configPath) {
   // 组件集合（供 handleRequest 使用）
   const components = {
     config,
+    configPath: configPath ? resolve(configPath) : resolve(process.cwd(), 'config', 'config.json'),
     store,
     keyPool,
     health,
@@ -259,7 +260,7 @@ async function handleRequest(req, res, components) {
     if (await handleDashboardRequest(req, res, config, pathname)) return;
 
     // 2b. 本地管理接口（Phase2-C Safety Sealed）：仅 127.0.0.1 + Admin Token
-    if (pathname.startsWith('/_smart-router/intelligence/')) {
+    if (pathname.startsWith('/_smart-router/intelligence/') || pathname.startsWith('/_smart-router/config/')) {
       await handleIntelligenceAdmin(req, res, components, pathname);
       return;
     }
@@ -590,6 +591,76 @@ function buildConfigSummary(config) {
 }
 
 /**
+ * 生成可编辑但不含密钥的配置草稿。
+ * 保存时服务端会按 provider.name 复用当前密钥，避免 Token 往返浏览器。
+ */
+function buildEditableConfig(config) {
+  const clone = (value) => JSON.parse(JSON.stringify(value));
+  const intelligence = clone(config?.intelligence || {});
+  delete intelligence.adminToken;
+  const providers = Array.isArray(config?.providers)
+    ? config.providers.map(({ api_key: _apiKey, ...provider }) => provider)
+    : [];
+  return {
+    intelligence,
+    routing: clone(config?.routing || {}),
+    models: clone(config?.models || []),
+    providers,
+    agent_bindings: clone(config?.agent_bindings || {}),
+    budget: clone(config?.budget || {}),
+    circuit_breaker: clone(config?.circuit_breaker || {}),
+  };
+}
+
+function mergeEditableConfig(current, incoming) {
+  const clone = (value) => JSON.parse(JSON.stringify(value));
+  const next = clone(current);
+  const editableSections = ['intelligence', 'routing', 'models', 'agent_bindings', 'budget', 'circuit_breaker'];
+  for (const section of editableSections) {
+    if (Object.prototype.hasOwnProperty.call(incoming, section)) {
+      next[section] = clone(incoming[section]);
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(incoming, 'providers')) {
+    const previousByName = new Map(
+      (Array.isArray(current.providers) ? current.providers : [])
+        .filter((provider) => provider?.name)
+        .map((provider) => [provider.name, provider]),
+    );
+    next.providers = (Array.isArray(incoming.providers) ? incoming.providers : []).map((provider) => {
+      const previous = previousByName.get(provider?.name);
+      const merged = clone(provider);
+      // 草稿不含 api_key 时复用现有密钥；新 Provider 必须显式配置密钥后才能通过校验。
+      if (merged.api_key === undefined && previous?.api_key !== undefined) merged.api_key = previous.api_key;
+      return merged;
+    });
+  }
+
+  // server、data_dir、adminToken 等运行时/认证边界不允许由 Dashboard 修改。
+  next.server = clone(current.server || {});
+  if (current.intelligence?.adminToken !== undefined) {
+    next.intelligence.adminToken = current.intelligence.adminToken;
+  }
+  return next;
+}
+
+async function writeConfigAtomically(configPath, config) {
+  const stamp = new Date().toISOString().replace(/[-:.TZ]/g, '');
+  const backupPath = `${configPath}.bak-${stamp}-${randomBytes(3).toString('hex')}`;
+  const tempPath = `${configPath}.tmp-${process.pid}-${randomBytes(3).toString('hex')}`;
+  await copyFile(configPath, backupPath);
+  try {
+    await writeFile(tempPath, `${JSON.stringify(config, null, 2)}\n`, { encoding: 'utf8', mode: 0o600 });
+    await rename(tempPath, configPath);
+  } catch (error) {
+    try { await rename(tempPath, `${configPath}.failed-${process.pid}`); } catch { /* best effort cleanup */ }
+    throw error;
+  }
+  return backupPath;
+}
+
+/**
  * 提供本地运维 Dashboard 静态资源。
  * 页面本身不携带 Token；实际状态、Kill、Resume 请求仍走 Admin Token。
  */
@@ -733,7 +804,51 @@ async function handleIntelligenceAdmin(req, res, components, pathname) {
   try {
     if (req.method === 'GET' && pathname === ADMIN_STATUS) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ ok: true, ...intelligence.status(), config: buildConfigSummary(config) }));
+      res.end(JSON.stringify({
+        ok: true,
+        ...intelligence.status(),
+        config: buildConfigSummary(config),
+        editableConfig: buildEditableConfig(config),
+      }));
+      return;
+    }
+    if (req.method === 'POST' && (pathname === '/_smart-router/config/validate' || pathname === '/_smart-router/config/apply')) {
+      const body = await parseBody(req, config);
+      assertRequestBodyObject(body);
+      if (!body.config || typeof body.config !== 'object' || Array.isArray(body.config)) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, error: 'config_object_required' }));
+        return;
+      }
+      if (Buffer.byteLength(JSON.stringify(body.config), 'utf8') > 1024 * 1024) {
+        res.writeHead(413, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, error: 'config_too_large' }));
+        return;
+      }
+      const candidate = mergeEditableConfig(config, body.config);
+      const validation = validateConfig(candidate);
+      if (!validation.valid) {
+        res.writeHead(422, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, valid: false, errors: validation.errors, warnings: validation.warnings }));
+        return;
+      }
+      if (pathname.endsWith('/validate')) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, valid: true, errors: [], warnings: validation.warnings, config: buildConfigSummary(candidate) }));
+        return;
+      }
+      const backupPath = await writeConfigAtomically(components.configPath, candidate);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        ok: true,
+        applied: true,
+        valid: true,
+        restartRequired: true,
+        backupCreated: true,
+        backupName: backupPath.split('/').pop(),
+        warnings: validation.warnings,
+        config: buildConfigSummary(candidate),
+      }));
       return;
     }
     if (req.method === 'POST' && pathname === ADMIN_KILL) {
