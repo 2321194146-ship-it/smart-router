@@ -3,9 +3,9 @@
   "version": "1.0.0-phase2c-active-canary",
   "branch": "phase2-shadow",
   "base_commit": "c5f182ad75104b325dfb1d631d6209a052cf2218",
-  "date": "2026-08-07T15:13:25.269Z",
+  "date": "2026-08-07T15:22:29.598Z",
   "description": "Smart Router Mainline Phase 2-C Active Canary 安全控制与决策语义收口 + Safety Sealed + 5% Canary Live Pilot - binary vs graded capability, toolsAvailable vs toolsRequired, protocol-level structured output detection, conservative token estimator, capability source unification, effective policy with deterministic tie-breaker, 208-task holdout eval (all gates PASS), Active Canary controller (SHA-256 sampling, Phase1-legal reorder, Fail Open, Kill Switch, auto-stop); Safety Sealed (blocked never in fallback, Active-only metrics, budget defense maxRequestCost/strictModel/estimatedCost + low-risk eligibility, local admin API with SQLite persisted kill, allowedAgents=[claude-code], truly-consecutive errors, version 1.0.0-phase2c-active-canary); 5% Live Pilot (Claude Code low-risk streaming allowed with anthropic-only + streaming-capable candidates, auto-stop immediate persistence on apply/finalize, 127.0.0.1:28788 internal pilot 456 requests -> 20 active all reordered, Kill Switch restart-persisted, resume-shadow only)",
-  "commit": "fd72d5cfa890fe02d135df420ef41684ffa0e77f",
+  "commit": "1a76c80058d48bd4ae0a4fe7f69cee3b95ef219c",
   "pilot_summary": {
     "status": "failed_after_current_changes",
     "total": 3,
@@ -401,9 +401,9 @@
     "test/unit/request-controls.test.js": "e3f3144a1de570bffb708959ec839319d8cc9f886566ba07df76dc73f04d80b5",
     "test/unit/response-normalization.test.js": "814016bc8663579624810da8217a5037c121325ae1e877e419a1aa26eb9e3246",
     "test/unit/token-estimator.test.js": "c4bb632e833d7d4eef9fa851a4222f2c8468c0e70a5fffc90271f45054c29029",
-    "web/app.js": "2e94e2b7968d94edbec864073d7befa67546ed5ff077782e75a2fd2dcd9570b3",
-    "web/index.html": "b9e5bbac0a5e600cd0e20df61c36c6a65db89828e71d8ea971b9d33b669c4b05",
-    "web/styles.css": "c29a0a81b7bda74964fb44064121cf021a2090d746cb6c56fa26cdfcc272d7a5"
+    "web/app.js": "4a5535deb667054f5555f4238de9c3e15993bb9688c05c0be5b6fdd072344291",
+    "web/index.html": "2a7cbece73153114aae88b2f2cdac4f510d072f23e383d44d6aca61a21ae64e5",
+    "web/styles.css": "96b1f0a361d0995f6fef24bc9dc9275f252ae48d1063f836c7e0d0a4f5fac266"
   },
   "reports": [
     "phase2-docs/DECISION_SEMANTICS_FIX_REPORT.md",
@@ -437,9 +437,9 @@
   },
   "release_status": {
     "status": "release_candidate_source_snapshot",
-    "source_commit": "fd72d5cfa890fe02d135df420ef41684ffa0e77f",
+    "source_commit": "1a76c80058d48bd4ae0a4fe7f69cee3b95ef219c",
     "branch": "phase2-shadow",
-    "generated_at": "2026-08-07T15:13:25.269Z",
+    "generated_at": "2026-08-07T15:22:29.598Z",
     "tests": 629,
     "real_external_provider_pilot": "failed_after_current_changes",
     "production_deploy": "not_performed",
