@@ -61,6 +61,8 @@ curl -s http://127.0.0.1:28788/v1 | head -c 200
 - 状态、Kill、Resume 操作仍需要 `SMART_ROUTER_ADMIN_TOKEN`；Token 只在页面内存中使用，不写入 localStorage、Cookie 或配置文件。
 - 当前页面提供运行模式、Canary、Active 请求、成本、Fallback、停止原因和 Shadow 恢复操作。
 
+完整验收门禁见 [RELEASE_ACCEPTANCE_PLAN.md](phase2-docs/RELEASE_ACCEPTANCE_PLAN.md)。
+
 示例：
 
 ```bash
@@ -81,6 +83,7 @@ npm run test:integration # 97 项（含 SQLite 重启恢复、Finalize 事务原
 npm run test:audit       # 33 项
 npm run syntax:check     # src/index.js + src/server.js 语法
 node scripts/release-evidence-check.mjs --json  # 发布前校验分支、提交、工作区和源文件哈希
+node scripts/run-acceptance.mjs                  # 一键执行本次发布范围的全部门禁
 ```
 
 ## 运行闭环（Phase 1 Final Verified）

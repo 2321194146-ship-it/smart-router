@@ -88,6 +88,7 @@ const paths = new Set([
   'config/real-pilot-config.template.json',
   'package.json',
   'package-lock.json',
+  'phase2-docs/RELEASE_ACCEPTANCE_PLAN.md',
   'web/index.html',
   'web/app.js',
   'web/styles.css',
