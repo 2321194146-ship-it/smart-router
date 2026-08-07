@@ -89,6 +89,17 @@ function validateServer(server, errors, warnings) {
       errors.push('server.request_timeout_ms must be a positive number');
     }
   }
+  for (const field of ['stream_idle_timeout_ms', 'stream_total_timeout_ms']) {
+    if (server[field] !== undefined &&
+        (!Number.isInteger(server[field]) || server[field] <= 0)) {
+      errors.push(`server.${field} must be a positive integer`);
+    }
+  }
+  if (Number.isInteger(server.stream_idle_timeout_ms) &&
+      Number.isInteger(server.stream_total_timeout_ms) &&
+      server.stream_total_timeout_ms < server.stream_idle_timeout_ms) {
+    errors.push('server.stream_total_timeout_ms must be >= server.stream_idle_timeout_ms');
+  }
   if (server.shutdown_grace_ms !== undefined) {
     if (!Number.isFinite(server.shutdown_grace_ms) || server.shutdown_grace_ms < 0) {
       errors.push('server.shutdown_grace_ms must be a non-negative number');
@@ -97,6 +108,19 @@ function validateServer(server, errors, warnings) {
   if (server.max_request_body_bytes !== undefined) {
     if (!Number.isInteger(server.max_request_body_bytes) || server.max_request_body_bytes <= 0) {
       errors.push('server.max_request_body_bytes must be a positive integer');
+    }
+  }
+  if (server.auth !== undefined) {
+    if (!server.auth || typeof server.auth !== 'object' || Array.isArray(server.auth)) {
+      errors.push('server.auth must be an object if present');
+    } else {
+      if (server.auth.enabled !== undefined && typeof server.auth.enabled !== 'boolean') {
+        errors.push('server.auth.enabled must be a boolean');
+      }
+      if (server.auth.token_env !== undefined &&
+          (typeof server.auth.token_env !== 'string' || !server.auth.token_env.trim())) {
+        errors.push('server.auth.token_env must be a non-empty string');
+      }
     }
   }
 
@@ -162,6 +186,23 @@ function validateRouting(routing, errors, warnings) {
       errors.push('routing.max_concurrent must be a positive integer');
     }
   }
+  if (routing.rate_limit !== undefined) {
+    if (!routing.rate_limit || typeof routing.rate_limit !== 'object' || Array.isArray(routing.rate_limit)) {
+      errors.push('routing.rate_limit must be an object if present');
+    } else {
+      if (routing.rate_limit.enabled !== undefined && typeof routing.rate_limit.enabled !== 'boolean') {
+        errors.push('routing.rate_limit.enabled must be a boolean');
+      }
+      if (routing.rate_limit.window_ms !== undefined &&
+          (!Number.isInteger(routing.rate_limit.window_ms) || routing.rate_limit.window_ms < 100)) {
+        errors.push('routing.rate_limit.window_ms must be an integer >= 100');
+      }
+      if (routing.rate_limit.max_requests !== undefined &&
+          (!Number.isInteger(routing.rate_limit.max_requests) || routing.rate_limit.max_requests < 1)) {
+        errors.push('routing.rate_limit.max_requests must be a positive integer');
+      }
+    }
+  }
   if (routing.max_retries !== undefined) {
     if (!Number.isInteger(routing.max_retries) || routing.max_retries < 0) {
       errors.push('routing.max_retries must be a non-negative integer');
@@ -203,6 +244,9 @@ function validateProviders(providers, errors, warnings) {
     if (typeof p.name !== 'string' || !p.name.trim()) {
       errors.push(`${ctx}.name must be a non-empty string`);
       return;
+    }
+    if (p.api_type !== undefined && !['openai', 'anthropic_native'].includes(p.api_type)) {
+      errors.push(`${ctx}.api_type must be "openai" or "anthropic_native"`);
     }
     if (names.has(p.name)) {
       errors.push(`${ctx}.name duplicate provider name "${p.name}"`);

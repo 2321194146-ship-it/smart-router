@@ -26,6 +26,7 @@ import {
   getCooldownScope,
 } from '../provider/errors.js';
 import { FallbackChain, FallbackDecision } from './fallback.js';
+import { estimateTokens } from '../intelligence/token-estimator.js';
 
 // ----------------------------------------------------------------------------
 // 日志
@@ -48,18 +49,20 @@ function log(msg) {
  * @property {Array<object>} attempts attemptLog 数组（审计记录）
  * @property {object|null} finalCandidate 最终成功的候选
  * @property {object|null} error 最终错误
+ * @property {boolean} nativeProtocol 是否由原生协议 Provider 返回
  * @property {string} outcome 结果类型：
  *   'completed' | 'incomplete' | 'no_candidate' | 'client_aborted' |
  *   'budget_exceeded' | 'provider_error'
  */
 export class ExecutionResult {
-  constructor(success, response, attempts, finalCandidate, error, outcome) {
+  constructor(success, response, attempts, finalCandidate, error, outcome, nativeProtocol = false) {
     this.success = !!success;
     this.response = response || null;
     this.attempts = Array.isArray(attempts) ? attempts : [];
     this.finalCandidate = finalCandidate || null;
     this.error = error || null;
     this.outcome = outcome || (success ? 'completed' : 'incomplete');
+    this.nativeProtocol = nativeProtocol === true;
   }
 
   toJSON() {
@@ -180,6 +183,7 @@ export class ExecutionEngine {
     const chain = new FallbackChain(candidates, this.config);
     const attempts = [];
     let lastError = null;
+    let budgetBlocked = false;
     let totalUpstreamCalls = 0;
     const providersTried = new Set();
     const providerKeyCount = new Map(); // providerName → 已尝试 key 数
@@ -187,6 +191,9 @@ export class ExecutionEngine {
     const abortSignal = options.abortSignal || null;
     const protocol = options.protocol || 'chat';
     const requestId = options.requestId || null;
+    // 与 Shadow Decision Engine 共用同一套确定性 Token 估算，
+    // 让真实预算闸门不再以 0 token 作为默认值而放行付费请求。
+    const tokenEstimate = estimateTokens(body, { protocol });
 
     // 持久化请求元数据到 store
     if (this.store && requestId) {
@@ -261,7 +268,9 @@ export class ExecutionEngine {
         }
 
         // 不再 fallback：根据原因返回不同 outcome
-        const outcome = this._decisionToOutcome(decision.reason);
+        const outcome = budgetBlocked
+          ? 'budget_exceeded'
+          : this._decisionToOutcome(decision.reason);
         return new ExecutionResult(false, null, attempts, null, lastError, outcome);
       }
 
@@ -294,10 +303,13 @@ export class ExecutionEngine {
           allowedProviders: options.budget?.allowedProviders,
           strictModel: options.budget?.strictModel,
           requestedModel: body?.model,
+          estimatedInputTokens: tokenEstimate.input,
+          estimatedOutputTokens: tokenEstimate.output,
         }
       );
 
       if (!budgetCheck.allowed) {
+        budgetBlocked = true;
         log(`budget blocked for ${candidate.provider}/${candidate.modelId}: ${budgetCheck.reason}`);
         const attemptLog = this._buildAttemptLog(
           candidate, null, attempts.length + 1,
@@ -403,16 +415,17 @@ export class ExecutionEngine {
 
       // 成功
       if (tryResult.success) {
-        // 记录成本
-        this._recordCost(tryResult, candidate, options);
-
+        // 成本由 Finalizer 在最终原子收尾时记录。
+        // 不在执行阶段提前写入，避免上游成功但 Finalize 失败时留下孤立成本记录，
+        // 也避免 Cloud Billing 在事务提交前发生不可回滚的副作用。
         log(
           `request completed: ${candidate.provider}/${candidate.modelId} ` +
             `(${tryResult.attemptLog.latencyMs}ms, ${totalUpstreamCalls} upstream calls)`
         );
 
         return new ExecutionResult(
-          true, tryResult.response, attempts, candidate, null, 'completed'
+          true, tryResult.response, attempts, candidate, null, 'completed',
+          tryResult.nativeProtocol,
         );
       }
 
@@ -540,9 +553,22 @@ export class ExecutionEngine {
     let error = null;
 
     try {
-      if (protocol === 'anthropic') {
+      // 原生 Anthropic 必须显式声明 api_type=anthropic_native；不再通过认证头猜协议。
+      // 只有 Anthropic 入站请求才允许走原生协议，并透传原始 Anthropic body。
+      const providerCfg =
+        (this.providerClient && typeof this.providerClient.getProvider === 'function')
+          ? this.providerClient.getProvider(modelConfig.provider)
+          : null;
+      const nativeAnthropic = protocol === 'anthropic' && providerCfg?.api_type === 'anthropic_native';
+      if (nativeAnthropic) {
         result = await this.providerClient.callAnthropic(
-          modelConfig, body, callOptions
+          modelConfig,
+          options.nativeBody || body,
+          {
+            ...callOptions,
+            nativeRequest: true,
+            nativeBody: options.nativeBody || body,
+          },
         );
       } else {
         result = await this.providerClient.callChat(
@@ -769,6 +795,7 @@ export class ExecutionEngine {
         keyId: result.keyId,
         usage,
         cost,
+        nativeProtocol: result.nativeProtocol === true,
       };
     }
 
@@ -853,12 +880,21 @@ export class ExecutionEngine {
     }
 
     try {
-      // 预读循环：最多读取 3 个 chunk 或找到有效事件
-      for (let i = 0; i < 3 && !validEventFound; i++) {
-        // 带超时的读取
+      // 预读循环：最多读取 40 个 chunk 或找到有效事件，累计预算 15s。
+      // 真实 Provider（如 7878 网关）可能将 SSE 拆成极碎 chunk（503B/1B 交替），
+      // 原 3-chunk 限制在分块边界下凑不齐完整 `\n\n` 事件 → 误判 no_valid_events。
+      const preReadStart = Date.now();
+      const preReadBudget = 15000;
+      for (let i = 0; i < 40 && !validEventFound; i++) {
+        const elapsed = Date.now() - preReadStart;
+        if (elapsed >= preReadBudget) {
+          log('stream pre-read budget exhausted');
+          break;
+        }
+        // 带超时的读取（每 chunk 超时 = min(timeoutMs, 剩余预算)）
         const readPromise = reader.read();
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('pread_timeout')), timeoutMs);
+          setTimeout(() => reject(new Error('pread_timeout')), Math.min(timeoutMs, preReadBudget - elapsed));
         });
 
         let readResult;
@@ -994,6 +1030,14 @@ export class ExecutionEngine {
     // 若首事件仅为 [DONE]，说明上游返回了空 SSE，应允许 Fallback
     if (dataStr && dataStr.trim() === '[DONE]') return false;
 
+    if (!dataStr) {
+      // 裸 JSON 块兼容：无 data 行但整块是 JSON（7878 等网关返回 Anthropic 原生 message）
+      const trimmed = block.trim();
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+        dataStr = trimmed;
+      }
+    }
+
     if (!dataStr) return false;
 
     // 根据协议验证
@@ -1003,9 +1047,11 @@ export class ExecutionEngine {
 
       switch (protocol) {
         case 'chat':
-          // Chat SSE: 应有 choices 数组或 error 对象
+          // Chat SSE: 应有 choices 数组或 error 对象；
+          // 部分真实网关（如 7878）对请求返回 Anthropic 原生 message 格式（type=message）
           return Array.isArray(parsed.choices) ||
-                 (parsed.error && typeof parsed.error === 'object');
+                 (parsed.error && typeof parsed.error === 'object') ||
+                 parsed.type === 'message';
         case 'anthropic':
           // Anthropic SSE: 原生事件有 type 字段；
           // 兼容上游为 Chat 格式（choices）经 adapter 转换的场景
@@ -1071,40 +1117,6 @@ export class ExecutionEngine {
       firstByteSentToClient: false,
       timestamp: new Date().toISOString(),
     };
-  }
-
-  // --------------------------------------------------------------------------
-  // 成本记录
-  // --------------------------------------------------------------------------
-
-  /**
-   * 记录请求成本（仅成功时调用，以 requestId 去重）。
-   *
-   * @param {object} tryResult 单次尝试结果
-   * @param {object} candidate 候选
-   * @param {object} options 全局选项
-   */
-  _recordCost(tryResult, candidate, options) {
-    if (!this.costTracker || !tryResult.usage) return;
-
-    const requestId = options.requestId || `auto-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    try {
-      const result = this.costTracker.recordCost(
-        requestId,
-        candidate.model,
-        candidate.provider,
-        tryResult.usage,
-        tryResult.cost
-      );
-      if (result.recorded) {
-        log(
-          `cost recorded: ${candidate.provider}/${candidate.modelId} ` +
-            `${result.record.cost.totalCost} ${result.record.cost.currency}`
-        );
-      }
-    } catch (err) {
-      log(`cost recording failed: ${err.message}`);
-    }
   }
 
   // --------------------------------------------------------------------------

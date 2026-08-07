@@ -354,6 +354,55 @@ export function chatChunkToAnthropicEvents(chunk, state, context = {}) {
     return events;
   }
 
+  // --------------------------------------------------------------------------
+  // 0. Anthropic 原生 message chunk（部分真实网关返回 type:message 完整响应）
+  // --------------------------------------------------------------------------
+  if (chunk.type === 'message' && Array.isArray(chunk.content)) {
+    if (chunk.usage) {
+      state.lastUsage = {
+        input_tokens: extractInputTokens(chunk.usage),
+        output_tokens: extractOutputTokens(chunk.usage),
+        raw: { ...chunk.usage },
+      };
+    }
+    if (!state.messageStarted) {
+      state.messageStarted = true;
+      state.messageId = chunk.id || `msg_${Date.now()}`;
+      events.push({
+        type: 'message_start',
+        message: {
+          id: state.messageId, type: 'message', role: 'assistant', content: [], model,
+          stop_reason: null, stop_sequence: null,
+          usage: { input_tokens: state.lastUsage?.input_tokens || 0, output_tokens: 0 },
+        },
+      });
+    }
+    const textParts = chunk.content
+      .filter((b) => b && b.type === 'text' && typeof b.text === 'string')
+      .map((b) => b.text);
+    const fullText = textParts.join('');
+    if (fullText) {
+      const blockIndex = state.nextBlockIndex++;
+      state.currentBlock = { index: blockIndex, type: 'text', text: '' };
+      events.push({ type: 'content_block_start', index: blockIndex, content_block: { type: 'text', text: '' } });
+      state.currentBlock.text = fullText;
+      state.totalText += fullText;
+      state.hasContent = true;
+      events.push({ type: 'content_block_delta', index: blockIndex, delta: { type: 'text_delta', text: fullText } });
+      events.push({ type: 'content_block_stop', index: blockIndex });
+      state.contentBlocks.push(state.currentBlock);
+    }
+    const stopReason = chunk.stop_reason || 'end_turn';
+    events.push({
+      type: 'message_delta',
+      delta: { stop_reason: stopReason, stop_sequence: null },
+      usage: { output_tokens: state.lastUsage?.output_tokens || 0 },
+    });
+    events.push({ type: 'message_stop' });
+    state.messageStopped = true;
+    return events;
+  }
+
   const choice = chunk.choices?.[0];
   const delta = choice?.delta;
   const finishReason = choice?.finish_reason;
@@ -626,6 +675,7 @@ export function isMessageStop(event) {
  * @param {object} [options.cancelToken] CancelToken 实例
  * @param {object} [options.originalBody] 原始 Anthropic 请求体
  * @param {string} [options.model] 模型名称
+ * @param {boolean} [options.nativeProtocol] 上游是否已返回 Anthropic 原生 SSE
  * @returns {Promise<{ completed: boolean, bytesTransferred: number, hadError: boolean, lastUsage: object|null, clientAborted: boolean }>}
  */
 export async function openaiSSEToAnthropicSSE(upstreamResponse, res, options = {}) {
@@ -637,6 +687,10 @@ export async function openaiSSEToAnthropicSSE(upstreamResponse, res, options = {
     originalBody,
     model,
   } = options;
+
+  if (options.nativeProtocol === true) {
+    return passThroughNativeAnthropicSSE(upstreamResponse, res, options);
+  }
 
   const state = createStreamState();
   let bytesTransferred = 0;
@@ -925,6 +979,66 @@ export async function openaiSSEToAnthropicSSE(upstreamResponse, res, options = {
   };
 }
 
+/**
+ * 原生 Anthropic Provider 的 SSE 透传路径。
+ * 原生事件已经是客户端契约，不能再经过 Chat → Anthropic 转换器。
+ */
+async function passThroughNativeAnthropicSSE(upstreamResponse, res, options = {}) {
+  let bytesTransferred = 0;
+  let firstByteSent = false;
+  let terminalReceived = false;
+  let clientAborted = false;
+  let hadError = false;
+  let cancelUnsub = null;
+
+  cancelUnsub = options.cancelToken?.onCancel(() => {
+    clientAborted = true;
+  });
+
+  try {
+    for await (const value of iterateBody(upstreamResponse?.body)) {
+      if (clientAborted || !isResWritable(res)) {
+        clientAborted = true;
+        break;
+      }
+      const chunk = Buffer.isBuffer(value) ? value : Buffer.from(value);
+      const text = chunk.toString('utf8');
+      if (!firstByteSent && chunk.length > 0) {
+        firstByteSent = true;
+        options.onFirstByte?.();
+      }
+      if (/event:\s*message_stop\b/.test(text) || /"type"\s*:\s*"message_stop"/.test(text)) {
+        terminalReceived = true;
+      }
+      try {
+        res.write(chunk);
+        bytesTransferred += chunk.length;
+      } catch {
+        clientAborted = true;
+        break;
+      }
+    }
+  } catch (error) {
+    hadError = true;
+    options.onError?.(error);
+  } finally {
+    cancelUnsub?.();
+  }
+
+  if (!terminalReceived && !clientAborted && !hadError) {
+    options.onError?.(new Error('native Anthropic stream missing message_stop'));
+  }
+
+  return {
+    completed: terminalReceived && !hadError && !clientAborted,
+    bytesTransferred,
+    hadError,
+    lastUsage: null,
+    clientAborted,
+    missingTerminalEvent: !terminalReceived && !clientAborted,
+  };
+}
+
 // ----------------------------------------------------------------------------
 // 主处理函数
 // ----------------------------------------------------------------------------
@@ -984,6 +1098,9 @@ export async function handleAnthropicMessageStream(req, res, body, context) {
     const pathname = req?.url || '';
     const patchResult = applyClaudeCodePatches(headers, parsedBody, pathname);
     const patchedBody = patchResult.body;
+    const nativeRequestBody = parsedBody?.output_config
+      ? { ...patchedBody, output_config: parsedBody.output_config }
+      : patchedBody;
 
     // 2. 转换为 Chat 格式
     const chatBody = anthropicToOpenAI(patchedBody);
@@ -1077,6 +1194,7 @@ export async function handleAnthropicMessageStream(req, res, body, context) {
       requestId,
       externalRequestId: context.externalRequestId || null,
       timeoutMs: config?.server?.request_timeout_ms,
+      nativeBody: nativeRequestBody,
     });
 
 
@@ -1169,6 +1287,7 @@ async function handleStreamSuccess(
       cancelToken,
       originalBody,
       model: modelName,
+      nativeProtocol: executionResult.nativeProtocol === true,
     },
   );
 

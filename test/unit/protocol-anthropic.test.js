@@ -7,7 +7,12 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert';
 import { anthropicToOpenAI, openaiToAnthropic, buildAnthropicError } from '../../src/protocols/anthropic.js';
-import { createStreamState, chatChunkToAnthropicEvents, isMessageStop } from '../../src/protocols/anthropic-stream.js';
+import {
+  createStreamState,
+  chatChunkToAnthropicEvents,
+  isMessageStop,
+  openaiSSEToAnthropicSSE,
+} from '../../src/protocols/anthropic-stream.js';
 
 describe('Anthropic Protocol Conversion', () => {
   // --------------------------------------------------------------------------
@@ -281,6 +286,27 @@ describe('Anthropic Protocol Conversion', () => {
       assert.strictEqual(result.role, 'assistant');
       assert.strictEqual(result.model, 'claude-3');
       assert.strictEqual(result.stop_reason, 'end_turn');
+    });
+  });
+
+  describe('native Anthropic SSE', () => {
+    test('passes native message events through without Chat conversion', async () => {
+      const response = new Response(
+        'event: message_start\ndata: {"type":"message_start"}\n\n' +
+        'event: message_stop\ndata: {"type":"message_stop"}\n\n',
+        { headers: { 'Content-Type': 'text/event-stream' } },
+      );
+      const writes = [];
+      const res = {
+        writableEnded: false,
+        destroyed: false,
+        write(chunk) { writes.push(String(chunk)); return true; },
+      };
+      const result = await openaiSSEToAnthropicSSE(response, res, { nativeProtocol: true });
+      assert.strictEqual(result.completed, true);
+      assert.strictEqual(result.hadError, false);
+      assert.match(writes.join(''), /message_start/);
+      assert.match(writes.join(''), /message_stop/);
     });
   });
 

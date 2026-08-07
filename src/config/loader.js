@@ -341,6 +341,12 @@ export function loadConfig(configPath, options = {}) {
 
   // 环境变量覆盖（最高优先级）
   applyEnvOverrides(merged);
+
+  // SMART_ROUTER_DATA_DIR（用户指定的数据目录环境变量，优先于配置 server.data_dir）
+  if (process.env.SMART_ROUTER_DATA_DIR) {
+    if (!merged.server) merged.server = {};
+    merged.server.data_dir = process.env.SMART_ROUTER_DATA_DIR;
+  }
   _configTemplate = deepClone(merged);
 
   // 记录 mtime 用于热重载

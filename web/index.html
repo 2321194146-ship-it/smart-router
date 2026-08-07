@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Smart Router 本地运维控制台">
+    <title>Smart Router Control Room</title>
+    <link rel="stylesheet" href="/dashboard/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">SMART ROUTER / LOCAL OPS</p>
+          <h1>Control Room</h1>
+          <p class="subtitle">路由、健康与 Canary 安全状态</p>
+        </div>
+        <div class="header-actions">
+          <span id="connection-badge" class="badge badge-muted">未连接</span>
+          <button id="refresh-button" class="button button-ghost" type="button">刷新</button>
+        </div>
+      </header>
+
+      <section class="auth-card" aria-labelledby="auth-title">
+        <div>
+          <p class="eyebrow">ADMIN ACCESS</p>
+          <h2 id="auth-title">连接本地管理接口</h2>
+          <p class="muted">Token 仅保存在当前页面内存，不写入 localStorage、Cookie 或配置文件。</p>
+        </div>
+        <form id="auth-form" class="auth-form">
+          <label for="admin-token">SMART_ROUTER_ADMIN_TOKEN</label>
+          <div class="token-row">
+            <input id="admin-token" type="password" minlength="16" autocomplete="off" placeholder="输入至少 16 位 Admin Token" required>
+            <button class="button button-primary" type="submit">连接</button>
+          </div>
+        </form>
+      </section>
+
+      <div id="message" class="message" role="status" aria-live="polite">请输入 Admin Token 后连接。</div>
+
+      <section class="metric-grid" aria-label="核心指标">
+        <article class="metric-card accent-blue">
+          <span class="metric-label">运行模式</span>
+          <strong id="mode-value">—</strong>
+          <span id="enabled-value" class="metric-foot">等待数据</span>
+        </article>
+        <article class="metric-card accent-purple">
+          <span class="metric-label">Canary</span>
+          <strong id="canary-value">—</strong>
+          <span id="canary-foot" class="metric-foot">等待数据</span>
+        </article>
+        <article class="metric-card accent-green">
+          <span class="metric-label">Active 请求</span>
+          <strong id="active-value">—</strong>
+          <span id="active-foot" class="metric-foot">等待数据</span>
+        </article>
+        <article class="metric-card accent-orange">
+          <span class="metric-label">累计成本</span>
+          <strong id="cost-value">—</strong>
+          <span id="cost-foot" class="metric-foot">本进程指标</span>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">CANARY SAFETY</p>
+              <h2>安全开关</h2>
+            </div>
+            <span id="stop-state" class="badge badge-muted">未知</span>
+          </div>
+          <p id="stop-detail" class="muted">连接后显示停止原因和时间。</p>
+          <div class="button-row">
+            <button id="kill-button" class="button button-danger" type="button" disabled>停止 Active Canary</button>
+            <button id="resume-button" class="button button-secondary" type="button" disabled>恢复 Shadow</button>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">ROUTING HEALTH</p>
+              <h2>请求与回退</h2>
+            </div>
+          </div>
+          <dl class="detail-list">
+            <div><dt>Eligible</dt><dd id="eligible-value">—</dd></div>
+            <div><dt>Sampled</dt><dd id="sampled-value">—</dd></div>
+            <div><dt>Fallback</dt><dd id="fallback-value">—</dd></div>
+            <div><dt>Incomplete</dt><dd id="incomplete-value">—</dd></div>
+            <div><dt>Provider Error</dt><dd id="provider-error-value">—</dd></div>
+          </dl>
+        </article>
+      </section>
+
+      <footer class="footer">仅供本机运维使用 · Smart Router Mainline</footer>
+    </main>
+    <script src="/dashboard/app.js" defer></script>
+  </body>
+</html>

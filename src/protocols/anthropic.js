@@ -742,6 +742,11 @@ export async function handleAnthropicMessage(req, res, body, context) {
     const pathname = req?.url || '';
     const patchResult = applyClaudeCodePatches(headers, parsedBody, pathname);
     const patchedBody = patchResult.body;
+    // 兼容补丁面向 OpenAI 兼容上游会清理 output_config；原生 Anthropic
+    // 需要保留该字段，由显式 api_type=anthropic_native 的 Provider 接收。
+    const nativeRequestBody = parsedBody?.output_config
+      ? { ...patchedBody, output_config: parsedBody.output_config }
+      : patchedBody;
     const isClaudeCode = patchResult.isClaudeCode;
 
     // 2. 转换为 Chat 格式
@@ -836,6 +841,7 @@ export async function handleAnthropicMessage(req, res, body, context) {
       requestId,
       externalRequestId: context.externalRequestId || null,
       timeoutMs: config?.server?.request_timeout_ms,
+      nativeBody: nativeRequestBody,
     });
 
 
@@ -937,7 +943,10 @@ async function handleSuccess(
 
   // 转换为 Anthropic 格式
   let anthropicResponse;
-  if (chatResponse && typeof chatResponse === 'object') {
+  if (executionResult.nativeProtocol && chatResponse?.type === 'message') {
+    // 原生 Anthropic Provider 已经返回目标协议，保持其完整字段语义。
+    anthropicResponse = chatResponse;
+  } else if (chatResponse && typeof chatResponse === 'object') {
     anthropicResponse = openaiToAnthropic(chatResponse, originalBody);
   } else {
     // 响应体非 JSON，构造最小 Anthropic 响应

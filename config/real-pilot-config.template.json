@@ -1,0 +1,172 @@
+{
+  "server": {
+    "host": "127.0.0.1",
+    "port": 28788,
+    "data_dir": "./data",
+    "request_timeout_ms": 120000,
+    "shutdown_grace_ms": 5000
+  },
+  "intelligence": {
+    "mode": "active_canary",
+    "fallback_to_routing": true,
+    "activeCanary": {
+      "percentage": 100,
+      "allowedAgents": [
+        "claude-code"
+      ],
+      "allowedProtocols": [
+        "anthropic"
+      ],
+      "allowedTaskTypes": [
+        "general_chat",
+        "writing",
+        "summarization",
+        "translation",
+        "extraction"
+      ]
+    },
+    "shadow": {
+      "retentionDays": 30
+    }
+  },
+  "routing": {
+    "strategy": "tier_weighted",
+    "tier_weights": {
+      "tier1": 10,
+      "tier2": 5,
+      "tier3": 1
+    },
+    "max_concurrent": 4,
+    "max_retries": 2,
+    "retry_backoff_ms": 400,
+    "cooldown_default_sec": 60,
+    "health_check_interval_sec": 999999,
+    "failover_on_error": true
+  },
+  "budget": {
+    "allowPaid": true,
+    "maxRequestCost": 1,
+    "allowedModels": [],
+    "allowedProviders": [],
+    "strictModel": false
+  },
+  "providers": [
+    {
+      "name": "gateway7878",
+      "base_url": "http://127.0.0.1:7878/v1",
+      "api_key": "REPLACE_VIA_SECRETS_OR_ENV",
+      "auth_header": "Authorization",
+      "auth_prefix": "Bearer "
+    }
+  ],
+  "models": [
+    {
+      "id": "phase1-primary",
+      "provider": "gateway7878",
+      "apiModel": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+      "tier": "tier1",
+      "paid": false,
+      "capability": [
+        "chat",
+        "streaming",
+        "coding"
+      ],
+      "context_window": 64000,
+      "max_tokens": 4096,
+      "price": {
+        "input": 2.8e-7,
+        "output": 4.2e-7
+      },
+      "enabled": true
+    },
+    {
+      "id": "canary-primary",
+      "provider": "gateway7878",
+      "apiModel": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "tier": "tier2",
+      "paid": false,
+      "capability": [
+        "chat",
+        "streaming",
+        "coding"
+      ],
+      "context_window": 128000,
+      "max_tokens": 4096,
+      "price": {
+        "input": 2.8e-7,
+        "output": 4.2e-7
+      },
+      "enabled": true
+    },
+    {
+      "id": "redundant-1",
+      "provider": "gateway7878",
+      "apiModel": "Qwen/Qwen3-Next-80B-A3B-Instruct",
+      "tier": "tier3",
+      "paid": false,
+      "capability": [
+        "chat",
+        "streaming",
+        "fast"
+      ],
+      "context_window": 128000,
+      "max_tokens": 4096,
+      "price": {
+        "input": 2.8e-7,
+        "output": 4.2e-7
+      },
+      "enabled": true
+    },
+    {
+      "id": "redundant-2",
+      "provider": "gateway7878",
+      "apiModel": "nvidia/nemotron-3-ultra-550b-a55b",
+      "tier": "tier3",
+      "paid": false,
+      "capability": [
+        "chat",
+        "streaming",
+        "reasoning"
+      ],
+      "context_window": 128000,
+      "max_tokens": 4096,
+      "price": {
+        "input": 2.8e-7,
+        "output": 4.2e-7
+      },
+      "enabled": true
+    }
+  ],
+  "agent_bindings": {
+    "claude-code": {
+      "model_ids": [
+        "phase1-primary",
+        "canary-primary",
+        "redundant-1",
+        "redundant-2"
+      ],
+      "budget": {
+        "allowPaid": true,
+        "maxRequestCost": 1,
+        "allowedModels": [
+          "phase1-primary",
+          "canary-primary",
+          "redundant-1",
+          "redundant-2"
+        ],
+        "allowedProviders": [
+          "gateway7878"
+        ],
+        "strictModel": false
+      }
+    }
+  },
+  "circuit_breaker": {
+    "enabled": false,
+    "failure_threshold": 100,
+    "failure_window_sec": 60,
+    "open_state_sec": 120,
+    "half_open_max_calls": 2,
+    "key_disable_on_auth_invalid": true
+  }
+}

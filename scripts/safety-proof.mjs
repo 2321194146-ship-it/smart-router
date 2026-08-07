@@ -17,8 +17,13 @@
 
 import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { dirname, join, resolve } from 'node:path';
 import { CanaryController } from '../src/intelligence/canary-controller.js';
+
+// 项目根目录动态解析（脚本自身位置，不包含任何开发者机器绝对路径）
+const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(SCRIPT_DIR, '..');
 import { IntelligenceLayer } from '../src/intelligence/index.js';
 import { MemoryStore } from '../src/storage/memory-store.js';
 import { SQLiteStore } from '../src/storage/sqlite-store.js';
@@ -189,7 +194,7 @@ const DEFAULT_BUDGET = { allowPaid: true, maxRequestCost: 100, allowedModels: []
 
 // ---------- P10：7878/17878 未受影响 ----------
 {
-  const serverSrc = readFileSync('/Users/lijie/CodeBuddy/20260801-smart-router-mainline/src/server.js', 'utf8');
+  const serverSrc = readFileSync(join(ROOT, 'src/server.js'), 'utf8');
   const portOk = serverSrc.includes('const DEFAULT_PORT = 28788;');
   // 本服务没有新增监听 7878 / 17878 的代码
   const no7878 = !/listen\(\s*7878\b/.test(serverSrc) && !/port:\s*7878\b/.test(serverSrc);

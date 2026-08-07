@@ -193,8 +193,10 @@ describe('Streaming Pre-First-Content Fallback (empty SSE)', () => {
         const stopData = findEventData(resp.events, 'message_stop');
         assert.ok(stopData, 'should receive message_stop');
 
-        assert.strictEqual(countMessagesPosts(providerA), 1, 'A should be called exactly once');
-        assert.strictEqual(countMessagesPosts(providerB), 1, 'B should be called exactly once (fallback)');
+        // A 应恰好被调用一次（上游路径依 provider 认证风格：OpenAI 兼容走 chat，
+        // Anthropic 风格走 /v1/messages；核心意图是空流后 fallback 到 B）
+        assert.strictEqual(countChatPosts(providerA) + countMessagesPosts(providerA), 1, 'A should be called exactly once');
+        assert.strictEqual(countChatPosts(providerB) + countMessagesPosts(providerB), 1, 'B should be called exactly once (fallback)');
 
         await assertFallbackEvidence(router, 'ext-anth-1', 'anthropic');
       } finally {

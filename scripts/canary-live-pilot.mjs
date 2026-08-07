@@ -13,8 +13,12 @@ import { mkdtempSync, writeFileSync, rmSync, existsSync, readFileSync, mkdirSync
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer as createRouter } from '../src/server.js';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
 
-const ROOT = '/Users/lijie/CodeBuddy/20260801-smart-router-mainline';
+// 项目根目录动态解析（脚本自身位置，不包含任何开发者机器绝对路径）
+const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(SCRIPT_DIR, '..');
 const ADMIN_TOKEN = 'live-pilot-admin-token-local';
 const TARGET_ACTIVE = 20;
 const MAX_REQUESTS = 1200;
@@ -279,6 +283,9 @@ server2.closeAllConnections?.();
 await new Promise((resolve) => server2.close(() => resolve()));
 mock.server.close();
 delete process.env.SMART_ROUTER_ADMIN_TOKEN;
+
+// 写 Evidence 前自动创建目录（任意目录均可执行）
+mkdirSync(join(ROOT, 'evidence'), { recursive: true });
 
 // 保存脱敏配置快照（api_key 用占位）
 const sanitizedConfig = JSON.parse(JSON.stringify(config));

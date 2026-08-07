@@ -361,11 +361,13 @@ export function analyzeTask(body, options = {}) {
   const protocol = options.protocol || null;
   const messages = collectMessages(body);
   const userMsgs = messages.filter((m) => m.role === 'user');
-  const allText = messages.map((m) => extractTextFromContent(m.content)).join('\n');
   const lastUser = userMsgs.length > 0
     ? extractTextFromContent(userMsgs[userMsgs.length - 1].content)
     : '';
-  const low = lower(allText);
+  // 任务类型判定信号：仅用户消息（用户意图）。
+  // 修复：真实 Claude Code 请求的系统提示含大量 coding/debug 背景词，
+  //       若用全部文本会导致低风险任务（问答/写作/摘要/翻译/提取）被误判为 coding/debugging。
+  const userLow = lower(userMsgs.map((m) => extractTextFromContent(m.content)).join('\n'));
   const signals = [];
 
   // 能力需求信号
@@ -379,8 +381,8 @@ export function analyzeTask(body, options = {}) {
   const toolChoice = body?.tool_choice;
   const toolChoiceRequired = isToolChoiceRequired(toolChoice);
   const explicitToolRequest =
-    TOOL_REQUIRED_HINTS.some((h) => low.includes(h)) ||
-    TOOL_REQUIRED_PATTERNS.some((re) => re.test(low));
+    TOOL_REQUIRED_HINTS.some((h) => userLow.includes(h)) ||
+    TOOL_REQUIRED_PATTERNS.some((re) => re.test(userLow));
   const toolsRequired = toolChoiceRequired || explicitToolRequest;
   if (toolsAvailable) signals.push('tools_available');
   if (toolsRequired) signals.push('tool_use');
@@ -393,26 +395,26 @@ export function analyzeTask(body, options = {}) {
         return c.some((b) => b && (b.type === 'image_url' || b.type === 'image' || b.type === 'input_image'));
       }
       return false;
-    }) || VISION_HINTS.some((h) => low.includes(h));
+    }) || VISION_HINTS.some((h) => userLow.includes(h));
   if (needsVision) signals.push('vision');
 
   const structuredOutputRequired = detectProtocolStructuredOutput(body);
   const needsStructuredOutput =
-    structuredOutputRequired || STRUCTURED_OUTPUT_HINTS.some((h) => low.includes(h));
+    structuredOutputRequired || STRUCTURED_OUTPUT_HINTS.some((h) => userLow.includes(h));
   if (structuredOutputRequired) signals.push('structured_output_required');
   if (needsStructuredOutput && !structuredOutputRequired) signals.push('structured_output');
 
-  const codeRelated = CODING_HINTS.some((h) => low.includes(h));
+  const codeRelated = CODING_HINTS.some((h) => userLow.includes(h));
   if (codeRelated) signals.push('coding');
 
-  const debugRelated = DEBUG_HINTS.some((h) => low.includes(h));
-  const archRelated = ARCHITECTURE_HINTS.some((h) => low.includes(h));
-  const researchRelated = RESEARCH_HINTS.some((h) => low.includes(h));
-  const writingRelated = WRITING_HINTS.some((h) => low.includes(h));
-  const summRelated = SUMMARIZATION_HINTS.some((h) => low.includes(h));
-  const transRelated = TRANSLATION_HINTS.some((h) => low.includes(h));
-  const extractRelated = EXTRACTION_HINTS.some((h) => low.includes(h));
-  const reasonRelated = REASONING_HINTS.some((h) => low.includes(h)) || ANALYSIS_HINTS.some((h) => low.includes(h));
+  const debugRelated = DEBUG_HINTS.some((h) => userLow.includes(h));
+  const archRelated = ARCHITECTURE_HINTS.some((h) => userLow.includes(h));
+  const researchRelated = RESEARCH_HINTS.some((h) => userLow.includes(h));
+  const writingRelated = WRITING_HINTS.some((h) => userLow.includes(h));
+  const summRelated = SUMMARIZATION_HINTS.some((h) => userLow.includes(h));
+  const transRelated = TRANSLATION_HINTS.some((h) => userLow.includes(h));
+  const extractRelated = EXTRACTION_HINTS.some((h) => userLow.includes(h));
+  const reasonRelated = REASONING_HINTS.some((h) => userLow.includes(h)) || ANALYSIS_HINTS.some((h) => userLow.includes(h));
 
   // 任务类型判定（优先级：vision > tool > structured > debug > arch > coding > research > analysis > writing > summ > trans > extract > chat）
   let taskType = TaskType.GENERAL_CHAT;

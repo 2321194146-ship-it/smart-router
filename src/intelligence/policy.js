@@ -317,7 +317,11 @@ export function estimateCost(candidate, task) {
   const outCost = price.output_cost_per_1k || 0;
   if (inCost <= 0 && outCost <= 0) return 0;
   const inTokens = task?.estimatedInputTokens || 1000;
-  const outTokens = Math.ceil((task?.complexity || 0.3) * 800) + 100;
+  // 与 Token Estimator / ExecutionEngine 共用输出预留；旧的 complexity 估算
+  // 会让 Shadow 与真实预算闸门使用不同口径，导致推荐与执行结果分叉。
+  const outTokens = Number.isFinite(task?.estimatedOutputTokens) && task.estimatedOutputTokens > 0
+    ? task.estimatedOutputTokens
+    : Math.ceil((task?.complexity || 0.3) * 800) + 100;
   const cost = (inTokens / 1000) * inCost + (outTokens / 1000) * outCost;
   return Number(cost.toFixed(8));
 }

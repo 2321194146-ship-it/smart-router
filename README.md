@@ -1,6 +1,6 @@
 # Smart Router Mainline - Phase 1 生产核心底座
 
-独立端口 **127.0.0.1:28788**，intelligence.mode = off，不包含智能决策 / Dashboard / 企业功能。
+独立端口 **127.0.0.1:28788**，默认 `intelligence.mode = off`；包含本地运维 Dashboard，不包含公网产品前端和企业功能。
 
 ## 环境要求
 
@@ -44,17 +44,43 @@ npm start
 curl -s http://127.0.0.1:28788/v1 | head -c 200
 ```
 
+## 生产 HTTP 安全边界
+
+- 绑定 `127.0.0.1`、`::1` 或 `localhost` 时保持本机兼容；绑定其他地址时，服务启动会强制要求环境变量 `SMART_ROUTER_API_TOKEN`（至少 16 个字符），主 API 使用 `Authorization: Bearer <token>`。
+- `routing.max_concurrent` 现在由 HTTP 入口实际执行；超过上限返回 `503`，不会进入 Provider。
+- 对外监听默认启用按客户端地址的内存固定窗口限流：每分钟 120 次；可用 `routing.rate_limit.enabled/window_ms/max_requests` 调整。多实例部署仍需在反向代理或共享限流层做全局限流。
+- 非法 JSON、空对象和数组请求在路由前返回 `400`；不会触发上游调用。
+- 流式 Provider 响应默认有 30 秒空闲超时和 `request_timeout_ms` 总时限；可用 `server.stream_idle_timeout_ms` / `server.stream_total_timeout_ms` 调整，超时会中止上游读取，避免连接和并发槽长期占用。
+- Anthropic 原生 API 必须在对应 Provider 上显式设置 `api_type: "anthropic_native"`；仅有 `x-api-key` 或 `anthropic-version` 不会自动切换协议。原生路径保留 `output_config`、工具和系统字段，并原样透传 Anthropic Messages 响应/SSE。
+
+## 本地运维 Dashboard
+
+启动服务后打开 [http://127.0.0.1:28788/dashboard](http://127.0.0.1:28788/dashboard)。这是本机控制台，不是公网用户前端：
+
+- 页面只在服务绑定 loopback（`127.0.0.1` / `::1` / `localhost`）时提供。
+- 状态、Kill、Resume 操作仍需要 `SMART_ROUTER_ADMIN_TOKEN`；Token 只在页面内存中使用，不写入 localStorage、Cookie 或配置文件。
+- 当前页面提供运行模式、Canary、Active 请求、成本、Fallback、停止原因和 Shadow 恢复操作。
+
+示例：
+
+```bash
+export SMART_ROUTER_API_TOKEN="替换为至少16个字符的随机值"
+curl -H "Authorization: Bearer ${SMART_ROUTER_API_TOKEN}" \
+  http://127.0.0.1:28788/v1/models
+```
+
 ## 测试门禁（全部必须退出 0）
 
 ```bash
-npm test                 # unit + integration + audit 全量（当前 443 项）
-npm run test:unit        # 345 项
-npm run test:integration # 65 项（含 SQLite 重启恢复、Finalize 事务原子性回滚与 100 并发事务、
+npm test                 # unit + integration + audit 全量（以当前输出为准）
+npm run test:unit        # 491 项
+npm run test:integration # 97 项（含 SQLite 重启恢复、Finalize 事务原子性回滚与 100 并发事务、
                          #      三协议流式首内容前空 SSE Fallback、真实失败 Fallback、Cancel 证据对齐、
                          #      429 Key 冷却持久化与重启恢复、externalRequestId 持久化、
                          #      三协议 HTTP 无候选原子性）
 npm run test:audit       # 33 项
 npm run syntax:check     # src/index.js + src/server.js 语法
+node scripts/release-evidence-check.mjs --json  # 发布前校验分支、提交、工作区和源文件哈希
 ```
 
 ## 运行闭环（Phase 1 Final Verified）
@@ -104,7 +130,7 @@ Active Readiness 评测：`node scripts/active-readiness-eval.mjs`（105 固定�
 
 端点声明：ModelScope 直连真实 Provider；Anthropic/Responses 经 7878 网关转发（真实链路，非 28788 直连官方）；评测使用确定性本地 Mock。
 
-本阶段未实现：Active 全流量、Dashboard、网站、用户系统、商业化、Prompt 注入、
+本阶段未实现：Active 全流量、公网网站、用户系统、商业化、Prompt 注入、
 用户消息改写、Tool 自动控制、多模型并行/拼接、自动学习修改生产权重。5% 低风险 Active 须经独立验收。
 
 ## Phase 2-C Safety Sealed（版本 1.0.0-phase2c-active-canary）
@@ -126,7 +152,7 @@ Active Canary 控制器 8 项安全收口（独立验收后，仅修以下内容
 
 ## Phase 2-C 5% Canary Live Pilot（127.0.0.1:28788 内部实验）
 
-真实 5% 低风险 Active Canary 启动补丁（仅完成以下内容，未新增评测体系 / Task 分类 / 网站 / Dashboard / 决策算法）：
+真实 5% 低风险 Active Canary 启动补丁（仅完成以下内容，未新增评测体系 / Task 分类 / 公网网站 / 决策算法；本地运维 Dashboard 独立提供）：
 
 - 允许 Claude Code 低风险流式请求参与 Canary：needsStreaming 不再直接排除；流式请求须 protocol=anthropic + agentId=claude-code + 低风险任务类型 + 所有执行候选支持 streaming；流式硬能力保留（stream=true + 模型不支持 streaming → 候选 blocked，不进 Fallback）
 - 自动停止状态立即持久化：apply 阶段（budget_violation）与 Finalize 阶段（budget_exceeded / first_byte_switch / repeated_tool / incomplete_rise / consecutive_provider_errors / consecutive_no_candidate）停止后立即写入 SQLite app_state.canary.killed；持久化失败不影响进程内停止采样；重启后仍 stopped，不恢复 5% 采样

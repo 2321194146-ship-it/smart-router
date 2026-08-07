@@ -93,6 +93,14 @@ export class CircuitBreaker {
   }
 
   /**
+   * 等待熔断器状态恢复完成。
+   * @returns {Promise<void>|undefined}
+   */
+  getRestoredPromise() {
+    return this._restorePromise;
+  }
+
+  /**
    * 判断是否允许调用。
    * 在 OPEN 状态下返回 false；HALF_OPEN 状态下允许有限探测。
    *
@@ -417,6 +425,14 @@ export class ProviderHealth {
     if (this.store) {
       this._restorePromise = this._restoreHealthState();
     }
+  }
+
+  /**
+   * 等待 Provider 健康状态恢复完成。
+   * @returns {Promise<void>|undefined}
+   */
+  getRestoredPromise() {
+    return this._restorePromise;
   }
 
   // --------------------------------------------------------------------------

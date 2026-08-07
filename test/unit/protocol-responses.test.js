@@ -118,6 +118,41 @@ describe('Responses Protocol Conversion', () => {
       assert.ok(!('max_output_tokens' in result));
     });
 
+    test('preserves Responses structured output semantics', () => {
+      const result = responsesToChat({
+        input: 'Return JSON',
+        text: {
+          format: {
+            type: 'json_schema',
+            name: 'answer',
+            strict: true,
+            schema: { type: 'object', properties: { answer: { type: 'string' } } },
+          },
+        },
+      });
+      assert.deepStrictEqual(result.response_format, {
+        type: 'json_schema',
+        json_schema: {
+          name: 'answer',
+          description: undefined,
+          strict: true,
+          schema: { type: 'object', properties: { answer: { type: 'string' } } },
+        },
+      });
+    });
+
+    test('maps max_completion_tokens and reasoning effort', () => {
+      const result = responsesToChat({
+        input: 'Explain',
+        max_completion_tokens: 256,
+        reasoning: { effort: 'high' },
+        user: 'user-1',
+      });
+      assert.strictEqual(result.max_tokens, 256);
+      assert.strictEqual(result.reasoning_effort, 'high');
+      assert.strictEqual(result.user, 'user-1');
+    });
+
     test('forces stream to false', () => {
       const body = { model: 'gpt-4', input: 'Hi', stream: true };
       const result = responsesToChat(body);

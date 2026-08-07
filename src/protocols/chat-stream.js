@@ -282,6 +282,14 @@ export function parseSSEChunk(chunk) {
       }
     }
 
+    // 裸 JSON 块兼容：无字段行但整块是 JSON（部分网关返回非标准 SSE，如 7878 返回 Anthropic 原生 message）
+    if (event.data === null && event.event === null) {
+      const trimmed = block.trim();
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+        event.data = trimmed;
+      }
+    }
+
     // 仅返回有实际内容的事件
     if (event.data !== null || event.event !== null) {
       events.push(event);

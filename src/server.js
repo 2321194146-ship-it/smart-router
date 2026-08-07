@@ -19,8 +19,11 @@
 // 仅使用 Node.js 内置模块（http, url, crypto），无第三方依赖。
 
 import http from 'node:http';
-import { randomBytes } from 'node:crypto';
-import { join } from 'node:path';
+import { randomBytes, timingSafeEqual } from 'node:crypto';
+import { mkdir } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { loadConfig, getConfig, log } from './config/loader.js';
 import { validateConfig } from './config/validator.js';
 import { resolveAgent } from './agent/identity.js';
@@ -38,6 +41,7 @@ import { IntelligenceLayer } from './intelligence/index.js';
 import { CostTracker } from './cost/tracker.js';
 import { CancelToken } from './runtime/cancellation.js';
 import { Finalizer } from './runtime/finalization.js';
+import { ConcurrencyGate, FixedWindowRateLimiter } from './runtime/request-controls.js';
 import { MemoryStore, SQLiteStore } from './storage/index.js';
 import { handleChatCompletion } from './protocols/chat.js';
 import { handleChatCompletionStream } from './protocols/chat-stream.js';
@@ -55,6 +59,7 @@ const DEFAULT_PORT = 28788;
 const DEFAULT_REQUEST_TIMEOUT_MS = 120000;
 const DEFAULT_KEEP_ALIVE_TIMEOUT_MS = 5000;
 const DEFAULT_MAX_BODY_BYTES = 10 * 1024 * 1024; // 10MB
+const DASHBOARD_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'web');
 
 // ----------------------------------------------------------------------------
 // createServer：创建并配置 HTTP 服务器
@@ -95,12 +100,24 @@ export async function createServer(configPath) {
   }
   log('server: config validated');
 
+  // 非回环监听默认强制 API Bearer Token；即使配置显式关闭，也不允许把公网接口裸露出去。
+  const publicAuth = createPublicAuthPolicy(config);
+  const rateLimitConfig = config.routing?.rate_limit || {};
+  const rateLimiter = new FixedWindowRateLimiter({
+    enabled: rateLimitConfig.enabled ?? publicAuth.enabled,
+    windowMs: rateLimitConfig.window_ms ?? 60_000,
+    maxRequests: rateLimitConfig.max_requests ?? 120,
+  });
+  const concurrencyGate = new ConcurrencyGate(config.routing?.max_concurrent ?? 64);
+
   // 3. 初始化存储后端
   //    测试环境（port=0 或无 data_dir）使用 MemoryStore
   //    生产环境使用 SQLiteStore
   let store = null;
   const dataDir = config.server?.data_dir || config.data_dir || null;
   if (dataDir) {
+    // SQLite 不会自动创建父目录；先初始化数据目录，避免首次部署因目录不存在启动失败。
+    await mkdir(dataDir, { recursive: true, mode: 0o700 });
     const dbPath = join(dataDir, 'smart-router.db');
     store = new SQLiteStore(dbPath);
   } else {
@@ -125,6 +142,17 @@ export async function createServer(configPath) {
     circuitBreaker,
     store,
   );
+
+  // 持久化状态必须在监听端口前恢复完成，避免重启后的首批请求绕过冷却 Key、
+  // Provider 健康状态或已打开的熔断器。
+  await Promise.all(
+    [
+      keyPool.getRestoredPromise?.(),
+      health.getRestoredPromise?.(),
+      circuitBreaker.getRestoredPromise?.(),
+    ].filter(Boolean),
+  );
+  log('server: provider state restored');
 
   // 4b. 初始化智能层（Phase2-A/2-B Shadow；off 模式零开销；Shadow 记录持久化到 store）
   const intelligence = new IntelligenceLayer(config, {
@@ -162,6 +190,9 @@ export async function createServer(configPath) {
     finalizer,
     executionEngine,
     intelligence,
+    publicAuth,
+    rateLimiter,
+    concurrencyGate,
   };
 
   // 6. 创建 HTTP 服务器
@@ -213,7 +244,8 @@ export async function createServer(configPath) {
  * @param {object} components 组件集合
  */
 async function handleRequest(req, res, components) {
-  const { config } = components;
+  const { config, publicAuth, rateLimiter, concurrencyGate } = components;
+  let admitted = false;
 
   try {
     // 1. 解析 URL
@@ -223,11 +255,45 @@ async function handleRequest(req, res, components) {
     // 2. 路径归一化（/v1/v1/ → /v1/，Claude Code 2.1.206+ 兼容）
     pathname = normalizePath(pathname);
 
+    // 本地 Dashboard：只允许 loopback 绑定，数据操作仍由 Admin Token 保护。
+    if (await handleDashboardRequest(req, res, config, pathname)) return;
+
     // 2b. 本地管理接口（Phase2-C Safety Sealed）：仅 127.0.0.1 + Admin Token
     if (pathname.startsWith('/_smart-router/intelligence/')) {
       await handleIntelligenceAdmin(req, res, components, pathname);
       return;
     }
+
+    // 先限流再认证，避免错误 Token 暴力尝试绕过资源保护。
+    const clientKey = req.socket?.remoteAddress || 'unknown';
+    const rate = rateLimiter.consume(clientKey);
+    if (!rate.allowed) {
+      res.writeHead(429, {
+        'Content-Type': 'application/json',
+        'Retry-After': String(Math.ceil(rate.retryAfterMs / 1000)),
+      });
+      res.end(JSON.stringify({ error: { message: 'Too many requests' } }));
+      return;
+    }
+
+    if (publicAuth.enabled && !isPublicRequestAuthorized(req, publicAuth.token)) {
+      res.writeHead(401, {
+        'Content-Type': 'application/json',
+        'WWW-Authenticate': 'Bearer',
+      });
+      res.end(JSON.stringify({ error: { message: 'Unauthorized' } }));
+      return;
+    }
+
+    if (!concurrencyGate.tryAcquire()) {
+      res.writeHead(503, {
+        'Content-Type': 'application/json',
+        'Retry-After': '1',
+      });
+      res.end(JSON.stringify({ error: { message: 'Server is at concurrency capacity' } }));
+      return;
+    }
+    admitted = true;
 
     // 3. HEAD /v1 探活（Claude Code 兼容）
     if (req.method === 'HEAD') {
@@ -266,6 +332,7 @@ async function handleRequest(req, res, components) {
     // 6. POST 请求路由到协议处理器
     if (req.method === 'POST') {
       const body = await parseBody(req, config);
+      assertRequestBodyObject(body);
 
       // 创建取消令牌（监听客户端断开）
       const cancelToken = CancelToken.fromHttp(req, res);
@@ -350,7 +417,7 @@ async function handleRequest(req, res, components) {
       // 请求体过大 → 413
       const status = error.statusCode || 500;
       const message =
-        status === 413
+        status === 400 || status === 413
           ? error.message
           : 'Internal server error';
       res.writeHead(status, { 'Content-Type': 'application/json' });
@@ -363,6 +430,8 @@ async function handleRequest(req, res, components) {
         // 忽略结束异常
       }
     }
+  } finally {
+    if (admitted) concurrencyGate.release();
   }
 }
 
@@ -377,7 +446,7 @@ async function handleRequest(req, res, components) {
  *   - 支持 Content-Length 和 chunked 传输
  *   - 大请求体限制（默认 10MB，可配置）
  *   - 超限时抛出 413 错误（由 handleRequest 顶层捕获）
- *   - JSON 解析失败时返回空对象（不抛出错误，由调用方处理）
+ *   - JSON 解析失败时返回 400，不进入路由或上游调用
  *   - 空请求体返回空对象
  *
  * @param {http.IncomingMessage} req HTTP 请求对象
@@ -429,9 +498,12 @@ async function parseBody(req, config) {
         const parsed = JSON.parse(raw);
         resolve(parsed);
       } catch (e) {
-        // JSON 解析失败：返回空对象，由协议处理器处理无效 body
+        // JSON 解析失败：稳定返回 400，避免无效请求进入 Provider。
         log(`server: JSON 解析失败: ${e.message}`);
-        resolve({});
+        const err = new Error('Invalid JSON request body');
+        err.statusCode = 400;
+        err.code = 'INVALID_JSON';
+        reject(err);
       }
     });
 
@@ -451,11 +523,97 @@ const ADMIN_STATUS = '/_smart-router/intelligence/status';
 const ADMIN_KILL = '/_smart-router/intelligence/kill';
 const ADMIN_RESUME = '/_smart-router/intelligence/resume-shadow';
 
+const DASHBOARD_ASSETS = new Map([
+  ['/dashboard', ['index.html', 'text/html; charset=utf-8']],
+  ['/dashboard/', ['index.html', 'text/html; charset=utf-8']],
+  ['/dashboard/app.js', ['app.js', 'text/javascript; charset=utf-8']],
+  ['/dashboard/styles.css', ['styles.css', 'text/css; charset=utf-8']],
+]);
+
+/**
+ * 提供本地运维 Dashboard 静态资源。
+ * 页面本身不携带 Token；实际状态、Kill、Resume 请求仍走 Admin Token。
+ */
+async function handleDashboardRequest(req, res, config, pathname) {
+  if (req.method !== 'GET' || !DASHBOARD_ASSETS.has(pathname)) return false;
+  if (!isLoopbackBind(config?.server?.host) || !isLoopback(req.socket?.remoteAddress || '')) {
+    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Not found');
+    return true;
+  }
+
+  const [fileName, contentType] = DASHBOARD_ASSETS.get(pathname);
+  try {
+    const content = readFileSync(join(DASHBOARD_DIR, fileName));
+    res.writeHead(200, {
+      'Content-Type': contentType,
+      'Content-Length': content.length,
+      'Cache-Control': 'no-store',
+      'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Referrer-Policy': 'no-referrer',
+    });
+    res.end(content);
+  } catch (error) {
+    log(`server: dashboard asset error: ${error.message}`);
+    res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Dashboard unavailable');
+  }
+  return true;
+}
+
 /**
  * 判断是否为回环地址（仅本机可访问管理接口）。
  */
 function isLoopback(addr) {
   return addr === '127.0.0.1' || addr === '::1' || addr === '::ffff:127.0.0.1';
+}
+
+/**
+ * 监听地址是否仅限本机。
+ * 未知地址按非回环处理，避免误配置时默认裸露 API。
+ */
+function isLoopbackBind(host) {
+  return host === '127.0.0.1' || host === '::1' || host === 'localhost';
+}
+
+/**
+ * 构造主推理 API 的认证策略。
+ * Token 只从环境变量读取，配置文件不接受明文 api token。
+ */
+function createPublicAuthPolicy(config) {
+  const authConfig = config?.server?.auth;
+  const nonLoopback = !isLoopbackBind(config?.server?.host);
+  const enabled = nonLoopback || authConfig?.enabled === true;
+  if (!enabled) return { enabled: false, token: null };
+
+  const tokenEnv = typeof authConfig?.token_env === 'string' && authConfig.token_env.trim()
+    ? authConfig.token_env.trim()
+    : 'SMART_ROUTER_API_TOKEN';
+  const token = process.env[tokenEnv];
+  if (typeof token !== 'string' || token.length < 16) {
+    throw new Error(
+      `public API auth is required for server.host="${config?.server?.host}"; ` +
+      `set ${tokenEnv} to a token of at least 16 characters`,
+    );
+  }
+  return { enabled: true, token };
+}
+
+function isPublicRequestAuthorized(req, token) {
+  const auth = req.headers['authorization'];
+  if (typeof auth !== 'string' || !auth.startsWith('Bearer ')) return false;
+  return secureTokenEqual(token, auth.slice(7));
+}
+
+function assertRequestBodyObject(body) {
+  if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).length === 0) {
+    const err = new Error('Request body must be a non-empty JSON object');
+    err.statusCode = 400;
+    err.code = 'INVALID_REQUEST_BODY';
+    throw err;
+  }
 }
 
 /**
@@ -466,6 +624,18 @@ function resolveAdminToken(config) {
   if (process.env.SMART_ROUTER_ADMIN_TOKEN) return process.env.SMART_ROUTER_ADMIN_TOKEN;
   const t = config?.intelligence?.adminToken;
   return typeof t === 'string' && t.length > 0 ? t : null;
+}
+
+/**
+ * 使用常量时间比较管理 Token，避免直接字符串比较暴露可利用的时序差异。
+ * 长度不一致时只能提前返回；相同长度的比较使用 timingSafeEqual。
+ */
+function secureTokenEqual(expected, provided) {
+  if (typeof expected !== 'string' || typeof provided !== 'string') return false;
+  const expectedBytes = Buffer.from(expected, 'utf8');
+  const providedBytes = Buffer.from(provided, 'utf8');
+  if (expectedBytes.length !== providedBytes.length) return false;
+  return timingSafeEqual(expectedBytes, providedBytes);
 }
 
 /**
@@ -495,7 +665,7 @@ async function handleIntelligenceAdmin(req, res, components, pathname) {
     }));
     return;
   }
-  if (provided !== token) {
+  if (!secureTokenEqual(provided, token)) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: false, error: 'unauthorized' }));
     return;

@@ -232,16 +232,15 @@ describe('Phase2-B Active Readiness 回归', () => {
       const resp = await httpRequest(router.port, '/v1/chat/completions', {
         body: { model: 'paid-pricey', messages: [{ role: 'user', content: 'Analyze this long document' }] },
       });
-      // Phase1 协议层未向 CostTracker 传估算 token → 不拦截（Phase1 行为保持）；
-      // Shadow 层 Budget 独立决策：超限候选 blocked
-      assert.strictEqual(resp.status, 200, 'Phase1 behavior unchanged (no est tokens passed)');
+      // 运行时与 Shadow 共用 Token 估算：付费候选超过 maxRequestCost 必须在上游调用前阻断。
+      assert.strictEqual(resp.status, 402, 'runtime budget gate must block before upstream');
       const layer = router.server._components.intelligence;
       const recs = await layer.getRecords();
       const rec = recs[0];
       assert.strictEqual(rec.recommendation, null, 'over-budget must not be recommended');
       assert.ok(rec.rankedCandidates[0].blocked.includes('request_cost_exceeded'));
       assert.ok(rec.rankedCandidates[0].blocked.includes('0.000001'), 'blocked reason shows maxRequestCost');
-      assert.strictEqual(rec.actualOutcome, 'completed');
+      assert.strictEqual(rec.actualOutcome, 'budget_exceeded');
       assert.ok(rec.budgetAssessment === undefined || true);
     } finally {
       await stopSmartRouter(router);

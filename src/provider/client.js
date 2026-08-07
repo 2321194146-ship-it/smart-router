@@ -25,6 +25,7 @@ import {
 // ----------------------------------------------------------------------------
 
 const DEFAULT_TIMEOUT_MS = 300000; // 5min，与 config.server.request_timeout_ms 默认值一致
+const DEFAULT_STREAM_IDLE_TIMEOUT_MS = 30000;
 const PROBE_TIMEOUT_MS = 10000; // listModels 探测超时
 const MAX_BODY_LOG_LEN = 512; // 错误日志中 body 截断长度
 
@@ -52,6 +53,93 @@ function truncate(str, max) {
   if (!str) return '';
   const s = String(str);
   return s.length > max ? s.slice(0, max) + '…' : s;
+}
+
+/**
+ * 为上游流包装 idle/total deadline。
+ * fetch 收到响应头后不会再受普通 fetch timeout 保护，因此必须把 deadline
+ * 延伸到 ReadableStream 消费阶段，避免 Provider 保持连接无限占用资源。
+ */
+function guardStreamingResponse(response, abortController, externalSignal, onExternalAbort, options) {
+  if (!response?.body || typeof response.body.getReader !== 'function') return response;
+
+  const reader = response.body.getReader();
+  const idleTimeoutMs = Math.max(1, options.idleTimeoutMs);
+  const totalTimeoutMs = Math.max(1, options.totalTimeoutMs);
+  let idleTimer = null;
+  let totalTimer = null;
+  let finished = false;
+  let streamController = null;
+
+  const clearTimers = () => {
+    if (idleTimer) clearTimeout(idleTimer);
+    if (totalTimer) clearTimeout(totalTimer);
+    idleTimer = null;
+    totalTimer = null;
+  };
+
+  const cleanup = () => {
+    clearTimers();
+    if (externalSignal && onExternalAbort) {
+      externalSignal.removeEventListener('abort', onExternalAbort);
+    }
+  };
+
+  const abortStream = (error) => {
+    if (finished) return;
+    finished = true;
+    cleanup();
+    try { abortController.abort(); } catch {}
+    reader.cancel(error).catch(() => {});
+    if (streamController) streamController.error(error);
+  };
+
+  const guardedBody = new ReadableStream({
+    start(controller) {
+      streamController = controller;
+      totalTimer = setTimeout(() => {
+        abortStream(new Error('upstream stream total timeout'));
+      }, totalTimeoutMs);
+    },
+    async pull(controller) {
+      if (finished) return;
+      if (idleTimer) clearTimeout(idleTimer);
+      let idleReject;
+      const idlePromise = new Promise((_, reject) => { idleReject = reject; });
+      idleTimer = setTimeout(() => {
+        const error = new Error('upstream stream idle timeout');
+        try { abortController.abort(); } catch {}
+        idleReject(error);
+      }, idleTimeoutMs);
+
+      try {
+        const result = await Promise.race([reader.read(), idlePromise]);
+        if (idleTimer) clearTimeout(idleTimer);
+        idleTimer = null;
+        if (result.done) {
+          finished = true;
+          cleanup();
+          controller.close();
+          return;
+        }
+        if (result.value) controller.enqueue(result.value);
+      } catch (error) {
+        abortStream(error);
+      }
+    },
+    async cancel(reason) {
+      if (finished) return;
+      finished = true;
+      cleanup();
+      try { await reader.cancel(reason); } catch {}
+    },
+  });
+
+  return new Response(guardedBody, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
 }
 
 // ----------------------------------------------------------------------------
@@ -89,6 +177,10 @@ export class ProviderClient {
     this.health = health || null;
     this._defaultTimeoutMs =
       config?.server?.request_timeout_ms ?? DEFAULT_TIMEOUT_MS;
+    this._streamIdleTimeoutMs =
+      config?.server?.stream_idle_timeout_ms ?? DEFAULT_STREAM_IDLE_TIMEOUT_MS;
+    this._streamTotalTimeoutMs =
+      config?.server?.stream_total_timeout_ms ?? this._defaultTimeoutMs;
 
     // 构建 provider 查找索引（name → provider config）
     this._providerIndex = new Map();
@@ -415,9 +507,18 @@ export class ProviderClient {
     const headers = this._buildHeaders(provider, keyInfo.key);
 
     // apiModel 映射：将网关内部 model id 替换为上游实际 apiModel
-    const requestBody = { ...body };
+    const requestBody = opts.nativeRequest && opts.nativeBody
+      ? { ...opts.nativeBody }
+      : { ...body };
     if (modelConfig.apiModel) {
       requestBody.model = modelConfig.apiModel;
+    }
+    // 传输兼容性：按模型配置的 max_tokens 收紧请求（部分真实网关对超大 max_tokens + tools 拒绝）
+    if (typeof modelConfig.max_tokens === 'number' && modelConfig.max_tokens > 0) {
+      const reqMax = Number(requestBody.max_tokens);
+      if (!Number.isFinite(reqMax) || reqMax > modelConfig.max_tokens) {
+        requestBody.max_tokens = modelConfig.max_tokens;
+      }
     }
 
     // Anthropic 特殊处理：添加 anthropic-version 头（若未在 provider 配置中指定）
@@ -439,7 +540,14 @@ export class ProviderClient {
         method: 'POST',
         headers,
         body: requestBodyStr,
-      }, timeoutMs, opts.abortSignal);
+      }, timeoutMs, opts.abortSignal, requestBody.stream === true ? {
+        idleTimeoutMs: opts.streamIdleTimeoutMs
+          ?? provider.stream_idle_timeout_ms
+          ?? this._streamIdleTimeoutMs,
+        totalTimeoutMs: opts.streamTotalTimeoutMs
+          ?? provider.stream_total_timeout_ms
+          ?? this._streamTotalTimeoutMs,
+      } : null);
     } catch (err) {
       // fetch 抛出：网络错误或 abort
       const latency = Date.now() - startTime;
@@ -486,6 +594,7 @@ export class ProviderClient {
         providerName,
         keyId: keyInfo.keyId,
         modelId,
+        nativeProtocol: opts.nativeRequest === true,
       };
     }
 
@@ -554,7 +663,7 @@ export class ProviderClient {
    * @param {AbortSignal} [externalSignal] 外部取消信号（客户端断开）
    * @returns {Promise<Response>}
    */
-  async _fetchWithTimeout(url, fetchOptions, timeoutMs, externalSignal) {
+  async _fetchWithTimeout(url, fetchOptions, timeoutMs, externalSignal, streamGuard = null) {
     const controller = new AbortController();
 
     // 超时定时器
@@ -574,16 +683,28 @@ export class ProviderClient {
       externalSignal.addEventListener('abort', onExternalAbort, { once: true });
     }
 
+    let streamGuardActive = false;
     try {
       const response = await fetch(url, {
         ...fetchOptions,
         signal: controller.signal,
       });
+      if (streamGuard && response.body) {
+        clearTimeout(timeout);
+        streamGuardActive = true;
+        return guardStreamingResponse(
+          response,
+          controller,
+          externalSignal,
+          onExternalAbort,
+          streamGuard,
+        );
+      }
       return response;
     } finally {
       // 清理：取消超时定时器，移除事件监听
-      clearTimeout(timeout);
-      if (externalSignal && onExternalAbort) {
+      if (!streamGuardActive) clearTimeout(timeout);
+      if (!streamGuardActive && externalSignal && onExternalAbort) {
         externalSignal.removeEventListener('abort', onExternalAbort);
       }
     }

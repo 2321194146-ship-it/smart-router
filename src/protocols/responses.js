@@ -336,7 +336,39 @@ export function responsesToChat(body) {
   // max_output_tokens → max_tokens
   if (body.max_output_tokens !== undefined) {
     chatBody.max_tokens = body.max_output_tokens;
+  } else if (body.max_completion_tokens !== undefined) {
+    // 兼容 OpenAI Responses 的旧字段；明确优先 max_output_tokens。
+    chatBody.max_tokens = body.max_completion_tokens;
   }
+
+  // Responses 的结构化输出语义映射为 Chat response_format。
+  // 这既让 Decision Engine 正确识别 structured_output 硬需求，
+  // 也让支持该能力的 OpenAI-compatible Provider 收到原始约束。
+  if (body.response_format && typeof body.response_format === 'object') {
+    chatBody.response_format = body.response_format;
+  } else if (body.text?.format && typeof body.text.format === 'object') {
+    const format = body.text.format;
+    if (format.type === 'json_object') {
+      chatBody.response_format = { type: 'json_object' };
+    } else if (format.type === 'json_schema' && format.schema && typeof format.schema === 'object') {
+      chatBody.response_format = {
+        type: 'json_schema',
+        json_schema: {
+          name: format.name || 'response_schema',
+          description: format.description,
+          strict: format.strict,
+          schema: format.schema,
+        },
+      };
+    }
+  }
+
+  // 兼容 reasoning effort 和调用方标识；未知字段不透传，避免把 Responses
+  // 专有结构误发给 Chat Provider。
+  if (body.reasoning?.effort !== undefined) {
+    chatBody.reasoning_effort = body.reasoning.effort;
+  }
+  if (body.user !== undefined) chatBody.user = body.user;
 
   // parallel_tool_calls 透传
   if (body.parallel_tool_calls !== undefined) {
