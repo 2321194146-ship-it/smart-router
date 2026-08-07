@@ -20,7 +20,15 @@ function run(name, command, args) {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
     });
-    checks.push({ name, pass: true, output: output.trim().slice(-500) });
+    let pass = true;
+    let detail = output.trim().slice(-500);
+    if (name === 'full test suite') {
+      const tests = Number(output.match(/ℹ tests (\d+)/)?.[1] || 0);
+      const failures = Number(output.match(/ℹ fail (\d+)/)?.[1] || 0);
+      pass = tests === expectedTests && failures === 0;
+      detail = `tests=${tests}; failures=${failures}`;
+    }
+    checks.push({ name, pass, output: detail });
   } catch (error) {
     checks.push({
       name,

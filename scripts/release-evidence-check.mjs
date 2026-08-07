@@ -48,6 +48,7 @@ function isLocalExcluded(path) {
 
 const dirtyEntries = dirty ? dirty.split('\n').filter(Boolean) : [];
 const blockingDirtyEntries = dirtyEntries.filter((line) => !isLocalExcluded(statusPath(line)));
+const excludedDirtyEntries = dirtyEntries.filter((line) => isLocalExcluded(statusPath(line)));
 
 check('package name', manifest.package === pkg.name, pkg.name, manifest.package);
 check('package version', manifest.version === pkg.version, pkg.version, manifest.version);
@@ -84,6 +85,7 @@ const result = {
   root,
   branch,
   commit,
+  excluded_local_entries: excludedDirtyEntries.map(statusPath),
   checks,
   blockers: failed.map((item) => item.name),
 };
@@ -92,7 +94,7 @@ if (process.argv.includes('--json')) {
   console.log(JSON.stringify(result, null, 2));
 } else {
   const passed = checks.length - failed.length;
-  console.log(`release evidence: ${result.status}; checks=${checks.length}; passed=${passed}; blockers=${failed.length}`);
+  console.log(`release evidence: ${result.status}; checks=${checks.length}; passed=${passed}; blockers=${failed.length}; excluded_local=${excludedDirtyEntries.length}`);
   if (failed.length > 0) console.log(failed.map((item) => `- ${item.name}`).join('\n'));
 }
 process.exitCode = failed.length === 0 ? 0 : 1;
