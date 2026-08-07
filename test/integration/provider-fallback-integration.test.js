@@ -163,4 +163,64 @@ describe('Provider and Fallback Integration', () => {
       routerInfo.server.close();
     }
   });
+
+  test('incomplete responses fall through three free candidates before completing', async () => {
+    mockProvider.queueResponse({
+      match: (req) => req.body?.model === 'fallback-model-1',
+      response: {
+        status: 200,
+        body: {
+          id: 'fb-incomplete-1', object: 'chat.completion', model: 'fallback-model-1',
+          choices: [{ index: 0, message: { role: 'assistant', content: '' }, finish_reason: 'length' }],
+        },
+      },
+      once: true,
+    });
+    mockProvider.queueResponse({
+      match: (req) => req.body?.model === 'fallback-model-2',
+      response: {
+        status: 200,
+        body: {
+          id: 'fb-incomplete-2', object: 'chat.completion', model: 'fallback-model-2',
+          choices: [{ index: 0, message: { role: 'assistant', content: '' }, finish_reason: 'length' }],
+        },
+      },
+      once: true,
+    });
+    mockProvider.setDefaultResponse({
+      status: 200,
+      body: {
+        id: 'fb-incomplete-3', object: 'chat.completion', model: 'fallback-model-3',
+        choices: [{ index: 0, message: { role: 'assistant', content: 'Third candidate completed' }, finish_reason: 'stop' }],
+      },
+    });
+
+    const config = createTestConfig(mockPort, {
+      customProviders: [
+        { name: 'mock-a', base_url: `http://127.0.0.1:${mockPort}/v1`, api_key: 'test-key-a', auth_header: 'Authorization', auth_prefix: 'Bearer ' },
+        { name: 'mock-b', base_url: `http://127.0.0.1:${mockPort}/v1`, api_key: 'test-key-b', auth_header: 'Authorization', auth_prefix: 'Bearer ' },
+        { name: 'mock-c', base_url: `http://127.0.0.1:${mockPort}/v1`, api_key: 'test-key-c', auth_header: 'Authorization', auth_prefix: 'Bearer ' },
+      ],
+      customModels: [
+        { id: 'fallback-model-1', tier: 'tier1', provider: 'mock-a', apiModel: 'fallback-model-1', enabled: true, paid: false, capability: ['chat'] },
+        { id: 'fallback-model-2', tier: 'tier2', provider: 'mock-b', apiModel: 'fallback-model-2', enabled: true, paid: false, capability: ['chat'] },
+        { id: 'fallback-model-3', tier: 'tier3', provider: 'mock-c', apiModel: 'fallback-model-3', enabled: true, paid: false, capability: ['chat'] },
+      ],
+    });
+    const configDir = `/tmp/sr-test-three-freefb-${Date.now()}`;
+    const configPath = writeConfig(config, configDir);
+    const routerInfo = await startSmartRouter(configPath);
+
+    try {
+      const resp = await httpRequest(routerInfo.port, '/v1/chat/completions', {
+        body: { model: 'auto', messages: [{ role: 'user', content: 'Test three-way fallback' }] },
+      });
+      assert.strictEqual(resp.status, 200);
+      const body = JSON.parse(resp.body);
+      assert.strictEqual(body.model, 'fallback-model-3');
+      assert.strictEqual(body.choices[0].message.content, 'Third candidate completed');
+    } finally {
+      routerInfo.server.close();
+    }
+  });
 });
