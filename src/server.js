@@ -631,9 +631,11 @@ function mergeEditableConfig(current, incoming) {
     next.providers = (Array.isArray(incoming.providers) ? incoming.providers : []).map((provider) => {
       const previous = previousByName.get(provider?.name);
       const merged = clone(provider);
+      const incomingApiKey = Object.prototype.hasOwnProperty.call(merged, 'api_key');
       // 草稿不含 api_key 时复用现有密钥；新 Provider 必须显式配置密钥后才能通过校验。
-      if (merged.api_key === undefined && previous?.api_key !== undefined) merged.api_key = previous.api_key;
-      if (merged.api_keys === undefined && previous?.api_keys !== undefined) merged.api_keys = previous.api_keys;
+      if (!incomingApiKey && merged.api_key === undefined && previous?.api_key !== undefined) merged.api_key = previous.api_key;
+      // 前端输入新 API Key 时会显式提交 api_key、移除 api_keys；这表示用户要用单密钥替换整个旧密钥池。
+      if (!incomingApiKey && merged.api_keys === undefined && previous?.api_keys !== undefined) merged.api_keys = previous.api_keys;
       return merged;
     });
   }

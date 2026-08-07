@@ -132,6 +132,14 @@ describe('Phase2-C 本地管理接口（Safety Sealed）', () => {
       assert.strictEqual(saved.providers[0].api_key, 'k', 'existing provider secret must be preserved server-side');
       assert.deepStrictEqual(saved.providers[0].api_keys, ['k', 'k-secondary'], 'existing provider key pool must be preserved server-side');
       assert.ok(readdirSync(tmp).some((name) => name === applied.body.backupName), 'backup file must exist');
+
+      const replacement = JSON.parse(JSON.stringify(draft));
+      replacement.providers[0].api_key = 'replacement-key';
+      const replaced = await httpJson(port, '/_smart-router/config/apply', { config: replacement }, 'POST', auth);
+      assert.strictEqual(replaced.status, 200);
+      const replacedConfig = JSON.parse(readFileSync(configPath, 'utf8'));
+      assert.strictEqual(replacedConfig.providers[0].api_key, 'replacement-key', 'explicit new key must replace the existing key');
+      assert.ok(!('api_keys' in replacedConfig.providers[0]), 'explicit new key must not restore the old key pool');
     } finally {
       await new Promise((resolve) => server.close(() => resolve()));
       delete process.env.SMART_ROUTER_ADMIN_TOKEN;
