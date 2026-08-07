@@ -20,7 +20,7 @@
 
 import http from 'node:http';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
-import { copyFile, mkdir, rename, writeFile } from 'node:fs/promises';
+import { chmod, copyFile, mkdir, rename, writeFile } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -599,7 +599,7 @@ function buildEditableConfig(config) {
   const intelligence = clone(config?.intelligence || {});
   delete intelligence.adminToken;
   const providers = Array.isArray(config?.providers)
-    ? config.providers.map(({ api_key: _apiKey, ...provider }) => provider)
+    ? config.providers.map(({ api_key: _apiKey, api_keys: _apiKeys, ...provider }) => provider)
     : [];
   return {
     intelligence,
@@ -633,6 +633,7 @@ function mergeEditableConfig(current, incoming) {
       const merged = clone(provider);
       // 草稿不含 api_key 时复用现有密钥；新 Provider 必须显式配置密钥后才能通过校验。
       if (merged.api_key === undefined && previous?.api_key !== undefined) merged.api_key = previous.api_key;
+      if (merged.api_keys === undefined && previous?.api_keys !== undefined) merged.api_keys = previous.api_keys;
       return merged;
     });
   }
@@ -650,6 +651,7 @@ async function writeConfigAtomically(configPath, config) {
   const backupPath = `${configPath}.bak-${stamp}-${randomBytes(3).toString('hex')}`;
   const tempPath = `${configPath}.tmp-${process.pid}-${randomBytes(3).toString('hex')}`;
   await copyFile(configPath, backupPath);
+  await chmod(backupPath, 0o600);
   try {
     await writeFile(tempPath, `${JSON.stringify(config, null, 2)}\n`, { encoding: 'utf8', mode: 0o600 });
     await rename(tempPath, configPath);

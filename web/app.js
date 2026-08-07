@@ -121,7 +121,7 @@
     $('config-validate-button').disabled = true;
     $('config-apply-button').disabled = true;
     $('config-edit-button').textContent = '开始编辑';
-    setEditorMessage('当前为安全预览，点击“开始编辑”后才可修改。');
+    setEditorMessage('当前为只读预览，点击“开始编辑”后才可修改。');
   }
 
   function render(data, models) {

@@ -144,11 +144,11 @@
         <section class="panel config-panel" id="config">
           <div class="panel-heading">
             <div><p class="eyebrow">CONFIG CENTER</p><h2>配置中心</h2></div>
-            <span class="status-pill status-warn"><span class="status-dot"></span>安全预览</span>
+            <span class="status-pill status-warn"><span class="status-dot"></span>安全编辑</span>
           </div>
           <div class="config-notice">
             <span class="notice-icon" aria-hidden="true">i</span>
-            <div><strong>当前配置可安全查看，尚未开放直接写入。</strong><p>页面不会回显任何 Token。下一阶段再接入配置草稿、校验、备份、回滚和热加载。</p></div>
+            <div><strong>支持安全编辑与备份，保存后需要重启服务。</strong><p>页面不会回显任何 Token。服务端会校验草稿、创建 0600 备份并原子写入。</p></div>
           </div>
           <div class="config-grid">
             <div class="config-block"><span class="section-label">路由策略</span><strong id="config-strategy">—</strong><span id="config-routing-detail" class="muted">—</span></div>
@@ -163,7 +163,7 @@
               <div class="editor-actions"><button id="config-edit-button" class="button button-secondary" type="button">开始编辑</button><button id="config-validate-button" class="button button-ghost" type="button" disabled>校验草稿</button><button id="config-apply-button" class="button button-primary" type="button" disabled>保存并备份</button></div>
             </div>
             <textarea id="config-editor" rows="16" spellcheck="false" readonly aria-label="配置草稿"></textarea>
-            <div id="config-editor-message" class="editor-message" role="status" aria-live="polite">当前为安全预览，点击“开始编辑”后才可修改。</div>
+            <div id="config-editor-message" class="editor-message" role="status" aria-live="polite">当前为只读预览，点击“开始编辑”后才可修改。</div>
           </details>
         </section>
 

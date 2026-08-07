@@ -80,8 +80,10 @@ describe('Phase2-C 本地管理接口（Safety Sealed）', () => {
       assert.ok(ok.body.canary, 'status must include canary snapshot');
       assert.ok(ok.body.config, 'status must include safe config summary');
       assert.ok(ok.body.config.providers.every((provider) => !('api_key' in provider)), 'config summary must not expose api_key');
+      assert.ok(ok.body.config.providers.every((provider) => !('api_keys' in provider)), 'config summary must not expose api_keys');
       assert.ok(ok.body.editableConfig, 'status must include editable config draft');
       assert.ok(ok.body.editableConfig.providers.every((provider) => !('api_key' in provider)), 'editable draft must not expose api_key');
+      assert.ok(ok.body.editableConfig.providers.every((provider) => !('api_keys' in provider)), 'editable draft must not expose api_keys');
       assert.ok(!('adminToken' in ok.body.editableConfig.intelligence), 'editable draft must not expose adminToken');
       assert.strictEqual(ok.body.config.models[0].id, 'phase1-first');
     } finally {
@@ -97,6 +99,7 @@ describe('Phase2-C 本地管理接口（Safety Sealed）', () => {
     rmSync(tmp, { recursive: true, force: true });
     mkdirSync(tmp, { recursive: true });
     const config = baseConfig(tmp, 1);
+    config.providers[0].api_keys = ['k', 'k-secondary'];
     const configPath = join(tmp, 'config.json');
     writeFileSync(configPath, JSON.stringify(config, null, 2));
     const auth = { Authorization: `Bearer ${ADMIN_TOKEN}` };
@@ -127,6 +130,7 @@ describe('Phase2-C 本地管理接口（Safety Sealed）', () => {
       const saved = JSON.parse(readFileSync(configPath, 'utf8'));
       assert.strictEqual(saved.routing.max_retries, 2);
       assert.strictEqual(saved.providers[0].api_key, 'k', 'existing provider secret must be preserved server-side');
+      assert.deepStrictEqual(saved.providers[0].api_keys, ['k', 'k-secondary'], 'existing provider key pool must be preserved server-side');
       assert.ok(readdirSync(tmp).some((name) => name === applied.body.backupName), 'backup file must exist');
     } finally {
       await new Promise((resolve) => server.close(() => resolve()));
