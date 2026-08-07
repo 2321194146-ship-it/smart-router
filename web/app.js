@@ -4,6 +4,7 @@
   let adminToken = '';
   let refreshTimer = null;
   let configEditing = false;
+  let editableConfigDraft = null;
   const $ = (id) => document.getElementById(id);
   const setText = (id, value) => { const node = $(id); if (node) node.textContent = String(value ?? '—'); };
   const number = (value) => Number.isFinite(Number(value)) ? Number(value).toLocaleString('zh-CN') : '—';
@@ -107,6 +108,98 @@
       </div>`).join('');
   }
 
+  const cloneJson = (value) => JSON.parse(JSON.stringify(value || {}));
+
+  function renderSimpleConfig(summary, editableConfig) {
+    if (!editableConfig) return;
+    editableConfigDraft = cloneJson(editableConfig);
+    const target = $('simple-config-content');
+    const providerMeta = new Map((summary?.providers || []).map((provider) => [provider.name, provider]));
+    const providers = Array.isArray(editableConfigDraft.providers) ? editableConfigDraft.providers : [];
+    const models = Array.isArray(editableConfigDraft.models) ? editableConfigDraft.models : [];
+    const routing = editableConfigDraft.routing || {};
+    const intelligence = editableConfigDraft.intelligence || {};
+    const budget = editableConfigDraft.budget || {};
+    target.innerHTML = `
+      <div class="simple-section">
+        <div class="simple-heading"><div><span class="section-label">第一步</span><strong>选择路由方式</strong></div><span class="simple-hint">普通用户只需要调整这几项</span></div>
+        <div class="simple-fields">
+          <label>智能模式<select id="simple-intelligence-mode"><option value="off">关闭智能层</option><option value="shadow">Shadow 观察</option><option value="active_canary">Active Canary</option></select></label>
+          <label>路由策略<select id="simple-routing-strategy"><option value="tier_weighted">按模型层级</option><option value="quality_first">质量优先</option><option value="cost_first">成本优先</option></select></label>
+          <label>最大回退次数<input id="simple-max-retries" type="number" min="0" max="10" step="1"></label>
+          <label class="switch-field"><span>失败自动回退</span><input id="simple-failover" type="checkbox"><i></i></label>
+          <label class="switch-field"><span>允许付费模型</span><input id="simple-allow-paid" type="checkbox"><i></i></label>
+          <label>单次成本上限<input id="simple-max-cost" type="number" min="0" step="0.01"></label>
+        </div>
+      </div>
+      <div class="simple-section">
+        <div class="simple-heading"><div><span class="section-label">第二步</span><strong>启用模型</strong></div><span class="simple-hint">关闭的模型不会进入候选池</span></div>
+        <div class="model-toggle-grid">${models.length ? models.map((model) => `<label class="model-toggle"><input type="checkbox" data-model-id="${escapeHtml(model.id)}" ${model.enabled !== false ? 'checked' : ''}><span><strong>${escapeHtml(model.id)}</strong><small>${escapeHtml(model.provider)} · ${escapeHtml(model.tier || '未分层')} · ${model.paid ? '付费' : '免费'}</small></span></label>`).join('') : '<div class="empty-state">还没有模型配置。</div>'}</div>
+      </div>
+      <div class="simple-section">
+        <div class="simple-heading"><div><span class="section-label">第三步</span><strong>Provider 连接</strong></div><button id="simple-add-provider" class="button button-secondary" type="button">＋ 添加自定义 Provider</button></div>
+        <div class="simple-provider-grid">${providers.length ? providers.map((provider) => { const meta = providerMeta.get(provider.name) || {}; return `<div class="simple-provider-card"><div class="provider-card-title"><strong>${escapeHtml(provider.name)}</strong><span class="status-pill status-good"><span class="status-dot"></span>${meta.hasApiKey ? '密钥已配置' : '需要密钥'}</span></div><label>接口地址<input data-provider-url="${escapeHtml(provider.name)}" value="${escapeHtml(provider.base_url || '')}" inputmode="url"></label><label>接口类型<select data-provider-type="${escapeHtml(provider.name)}"><option value="openai" ${provider.api_type === 'openai' ? 'selected' : ''}>OpenAI 兼容</option><option value="anthropic_native" ${provider.api_type === 'anthropic_native' ? 'selected' : ''}>Anthropic 原生</option></select></label></div>`; }).join('') : '<div class="empty-state">还没有 Provider。</div>'}</div>
+        <div id="new-provider-form" class="new-provider-form" hidden><label>Provider 名称<input id="new-provider-name" placeholder="例如：my-gateway"></label><label>接口地址<input id="new-provider-url" placeholder="https://api.example.com/v1" inputmode="url"></label><label>接口类型<select id="new-provider-type"><option value="openai">OpenAI 兼容</option><option value="anthropic_native">Anthropic 原生</option></select></label><label>API Key（只写入，不回显）<input id="new-provider-key" type="password" autocomplete="new-password" placeholder="输入后仅保存在本次草稿内存"></label><button id="new-provider-save" class="button button-primary" type="button">加入草稿</button></div>
+      </div>
+      <div class="simple-save-bar"><span id="simple-config-message" class="editor-message">修改后点击保存，服务会自动校验并创建备份。</span><button id="simple-save-button" class="button button-primary" type="button">校验并保存</button></div>`;
+
+    $('simple-intelligence-mode').value = intelligence.mode || 'off';
+    $('simple-routing-strategy').value = routing.strategy || 'tier_weighted';
+    $('simple-max-retries').value = Number.isFinite(Number(routing.max_retries)) ? routing.max_retries : 0;
+    $('simple-failover').checked = routing.failover_on_error !== false;
+    $('simple-allow-paid').checked = budget.allowPaid !== false;
+    $('simple-max-cost').value = Number.isFinite(Number(budget.maxRequestCost)) ? budget.maxRequestCost : 0;
+    $('simple-add-provider').addEventListener('click', () => { $('new-provider-form').hidden = !$('new-provider-form').hidden; });
+    $('new-provider-save').addEventListener('click', addProviderToDraft);
+    $('simple-save-button').addEventListener('click', saveSimpleConfig);
+  }
+
+  function addProviderToDraft() {
+    const name = $('new-provider-name').value.trim();
+    const baseUrl = $('new-provider-url').value.trim();
+    const apiKey = $('new-provider-key').value;
+    if (!name || !baseUrl || !apiKey) { setEditorMessage('新增 Provider 需要填写名称、接口地址和 API Key。', 'error'); return; }
+    if (editableConfigDraft.providers.some((provider) => provider.name === name)) { setEditorMessage('Provider 名称已存在，请换一个名称。', 'error'); return; }
+    editableConfigDraft.providers.push({ name, base_url: baseUrl, api_type: $('new-provider-type').value, auth_header: $('new-provider-type').value === 'anthropic_native' ? 'x-api-key' : 'Authorization', auth_prefix: $('new-provider-type').value === 'anthropic_native' ? '' : 'Bearer ', api_key: apiKey });
+    renderSimpleConfig({ providers: editableConfigDraft.providers.map(({ api_key: _key, ...provider }) => ({ ...provider, hasApiKey: true })) }, editableConfigDraft);
+    setEditorMessage(`Provider ${name} 已加入当前草稿，保存后才会写入。`, 'success');
+  }
+
+  function collectSimpleDraft() {
+    const draft = cloneJson(editableConfigDraft);
+    draft.intelligence.mode = $('simple-intelligence-mode').value;
+    draft.routing.strategy = $('simple-routing-strategy').value;
+    draft.routing.max_retries = Number($('simple-max-retries').value);
+    draft.routing.failover_on_error = $('simple-failover').checked;
+    draft.budget.allowPaid = $('simple-allow-paid').checked;
+    draft.budget.maxRequestCost = Number($('simple-max-cost').value);
+    for (const model of draft.models) model.enabled = Boolean(document.querySelector(`[data-model-id="${CSS.escape(model.id)}"]`)?.checked);
+    for (const provider of draft.providers) {
+      const urlInput = document.querySelector(`[data-provider-url="${CSS.escape(provider.name)}"]`);
+      const typeInput = document.querySelector(`[data-provider-type="${CSS.escape(provider.name)}"]`);
+      if (urlInput) provider.base_url = urlInput.value.trim();
+      if (typeInput) provider.api_type = typeInput.value;
+    }
+    return draft;
+  }
+
+  async function saveSimpleConfig() {
+    const draft = collectSimpleDraft();
+    const message = $('simple-config-message');
+    try {
+      const validation = await request('/_smart-router/config/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ config: draft }) });
+      if (validation.warnings?.length) message.textContent = `校验通过：${validation.warnings[0]}`;
+      if (!window.confirm('配置校验通过。确认保存并创建备份？保存后需要重启服务生效。')) return;
+      const result = await request('/_smart-router/config/apply', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ config: draft }) });
+      message.textContent = `已保存并备份：${result.backupName || '已创建'}，请重启服务生效。`;
+      message.className = 'editor-message success';
+      editableConfigDraft = draft;
+    } catch (error) {
+      message.textContent = `保存失败：${error.message}`;
+      message.className = 'editor-message error';
+    }
+  }
+
   function setEditorMessage(text, kind = '') {
     const node = $('config-editor-message');
     node.textContent = text;
@@ -163,6 +256,7 @@
     renderModels(models);
     renderTimeline(canary);
     renderConfig(data.config);
+    renderSimpleConfig(data.config, data.editableConfig);
     renderConfigEditor(data.editableConfig);
   }
 
