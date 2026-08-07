@@ -123,6 +123,23 @@
           </article>
         </section>
 
+        <section class="panel simulator-panel" id="simulator">
+          <div class="panel-heading">
+            <div><p class="eyebrow">ROUTE PREVIEW</p><h2>路由模拟器</h2></div>
+            <span class="status-pill status-muted"><span class="status-dot"></span>不会发送真实请求</span>
+          </div>
+          <div class="simulator-form">
+            <label>任务内容<textarea id="simulator-prompt" rows="4" maxlength="20000" placeholder="例如：分析这段 TypeScript 代码并给出修复方案"></textarea></label>
+            <div class="simulator-options">
+              <label>客户端<input id="simulator-agent" value="generic" placeholder="generic / claude-code / codex"></label>
+              <label>协议<select id="simulator-protocol"><option value="chat">OpenAI Chat</option><option value="anthropic">Anthropic</option><option value="responses">Responses</option></select></label>
+              <label>请求模型<input id="simulator-model" value="auto" placeholder="auto"></label>
+              <button id="simulate-button" class="button button-primary" type="button" disabled>模拟路由</button>
+            </div>
+          </div>
+          <div id="simulation-result" class="simulation-result"><div class="empty-state">连接控制台后，输入任务即可预览模型选择、成本、延迟和回退顺序。</div></div>
+        </section>
+
         <section class="lower-grid">
           <article class="panel metrics-panel" id="models">
             <div class="panel-heading"><div><p class="eyebrow">ROUTING HEALTH</p><h2>请求与回退指标</h2></div><span class="panel-caption">实时状态</span></div>
@@ -136,10 +153,23 @@
             </div>
           </article>
 
-          <article class="panel timeline-panel" id="audit">
+          <article class="panel timeline-panel" id="signals">
             <div class="panel-heading"><div><p class="eyebrow">AUDIT SIGNALS</p><h2>近期路由信号</h2></div><span class="panel-caption">本进程</span></div>
             <div id="timeline" class="timeline"><div class="empty-state">连接后显示实时审计信号。</div></div>
           </article>
+        </section>
+
+        <section class="panel logs-panel" id="audit">
+          <div class="panel-heading">
+            <div><p class="eyebrow">REQUEST LOGS</p><h2>请求日志</h2></div>
+            <button id="logs-refresh-button" class="button button-ghost" type="button" disabled>刷新日志</button>
+          </div>
+          <div class="logs-toolbar">
+            <label class="sr-only" for="logs-search">搜索请求日志</label>
+            <input id="logs-search" placeholder="搜索请求 ID、模型、Provider 或客户端">
+            <select id="logs-outcome" aria-label="按结果筛选"><option value="">全部结果</option><option value="completed">成功</option><option value="incomplete">不完整</option><option value="provider_error">Provider 错误</option><option value="no_candidate">无候选</option><option value="budget_exceeded">预算拦截</option><option value="client_aborted">客户端取消</option></select>
+          </div>
+          <div id="request-logs" class="request-logs"><div class="empty-state">连接后显示最近请求，不保存 Prompt 和响应正文。</div></div>
         </section>
 
         <section class="panel config-panel" id="config">
@@ -156,7 +186,12 @@
             <div class="config-block"><span class="section-label">预算防线</span><strong id="config-budget">—</strong><span id="config-budget-detail" class="muted">—</span></div>
             <div class="config-block"><span class="section-label">Agent 绑定</span><strong id="config-binding-count">—</strong><span id="config-binding-detail" class="muted">—</span></div>
           </div>
+          <div id="restart-required" class="restart-required" hidden role="status"><strong>配置已经写入，等待重启生效。</strong><span>当前运行中的请求仍使用旧配置，重启服务后会加载新版本。</span></div>
           <div id="simple-config-content" class="simple-config-content"><div class="empty-state">连接后加载常用配置。</div></div>
+          <div class="backup-panel">
+            <div class="simple-heading"><div><span class="section-label">配置保护</span><strong>备份与回滚</strong></div><button id="backups-refresh-button" class="button button-ghost" type="button" disabled>刷新备份</button></div>
+            <div id="backup-list" class="backup-list"><div class="empty-state">连接后读取最近备份。</div></div>
+          </div>
           <div class="config-provider-list"><div class="table-row table-head"><span>Provider</span><span>接口</span><span>密钥</span><span>模型数</span></div><div id="config-provider-rows"><div class="empty-state">连接后读取安全配置摘要。</div></div></div>
           <details id="config-editor-shell" class="config-editor">
             <summary>高级配置：编辑 JSON 草稿</summary>

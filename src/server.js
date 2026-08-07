@@ -20,13 +20,13 @@
 
 import http from 'node:http';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
-import { chmod, copyFile, mkdir, rename, writeFile } from 'node:fs/promises';
+import { chmod, copyFile, lstat, mkdir, readFile, readdir, rename, writeFile } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadConfig, getConfig, log } from './config/loader.js';
 import { validateConfig } from './config/validator.js';
-import { resolveAgent } from './agent/identity.js';
+import { getAgentBudget, getAgentModels, resolveAgent } from './agent/identity.js';
 import {
   handleHeadRequest,
   normalizePath,
@@ -36,6 +36,7 @@ import {
 import { KeyPool } from './provider/key-pool.js';
 import { ProviderHealth, CircuitBreaker } from './provider/health.js';
 import { ProviderClient } from './provider/client.js';
+import { buildCandidates } from './router/candidates.js';
 import { ExecutionEngine } from './router/execution.js';
 import { IntelligenceLayer } from './intelligence/index.js';
 import { CostTracker } from './cost/tracker.js';
@@ -260,7 +261,7 @@ async function handleRequest(req, res, components) {
     if (await handleDashboardRequest(req, res, config, pathname)) return;
 
     // 2b. 本地管理接口（Phase2-C Safety Sealed）：仅 127.0.0.1 + Admin Token
-    if (pathname.startsWith('/_smart-router/intelligence/') || pathname.startsWith('/_smart-router/config/')) {
+    if (pathname.startsWith('/_smart-router/')) {
       await handleIntelligenceAdmin(req, res, components, pathname);
       return;
     }
@@ -664,6 +665,302 @@ async function writeConfigAtomically(configPath, config) {
   return backupPath;
 }
 
+function adminInputError(code, message) {
+  const error = new Error(message);
+  error.statusCode = 400;
+  error.code = code;
+  return error;
+}
+
+function mergeProviderForTest(config, incoming) {
+  if (!incoming || typeof incoming !== 'object' || Array.isArray(incoming)) {
+    throw adminInputError('provider_object_required', 'Provider 配置无效');
+  }
+  const name = typeof incoming.name === 'string' ? incoming.name.trim() : '';
+  if (!name || name.length > 128) throw adminInputError('invalid_provider_name', 'Provider 名称无效');
+  const previous = (Array.isArray(config?.providers) ? config.providers : [])
+    .find((provider) => provider?.name === name);
+  const provider = { ...(previous || {}), ...incoming, name };
+  if (Object.prototype.hasOwnProperty.call(incoming, 'api_key')) delete provider.api_keys;
+
+  if (typeof provider.base_url !== 'string' || provider.base_url.length > 2048) {
+    throw adminInputError('invalid_base_url', '接口地址无效');
+  }
+  let parsed;
+  try { parsed = new URL(provider.base_url); } catch { throw adminInputError('invalid_base_url', '接口地址无效'); }
+  if (!['http:', 'https:'].includes(parsed.protocol) || parsed.username || parsed.password) {
+    throw adminInputError('invalid_base_url', '接口地址必须是无内嵌账号的 HTTP(S) 地址');
+  }
+  if (provider.api_type !== undefined && !['openai', 'anthropic_native'].includes(provider.api_type)) {
+    throw adminInputError('invalid_api_type', '接口类型只支持 OpenAI 兼容或 Anthropic 原生');
+  }
+  const key = Array.isArray(provider.api_keys)
+    ? provider.api_keys.find((item) => typeof item === 'string' && item.length > 0)
+    : provider.api_key;
+  if (typeof key !== 'string' || !key.trim() || key.length > 8192) {
+    throw adminInputError('api_key_required', '请输入 API Key 后再测试连接');
+  }
+  return provider;
+}
+
+function providerModelsUrl(provider) {
+  const target = new URL(provider.base_url);
+  const path = target.pathname.replace(/\/+$/, '');
+  if (/\/models$/i.test(path)) target.pathname = path;
+  else if (/\/v1$/i.test(path)) target.pathname = `${path}/models`;
+  else target.pathname = `${path}/v1/models`;
+  target.search = '';
+  target.hash = '';
+  return target.toString();
+}
+
+function providerTestHeaders(provider) {
+  const key = Array.isArray(provider.api_keys)
+    ? provider.api_keys.find((item) => typeof item === 'string' && item.length > 0)
+    : provider.api_key;
+  const nativeAnthropic = provider.api_type === 'anthropic_native';
+  const authHeader = provider.auth_header || (nativeAnthropic ? 'x-api-key' : 'Authorization');
+  const authPrefix = provider.auth_prefix ?? (nativeAnthropic ? '' : 'Bearer ');
+  const headers = { Accept: 'application/json', [authHeader]: `${authPrefix}${key}` };
+  if (nativeAnthropic) {
+    headers[provider.version_header || 'anthropic-version'] = provider.version_value || '2023-06-01';
+  }
+  return headers;
+}
+
+async function readProviderJson(response, maxBytes = 1024 * 1024) {
+  if (!response.body) return null;
+  const contentLength = Number(response.headers.get('content-length'));
+  if (Number.isFinite(contentLength) && contentLength > maxBytes) {
+    throw adminInputError('provider_response_too_large', 'Provider 返回的模型列表过大');
+  }
+  const reader = response.body.getReader();
+  const chunks = [];
+  let size = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > maxBytes) {
+      await reader.cancel();
+      throw adminInputError('provider_response_too_large', 'Provider 返回的模型列表过大');
+    }
+    chunks.push(Buffer.from(value));
+  }
+  if (size === 0) return null;
+  try { return JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { return null; }
+}
+
+function discoveredModels(payload) {
+  const source = Array.isArray(payload?.data)
+    ? payload.data
+    : Array.isArray(payload?.models) ? payload.models : [];
+  const unique = new Set();
+  const models = [];
+  for (const item of source) {
+    const id = typeof item === 'string' ? item : item?.id || item?.name;
+    if (typeof id !== 'string' || !id.trim() || id.length > 256 || unique.has(id)) continue;
+    unique.add(id);
+    models.push({ id, ownedBy: typeof item?.owned_by === 'string' ? item.owned_by : null });
+    if (models.length >= 200) break;
+  }
+  return models;
+}
+
+function providerFailure(status) {
+  if (status === 401 || status === 403) return ['authentication_failed', '认证失败，请检查 API Key 和接口类型'];
+  if (status === 404) return ['models_endpoint_not_found', '连接到了服务，但没有找到模型列表接口'];
+  if (status === 429) return ['rate_limited', 'Provider 限流，请稍后重试'];
+  if (status >= 500) return ['provider_unavailable', 'Provider 暂时不可用'];
+  return ['provider_rejected', `Provider 拒绝了测试请求（HTTP ${status}）`];
+}
+
+async function testProviderConnection(config, incoming) {
+  const provider = mergeProviderForTest(config, incoming);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  const startedAt = Date.now();
+  try {
+    const response = await fetch(providerModelsUrl(provider), {
+      method: 'GET',
+      headers: providerTestHeaders(provider),
+      redirect: 'manual',
+      signal: controller.signal,
+    });
+    const latencyMs = Date.now() - startedAt;
+    if (response.status >= 300 && response.status < 400) {
+      return { statusCode: 422, body: { ok: false, connected: false, errorCode: 'redirect_not_allowed', message: 'Provider 返回了跳转，为防止密钥泄露已停止测试', latencyMs } };
+    }
+    if (!response.ok) {
+      const [errorCode, message] = providerFailure(response.status);
+      return { statusCode: 422, body: { ok: false, connected: false, errorCode, message, httpStatus: response.status, latencyMs } };
+    }
+    const payload = await readProviderJson(response);
+    const models = discoveredModels(payload);
+    return {
+      statusCode: 200,
+      body: {
+        ok: true,
+        connected: true,
+        provider: provider.name,
+        latencyMs,
+        models,
+        message: models.length > 0 ? `连接成功，发现 ${models.length} 个模型` : '连接成功，但没有识别到模型列表',
+      },
+    };
+  } catch (error) {
+    if (error?.statusCode === 400) throw error;
+    const timedOut = error?.name === 'AbortError';
+    return {
+      statusCode: timedOut ? 504 : 502,
+      body: {
+        ok: false,
+        connected: false,
+        errorCode: timedOut ? 'provider_timeout' : 'provider_network_error',
+        message: timedOut ? '连接超时，请检查接口地址或网络' : '无法连接 Provider，请检查接口地址和网络',
+        latencyMs: Date.now() - startedAt,
+      },
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function backupNamePattern(configPath) {
+  const escaped = basename(configPath).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`^${escaped}\\.bak-\\d{14,20}-[a-f0-9]{6}$`);
+}
+
+async function listConfigBackups(configPath) {
+  const pattern = backupNamePattern(configPath);
+  const entries = await readdir(dirname(configPath), { withFileTypes: true });
+  const backups = [];
+  for (const entry of entries) {
+    if (!entry.isFile() || !pattern.test(entry.name)) continue;
+    const info = await lstat(join(dirname(configPath), entry.name));
+    backups.push({ name: entry.name, createdAt: info.mtime.toISOString(), size: info.size });
+  }
+  return backups.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 50);
+}
+
+async function rollbackConfig(components, backupName) {
+  if (typeof backupName !== 'string' || !backupNamePattern(components.configPath).test(backupName)) {
+    throw adminInputError('invalid_backup_name', '备份名称无效');
+  }
+  const backupPath = join(dirname(components.configPath), backupName);
+  const info = await lstat(backupPath).catch(() => null);
+  if (!info?.isFile() || info.size > 2 * 1024 * 1024) {
+    throw adminInputError('backup_unavailable', '备份不存在或不可用');
+  }
+  let candidate;
+  try { candidate = JSON.parse(await readFile(backupPath, 'utf8')); } catch { throw adminInputError('invalid_backup', '备份文件不是有效配置'); }
+  const validation = validateConfig(candidate);
+  if (!validation.valid) {
+    const error = adminInputError('invalid_backup', '备份配置校验失败');
+    error.details = validation.errors;
+    throw error;
+  }
+  const safetyBackup = await writeConfigAtomically(components.configPath, candidate);
+  return {
+    backupName,
+    safetyBackupName: basename(safetyBackup),
+    warnings: validation.warnings,
+    config: buildConfigSummary(candidate),
+  };
+}
+
+function simulateRoute(components, body) {
+  const prompt = typeof body?.prompt === 'string' ? body.prompt.trim() : '';
+  if (!prompt || prompt.length > 20000) throw adminInputError('invalid_prompt', '请输入 1 到 20000 字的任务内容');
+  const protocol = ['chat', 'anthropic', 'responses'].includes(body.protocol) ? body.protocol : 'chat';
+  const agentId = typeof body.agentId === 'string' && body.agentId.trim() ? body.agentId.trim().slice(0, 128) : 'generic';
+  const requestedModel = typeof body.model === 'string' && body.model.trim() ? body.model.trim() : 'auto';
+  const requestBody = protocol === 'responses'
+    ? { model: requestedModel, input: prompt }
+    : { model: requestedModel, messages: [{ role: 'user', content: prompt }] };
+  const agentModels = getAgentModels(agentId, components.config);
+  const budget = getAgentBudget(agentId, components.config);
+  const candidates = buildCandidates(requestedModel, components.config, {
+    agentId,
+    agentModels,
+    budget,
+    strictModel: budget.strictModel,
+  });
+  const decision = components.intelligence.decisionEngine.decide({
+    body: requestBody,
+    agentId,
+    budget,
+    candidates,
+    protocol,
+  });
+  return {
+    agentId,
+    protocol,
+    requestedModel,
+    candidateCount: candidates.length,
+    task: decision.task,
+    budgetAssessment: decision.budgetAssessment,
+    recommendation: decision.recommendation,
+    ranked: decision.ranked,
+    predictions: decision.predictions,
+    explanation: decision.explanation,
+  };
+}
+
+function sanitizeAttempt(attempt) {
+  return {
+    attemptNumber: attempt?.attemptNumber ?? null,
+    model: attempt?.model ?? null,
+    provider: attempt?.provider ?? null,
+    transportOutcome: attempt?.transportOutcome ?? null,
+    validatedOutcome: attempt?.validatedOutcome ?? null,
+    errorType: attempt?.errorType ?? null,
+    httpStatus: attempt?.httpStatus ?? null,
+    latencyMs: Number(attempt?.latencyMs || 0),
+    firstByteMs: attempt?.firstByteMs ?? null,
+    budgetBlocked: attempt?.budgetBlocked === true,
+    usage: attempt?.usage ?? null,
+    cost: attempt?.cost ?? null,
+    timestamp: attempt?.timestamp ?? null,
+  };
+}
+
+async function listRequestLogs(store, req) {
+  const url = new URL(req.url, 'http://127.0.0.1');
+  const limit = Math.min(100, Math.max(1, Number.parseInt(url.searchParams.get('limit') || '30', 10) || 30));
+  const query = (url.searchParams.get('q') || '').trim().toLowerCase().slice(0, 100);
+  const provider = (url.searchParams.get('provider') || '').trim().slice(0, 128);
+  const outcome = (url.searchParams.get('outcome') || '').trim().slice(0, 64);
+  const records = await store.getAllAuditRecords();
+  const filtered = records
+    .filter((record) => !provider || record.finalProvider === provider)
+    .filter((record) => !outcome || record.outcome === outcome)
+    .filter((record) => !query || [record.requestId, record.finalModel, record.finalProvider, record.agentId, record.protocol, record.outcome]
+      .some((value) => String(value || '').toLowerCase().includes(query)))
+    .sort((a, b) => String(b.timestamp || '').localeCompare(String(a.timestamp || '')))
+    .slice(0, limit);
+  const logs = await Promise.all(filtered.map(async (record) => {
+    const attempts = (Array.isArray(record.attempts) ? record.attempts : []).map(sanitizeAttempt);
+    const costRecord = await store.getCost(record.requestId);
+    return {
+      requestId: record.requestId,
+      outcome: record.outcome,
+      finalModel: record.finalModel,
+      finalProvider: record.finalProvider,
+      attemptCount: record.attemptCount,
+      agentId: record.agentId,
+      protocol: record.protocol,
+      responseSize: record.responseSize,
+      latencyMs: attempts.reduce((sum, attempt) => sum + attempt.latencyMs, 0),
+      usage: costRecord?.usage || attempts.at(-1)?.usage || null,
+      cost: costRecord?.cost || attempts.at(-1)?.cost || null,
+      attempts,
+      timestamp: record.timestamp,
+    };
+  }));
+  return { logs, count: logs.length, limit };
+}
+
 /**
  * 提供本地运维 Dashboard 静态资源。
  * 页面本身不携带 Token；实际状态、Kill、Resume 请求仍走 Admin Token。
@@ -816,6 +1113,52 @@ async function handleIntelligenceAdmin(req, res, components, pathname) {
       }));
       return;
     }
+    if (req.method === 'POST' && pathname === '/_smart-router/providers/test') {
+      const body = await parseBody(req, config);
+      assertRequestBodyObject(body);
+      if (Buffer.byteLength(JSON.stringify(body), 'utf8') > 64 * 1024) {
+        res.writeHead(413, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, error: 'request_too_large' }));
+        return;
+      }
+      const result = await testProviderConnection(config, body.provider);
+      res.writeHead(result.statusCode, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(result.body));
+      return;
+    }
+    if (req.method === 'GET' && pathname === '/_smart-router/config/backups') {
+      const backups = await listConfigBackups(components.configPath);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, backups }));
+      return;
+    }
+    if (req.method === 'POST' && pathname === '/_smart-router/config/rollback') {
+      const body = await parseBody(req, config);
+      assertRequestBodyObject(body);
+      const result = await rollbackConfig(components, body.backupName);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        ok: true,
+        rolledBack: true,
+        restartRequired: true,
+        ...result,
+      }));
+      return;
+    }
+    if (req.method === 'POST' && pathname === '/_smart-router/intelligence/simulate') {
+      const body = await parseBody(req, config);
+      assertRequestBodyObject(body);
+      const result = simulateRoute(components, body);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, simulated: true, ...result }));
+      return;
+    }
+    if (req.method === 'GET' && pathname === '/_smart-router/logs') {
+      const result = await listRequestLogs(components.store, req);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, ...result }));
+      return;
+    }
     if (req.method === 'POST' && (pathname === '/_smart-router/config/validate' || pathname === '/_smart-router/config/apply')) {
       const body = await parseBody(req, config);
       assertRequestBodyObject(body);
@@ -873,8 +1216,14 @@ async function handleIntelligenceAdmin(req, res, components, pathname) {
     res.end(JSON.stringify({ ok: false, error: 'not_found' }));
   } catch (err) {
     log(`server: admin route error: ${err.message}`);
-    res.writeHead(500, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ ok: false, error: 'internal' }));
+    const statusCode = Number.isInteger(err?.statusCode) ? err.statusCode : 500;
+    res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      ok: false,
+      error: statusCode === 500 ? 'internal' : err.code || 'invalid_request',
+      hint: statusCode === 500 ? undefined : err.message,
+      errors: Array.isArray(err?.details) ? err.details : undefined,
+    }));
   }
 }
 

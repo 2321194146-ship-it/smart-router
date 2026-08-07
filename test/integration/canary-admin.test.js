@@ -53,6 +53,32 @@ function baseConfig(tmp, mockPort) {
   };
 }
 
+async function createModelDiscoveryProvider() {
+  const requests = [];
+  const server = http.createServer((req, res) => {
+    requests.push({ url: req.url, authorization: req.headers.authorization });
+    if (req.method === 'GET' && req.url === '/v1/models') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        object: 'list',
+        data: [
+          { id: 'discovered-model-a', object: 'model' },
+          { id: 'discovered-model-b', object: 'model' },
+        ],
+      }));
+      return;
+    }
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'not_found' }));
+  });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  return {
+    port: server.address().port,
+    requests,
+    close: () => new Promise((resolve) => server.close(resolve)),
+  };
+}
+
 describe('Phase2-C 本地管理接口（Safety Sealed）', () => {
   test('S4 status requires admin token; 401 on wrong token; 503 when disabled', async () => {
     process.env.SMART_ROUTER_ADMIN_TOKEN = ADMIN_TOKEN;
@@ -69,6 +95,8 @@ describe('Phase2-C 本地管理接口（Safety Sealed）', () => {
       // 无 Token → 401
       const noAuth = await httpJson(port, '/_smart-router/intelligence/status', undefined, 'GET');
       assert.strictEqual(noAuth.status, 401, 'missing token must be 401');
+      const guardedProviderTest = await httpJson(port, '/_smart-router/providers/test', { provider: {} });
+      assert.strictEqual(guardedProviderTest.status, 401, 'new admin actions must use the same token guard');
       // 错误 Token → 401
       const badAuth = await httpJson(port, '/_smart-router/intelligence/status', undefined, 'GET', { Authorization: 'Bearer wrong-token' });
       assert.strictEqual(badAuth.status, 401);
@@ -140,8 +168,139 @@ describe('Phase2-C 本地管理接口（Safety Sealed）', () => {
       const replacedConfig = JSON.parse(readFileSync(configPath, 'utf8'));
       assert.strictEqual(replacedConfig.providers[0].api_key, 'replacement-key', 'explicit new key must replace the existing key');
       assert.ok(!('api_keys' in replacedConfig.providers[0]), 'explicit new key must not restore the old key pool');
+
+      const backups = await httpJson(port, '/_smart-router/config/backups', undefined, 'GET', auth);
+      assert.strictEqual(backups.status, 200);
+      assert.ok(backups.body.backups.some((backup) => backup.name === applied.body.backupName));
+      assert.ok(backups.body.backups.every((backup) => typeof backup.createdAt === 'string' && Number.isInteger(backup.size)));
+      assert.ok(!JSON.stringify(backups.body).includes('replacement-key'), 'backup metadata must never expose secrets');
+
+      const traversal = await httpJson(port, '/_smart-router/config/rollback', { backupName: '../config.json' }, 'POST', auth);
+      assert.strictEqual(traversal.status, 400, 'rollback must reject path traversal');
+
+      const rolledBack = await httpJson(port, '/_smart-router/config/rollback', { backupName: applied.body.backupName }, 'POST', auth);
+      assert.strictEqual(rolledBack.status, 200);
+      assert.strictEqual(rolledBack.body.rolledBack, true);
+      assert.strictEqual(rolledBack.body.restartRequired, true);
+      const restoredConfig = JSON.parse(readFileSync(configPath, 'utf8'));
+      assert.strictEqual(restoredConfig.routing.max_retries, 1, 'rollback must restore the selected backup');
+      assert.strictEqual(restoredConfig.providers[0].api_key, 'k');
+      assert.deepStrictEqual(restoredConfig.providers[0].api_keys, ['k', 'k-secondary']);
     } finally {
       await new Promise((resolve) => server.close(() => resolve()));
+      delete process.env.SMART_ROUTER_ADMIN_TOKEN;
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  test('provider connection test discovers models without exposing credentials', async () => {
+    process.env.SMART_ROUTER_ADMIN_TOKEN = ADMIN_TOKEN;
+    const upstream = await createModelDiscoveryProvider();
+    const tmp = join(process.cwd(), 'test', '.tmp-admin-provider-test');
+    rmSync(tmp, { recursive: true, force: true });
+    mkdirSync(tmp, { recursive: true });
+    const config = baseConfig(tmp, upstream.port);
+    config.providers[0].base_url = `http://127.0.0.1:${upstream.port}`;
+    const configPath = join(tmp, 'config.json');
+    writeFileSync(configPath, JSON.stringify(config, null, 2));
+    const auth = { Authorization: `Bearer ${ADMIN_TOKEN}` };
+    const server = await createServer(configPath);
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const port = server.address().port;
+    try {
+      const tested = await httpJson(port, '/_smart-router/providers/test', {
+        provider: {
+          name: 'mock',
+          base_url: config.providers[0].base_url,
+          api_type: 'openai',
+          auth_header: 'Authorization',
+          auth_prefix: 'Bearer ',
+        },
+      }, 'POST', auth);
+      assert.strictEqual(tested.status, 200);
+      assert.strictEqual(tested.body.connected, true);
+      assert.deepStrictEqual(tested.body.models.map((model) => model.id), ['discovered-model-a', 'discovered-model-b']);
+      assert.strictEqual(upstream.requests.at(-1).authorization, 'Bearer k', 'existing key must be reused server-side');
+      assert.ok(!JSON.stringify(tested.body).includes('Bearer k'));
+      assert.ok(!JSON.stringify(tested.body).includes('api_key'));
+
+      const invalid = await httpJson(port, '/_smart-router/providers/test', {
+        provider: { name: 'bad', base_url: 'file:///tmp/nope', api_key: 'not-returned' },
+      }, 'POST', auth);
+      assert.strictEqual(invalid.status, 400);
+      assert.ok(!JSON.stringify(invalid.body).includes('not-returned'));
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
+      await upstream.close();
+      delete process.env.SMART_ROUTER_ADMIN_TOKEN;
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  test('route simulation and request logs explain decisions without exposing credentials', async () => {
+    process.env.SMART_ROUTER_ADMIN_TOKEN = ADMIN_TOKEN;
+    const tmp = join(process.cwd(), 'test', '.tmp-admin-observability');
+    rmSync(tmp, { recursive: true, force: true });
+    mkdirSync(tmp, { recursive: true });
+    const config = baseConfig(tmp, 1);
+    const configPath = join(tmp, 'config.json');
+    writeFileSync(configPath, JSON.stringify(config, null, 2));
+    const auth = { Authorization: `Bearer ${ADMIN_TOKEN}` };
+    const server = await createServer(configPath);
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const port = server.address().port;
+    try {
+      const simulated = await httpJson(port, '/_smart-router/intelligence/simulate', {
+        prompt: '写一个 TypeScript 排序函数，并解释复杂度。',
+        agentId: 'claude-code',
+        protocol: 'chat',
+      }, 'POST', auth);
+      assert.strictEqual(simulated.status, 200);
+      assert.ok(simulated.body.recommendation?.modelId);
+      assert.ok(Array.isArray(simulated.body.ranked) && simulated.body.ranked.length > 0);
+      assert.ok(simulated.body.explanation);
+
+      await server._components.store.saveAuditRecord({
+        requestId: 'audit-visible-1',
+        outcome: 'completed',
+        finalModel: 'phase1-first',
+        finalProvider: 'mock',
+        attemptCount: 1,
+        agentId: 'claude-code',
+        protocol: 'chat',
+        responseSize: 128,
+        attempts: [{
+          attemptNumber: 1,
+          model: 'phase1-first',
+          provider: 'mock',
+          keyId: 'credential-id-must-not-leak',
+          validatedOutcome: 'success',
+          latencyMs: 42,
+          usage: { input_tokens: 10, output_tokens: 5 },
+        }],
+        timestamp: new Date().toISOString(),
+      });
+      await server._components.store.saveCost({
+        requestId: 'audit-visible-1',
+        modelId: 'phase1-first',
+        provider: 'mock',
+        usage: { input_tokens: 10, output_tokens: 5 },
+        cost: { totalCost: 0.001 },
+        dateKey: '2026-08-08',
+        timestamp: new Date().toISOString(),
+      });
+
+      const logs = await httpJson(port, '/_smart-router/logs?limit=10', undefined, 'GET', auth);
+      assert.strictEqual(logs.status, 200);
+      const entry = logs.body.logs.find((item) => item.requestId === 'audit-visible-1');
+      assert.ok(entry);
+      assert.strictEqual(entry.latencyMs, 42);
+      assert.strictEqual(entry.outcome, 'completed');
+      assert.strictEqual(entry.cost.totalCost, 0.001);
+      assert.ok(!JSON.stringify(entry).includes('credential-id-must-not-leak'));
+      assert.ok(!('keyId' in entry.attempts[0]));
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
       delete process.env.SMART_ROUTER_ADMIN_TOKEN;
       rmSync(tmp, { recursive: true, force: true });
     }

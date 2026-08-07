@@ -6,6 +6,9 @@
   let configEditing = false;
   let editableConfigDraft = null;
   let simpleConfigDirty = false;
+  let latestConfigSummary = null;
+  let logsSearchTimer = null;
+  const providerTestResults = new Map();
   const $ = (id) => document.getElementById(id);
   const setText = (id, value) => { const node = $(id); if (node) node.textContent = String(value ?? '—'); };
   const number = (value) => Number.isFinite(Number(value)) ? Number(value).toLocaleString('zh-CN') : '—';
@@ -20,14 +23,19 @@
 
   async function request(path, options = {}) {
     const controller = new AbortController();
-    const timer = window.setTimeout(() => controller.abort(), 8000);
+    const { timeoutMs = 8000, ...fetchOptions } = options;
+    const timer = window.setTimeout(() => controller.abort(), timeoutMs);
     const headers = { Accept: 'application/json', ...(options.headers || {}) };
     if (adminToken) headers.Authorization = `Bearer ${adminToken}`;
     try {
-      const response = await fetch(path, { ...options, headers, signal: controller.signal });
+      const response = await fetch(path, { ...fetchOptions, headers, signal: controller.signal });
       const body = await response.json().catch(() => ({}));
-      const detail = Array.isArray(body.errors) ? body.errors.join('；') : body.error || body.hint;
-      if (!response.ok) throw new Error(detail || `HTTP ${response.status}`);
+      const detail = Array.isArray(body.errors) ? body.errors.join('；') : body.message || body.hint || body.error;
+      if (!response.ok) {
+        const error = new Error(detail || `HTTP ${response.status}`);
+        error.code = body.errorCode || body.error || null;
+        throw error;
+      }
       return body;
     } finally {
       window.clearTimeout(timer);
@@ -40,6 +48,9 @@
     badge.className = `status-pill ${connected ? 'status-good' : 'status-muted'}`;
     $('kill-button').disabled = !connected;
     $('resume-button').disabled = !connected;
+    $('simulate-button').disabled = !connected;
+    $('logs-refresh-button').disabled = !connected;
+    $('backups-refresh-button').disabled = !connected;
   }
 
   function setStatusPill(id, text, kind) {
@@ -111,9 +122,37 @@
 
   const cloneJson = (value) => JSON.parse(JSON.stringify(value || {}));
 
+  function providerTestPanelHtml(providerName) {
+    const result = providerTestResults.get(providerName);
+    const models = Array.isArray(result?.models) ? result.models : [];
+    const stateClass = result?.connected ? 'success' : result?.error ? 'error' : '';
+    const message = result?.message || '先测试连接，再导入 Provider 返回的模型。';
+    return `
+      <div class="provider-card-actions">
+        <button class="button button-secondary" type="button" data-provider-test="${escapeHtml(providerName)}">测试连接并发现模型</button>
+      </div>
+      <div class="provider-test-result ${stateClass}" data-provider-result="${escapeHtml(providerName)}" role="status">${escapeHtml(message)}</div>
+      <div class="discovered-models" data-provider-models="${escapeHtml(providerName)}" ${models.length ? '' : 'hidden'}>
+        <div class="discovered-models-head"><span>发现 ${models.length} 个模型（最多展示 200 个）</span><button class="button button-ghost" type="button" data-provider-import="${escapeHtml(providerName)}">导入未配置模型</button></div>
+        <div class="model-chip-list">${models.slice(0, 30).map((model) => `<span class="model-chip" title="${escapeHtml(model.id)}">${escapeHtml(model.id)}</span>`).join('')}</div>
+      </div>`;
+  }
+
+  function providerCardHtml(provider, meta) {
+    const hasApiKey = meta.hasApiKey || Boolean(provider.api_key);
+    return `<div class="simple-provider-card">
+      <div class="provider-card-title"><strong>${escapeHtml(provider.name)}</strong><span class="status-pill ${hasApiKey ? 'status-good' : 'status-warn'}"><span class="status-dot"></span>${hasApiKey ? '密钥已配置' : '需要密钥'}</span></div>
+      <label>接口地址<input data-provider-url="${escapeHtml(provider.name)}" value="${escapeHtml(provider.base_url || '')}" inputmode="url"></label>
+      <label>接口类型<select data-provider-type="${escapeHtml(provider.name)}"><option value="openai" ${provider.api_type === 'openai' ? 'selected' : ''}>OpenAI 兼容</option><option value="anthropic_native" ${provider.api_type === 'anthropic_native' ? 'selected' : ''}>Anthropic 原生</option></select></label>
+      <label>API Key（只写入，不回显）<input data-provider-key="${escapeHtml(provider.name)}" type="password" autocomplete="new-password" placeholder="${hasApiKey ? '留空则保持不变' : '请输入 API Key'}"></label>
+      ${providerTestPanelHtml(provider.name)}
+    </div>`;
+  }
+
   function renderSimpleConfig(summary, editableConfig, preserveDraft = false) {
     if (!editableConfig) return;
     if (simpleConfigDirty && !preserveDraft) return;
+    latestConfigSummary = summary || latestConfigSummary;
     editableConfigDraft = cloneJson(editableConfig);
     const target = $('simple-config-content');
     const providerMeta = new Map((summary?.providers || []).map((provider) => [provider.name, provider]));
@@ -140,7 +179,7 @@
       </div>
       <div class="simple-section">
         <div class="simple-heading"><div><span class="section-label">第三步</span><strong>Provider 连接</strong></div><button id="simple-add-provider" class="button button-secondary" type="button">＋ 添加自定义 Provider</button></div>
-        <div class="simple-provider-grid">${providers.length ? providers.map((provider) => { const meta = providerMeta.get(provider.name) || {}; const hasApiKey = meta.hasApiKey || Boolean(provider.api_key); return `<div class="simple-provider-card"><div class="provider-card-title"><strong>${escapeHtml(provider.name)}</strong><span class="status-pill ${hasApiKey ? 'status-good' : 'status-warn'}"><span class="status-dot"></span>${hasApiKey ? '密钥已配置' : '需要密钥'}</span></div><label>接口地址<input data-provider-url="${escapeHtml(provider.name)}" value="${escapeHtml(provider.base_url || '')}" inputmode="url"></label><label>接口类型<select data-provider-type="${escapeHtml(provider.name)}"><option value="openai" ${provider.api_type === 'openai' ? 'selected' : ''}>OpenAI 兼容</option><option value="anthropic_native" ${provider.api_type === 'anthropic_native' ? 'selected' : ''}>Anthropic 原生</option></select></label><label>API Key（只写入，不回显）<input data-provider-key="${escapeHtml(provider.name)}" type="password" autocomplete="new-password" placeholder="${hasApiKey ? '留空则保持不变' : '请输入 API Key'}"></label></div>`; }).join('') : '<div class="empty-state">还没有 Provider。</div>'}</div>
+        <div class="simple-provider-grid">${providers.length ? providers.map((provider) => providerCardHtml(provider, providerMeta.get(provider.name) || {})).join('') : '<div class="empty-state">还没有 Provider。</div>'}</div>
         <div id="new-provider-form" class="new-provider-form" hidden><label>Provider 名称<input id="new-provider-name" placeholder="例如：my-gateway"></label><label>接口地址<input id="new-provider-url" placeholder="https://api.example.com/v1" inputmode="url"></label><label>接口类型<select id="new-provider-type"><option value="openai">OpenAI 兼容</option><option value="anthropic_native">Anthropic 原生</option></select></label><label>API Key（只写入，不回显）<input id="new-provider-key" type="password" autocomplete="new-password" placeholder="输入后仅保存在本次草稿内存"></label><button id="new-provider-save" class="button button-primary" type="button">加入草稿</button></div>
       </div>
       <div class="simple-save-bar"><span id="simple-config-message" class="editor-message">修改后点击保存，服务会自动校验并创建备份。</span><button id="simple-save-button" class="button button-primary" type="button">校验并保存</button></div>`;
@@ -155,10 +194,104 @@
     $('new-provider-save').addEventListener('click', addProviderToDraft);
     $('simple-save-button').addEventListener('click', saveSimpleConfig);
     if (target.dataset.dirtyBound !== 'true') {
-      target.addEventListener('input', () => { simpleConfigDirty = true; });
-      target.addEventListener('change', () => { simpleConfigDirty = true; });
+      const markDirty = (event) => {
+        simpleConfigDirty = true;
+        const providerName = event.target?.dataset?.providerUrl || event.target?.dataset?.providerType || event.target?.dataset?.providerKey;
+        if (providerName) providerTestResults.delete(providerName);
+        const message = $('simple-config-message');
+        if (message) {
+          message.textContent = '有未保存修改。测试连接后点击“校验并保存”。';
+          message.className = 'editor-message warn';
+        }
+      };
+      target.addEventListener('input', markDirty);
+      target.addEventListener('change', markDirty);
+      target.addEventListener('click', (event) => {
+        const testButton = event.target.closest('[data-provider-test]');
+        const importButton = event.target.closest('[data-provider-import]');
+        if (testButton) testProvider(testButton.dataset.providerTest, testButton);
+        if (importButton) importDiscoveredModels(importButton.dataset.providerImport);
+      });
       target.dataset.dirtyBound = 'true';
     }
+  }
+
+  function updateProviderTestPanel(providerName) {
+    const result = providerTestResults.get(providerName);
+    const message = document.querySelector(`[data-provider-result="${CSS.escape(providerName)}"]`);
+    const container = document.querySelector(`[data-provider-models="${CSS.escape(providerName)}"]`);
+    if (message) {
+      message.textContent = result?.message || '尚未测试';
+      message.className = `provider-test-result ${result?.connected ? 'success' : result?.error ? 'error' : ''}`;
+    }
+    if (!container) return;
+    const models = Array.isArray(result?.models) ? result.models : [];
+    container.hidden = models.length === 0;
+    if (!models.length) return;
+    container.innerHTML = `<div class="discovered-models-head"><span>发现 ${models.length} 个模型（最多展示 200 个）</span><button class="button button-ghost" type="button" data-provider-import="${escapeHtml(providerName)}">导入未配置模型</button></div><div class="model-chip-list">${models.slice(0, 30).map((model) => `<span class="model-chip" title="${escapeHtml(model.id)}">${escapeHtml(model.id)}</span>`).join('')}</div>`;
+  }
+
+  async function testProvider(providerName, button) {
+    const draft = collectSimpleDraft();
+    editableConfigDraft = draft;
+    const provider = draft.providers.find((item) => item.name === providerName);
+    if (!provider) return;
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = '正在测试…';
+    providerTestResults.set(providerName, { message: '正在连接 Provider…' });
+    updateProviderTestPanel(providerName);
+    try {
+      const result = await request('/_smart-router/providers/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider }),
+        timeoutMs: 10000,
+      });
+      providerTestResults.set(providerName, { connected: true, models: result.models || [], message: `${result.message} · ${result.latencyMs}ms` });
+    } catch (error) {
+      providerTestResults.set(providerName, { error: true, models: [], message: `连接失败：${error.message}` });
+    } finally {
+      button.disabled = false;
+      button.textContent = originalText;
+      updateProviderTestPanel(providerName);
+    }
+  }
+
+  function importDiscoveredModels(providerName) {
+    const result = providerTestResults.get(providerName);
+    if (!Array.isArray(result?.models) || !result.models.length) return;
+    const draft = collectSimpleDraft();
+    const existingPairs = new Set(draft.models.map((model) => `${model.provider}::${model.apiModel}`));
+    const existingIds = new Set(draft.models.map((model) => model.id));
+    let added = 0;
+    for (const discovered of result.models) {
+      if (existingPairs.has(`${providerName}::${discovered.id}`)) continue;
+      let id = discovered.id;
+      if (existingIds.has(id)) id = `${providerName}-${id}`;
+      let suffix = 2;
+      const baseId = id;
+      while (existingIds.has(id)) id = `${baseId}-${suffix++}`;
+      draft.models.push({
+        id,
+        provider: providerName,
+        apiModel: discovered.id,
+        tier: 'tier3',
+        paid: true,
+        capability: ['chat'],
+        max_tokens: 32768,
+        enabled: true,
+      });
+      existingIds.add(id);
+      existingPairs.add(`${providerName}::${discovered.id}`);
+      added += 1;
+    }
+    editableConfigDraft = draft;
+    simpleConfigDirty = true;
+    renderSimpleConfig(latestConfigSummary || { providers: [] }, draft, true);
+    const message = $('simple-config-message');
+    message.textContent = added > 0 ? `已导入 ${added} 个模型到草稿；默认按付费模型保守处理，请确认后保存。` : '发现的模型已经全部在草稿中。';
+    message.className = added > 0 ? 'editor-message success' : 'editor-message';
   }
 
   function addProviderToDraft() {
@@ -169,8 +302,10 @@
     if (editableConfigDraft.providers.some((provider) => provider.name === name)) { setEditorMessage('Provider 名称已存在，请换一个名称。', 'error'); return; }
     editableConfigDraft.providers.push({ name, base_url: baseUrl, api_type: $('new-provider-type').value, auth_header: $('new-provider-type').value === 'anthropic_native' ? 'x-api-key' : 'Authorization', auth_prefix: $('new-provider-type').value === 'anthropic_native' ? '' : 'Bearer ', api_key: apiKey });
     simpleConfigDirty = true;
-    renderSimpleConfig({ providers: editableConfigDraft.providers.map(({ api_key: _key, ...provider }) => ({ ...provider, hasApiKey: true })) }, editableConfigDraft, true);
-    setEditorMessage(`Provider ${name} 已加入当前草稿，保存后才会写入。`, 'success');
+    renderSimpleConfig(latestConfigSummary || { providers: [] }, editableConfigDraft, true);
+    const message = $('simple-config-message');
+    message.textContent = `Provider ${name} 已加入草稿。请先测试连接，再导入模型并保存。`;
+    message.className = 'editor-message success';
   }
 
   function collectSimpleDraft() {
@@ -207,9 +342,151 @@
       message.textContent = `已保存并备份：${result.backupName || '已创建'}，请重启服务生效。`;
       message.className = 'editor-message success';
       editableConfigDraft = draft;
+      showRestartRequired();
+      await loadBackups();
     } catch (error) {
       message.textContent = `保存失败：${error.message}`;
       message.className = 'editor-message error';
+    }
+  }
+
+  function showRestartRequired() {
+    $('restart-required').hidden = false;
+  }
+
+  function formatBytes(bytes) {
+    const value = Number(bytes || 0);
+    return value < 1024 ? `${value} B` : `${(value / 1024).toFixed(1)} KB`;
+  }
+
+  function renderBackups(backups) {
+    const target = $('backup-list');
+    if (!Array.isArray(backups) || !backups.length) {
+      target.innerHTML = '<div class="empty-state">还没有配置备份。首次保存后会自动创建。</div>';
+      return;
+    }
+    target.innerHTML = backups.slice(0, 8).map((backup) => `
+      <div class="backup-item">
+        <strong title="${escapeHtml(backup.name)}">${escapeHtml(new Date(backup.createdAt).toLocaleString('zh-CN'))}</strong>
+        <span>${escapeHtml(formatBytes(backup.size))} · ${escapeHtml(backup.name)}</span>
+        <button class="button button-secondary" type="button" data-backup-rollback="${escapeHtml(backup.name)}">回滚到此版本</button>
+      </div>`).join('');
+  }
+
+  async function loadBackups() {
+    if (!adminToken) return;
+    try {
+      const result = await request('/_smart-router/config/backups');
+      renderBackups(result.backups);
+    } catch (error) {
+      $('backup-list').innerHTML = `<div class="empty-state">读取备份失败：${escapeHtml(error.message)}</div>`;
+    }
+  }
+
+  async function rollbackBackup(backupName, button) {
+    const warning = simpleConfigDirty ? '当前页面还有未保存草稿。回滚只会修改磁盘配置，草稿不会自动合并。\n\n' : '';
+    if (!window.confirm(`${warning}确认回滚到 ${backupName}？系统会先备份当前配置，回滚后需要重启服务。`)) return;
+    button.disabled = true;
+    const originalText = button.textContent;
+    button.textContent = '回滚中…';
+    try {
+      const result = await request('/_smart-router/config/rollback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ backupName }),
+      });
+      showRestartRequired();
+      setMessage(`已回滚到 ${result.backupName}，并备份了回滚前配置。请重启服务生效。`, 'success');
+      await loadBackups();
+    } catch (error) {
+      setMessage(`回滚失败：${error.message}`, 'error');
+    } finally {
+      button.disabled = false;
+      button.textContent = originalText;
+    }
+  }
+
+  function renderSimulation(result) {
+    const recommendation = result.recommendation;
+    const predictions = result.predictions || {};
+    const ranked = Array.isArray(result.ranked) ? result.ranked : [];
+    $('simulation-result').innerHTML = `
+      <div class="simulation-summary">
+        <div class="simulation-stat"><span>推荐模型</span><strong>${escapeHtml(recommendation ? `${recommendation.provider}/${recommendation.modelId}` : '无可用推荐')}</strong></div>
+        <div class="simulation-stat"><span>候选数量</span><strong>${number(result.candidateCount)}</strong></div>
+        <div class="simulation-stat"><span>预估成本</span><strong>${predictions.cost == null ? '未知' : `$${Number(predictions.cost).toFixed(6)}`}</strong></div>
+        <div class="simulation-stat"><span>预估延迟</span><strong>${predictions.latency == null ? '未知' : `${number(predictions.latency)} ms`}</strong></div>
+      </div>
+      <div class="editor-message">${escapeHtml(result.explanation?.summary || '已完成静态路由预览。')}</div>
+      <div class="ranked-preview">${ranked.map((item, index) => `<div class="ranked-preview-row"><span class="rank">${index + 1}</span><strong>${escapeHtml(`${item.provider}/${item.modelId}`)}</strong><span>分数 ${Number(item.score || 0).toFixed(3)}</span><span class="${item.blocked ? 'blocked' : ''}">${escapeHtml(item.blocked || (item.paid ? '付费' : '免费'))}</span></div>`).join('') || '<div class="empty-state">当前规则没有产生候选模型。</div>'}</div>`;
+  }
+
+  async function simulateRoute() {
+    const prompt = $('simulator-prompt').value.trim();
+    if (!prompt) {
+      $('simulation-result').innerHTML = '<div class="editor-message error">请输入任务内容。</div>';
+      return;
+    }
+    const button = $('simulate-button');
+    button.disabled = true;
+    button.textContent = '计算中…';
+    try {
+      const result = await request('/_smart-router/intelligence/simulate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt,
+          agentId: $('simulator-agent').value.trim() || 'generic',
+          protocol: $('simulator-protocol').value,
+          model: $('simulator-model').value.trim() || 'auto',
+        }),
+      });
+      renderSimulation(result);
+    } catch (error) {
+      $('simulation-result').innerHTML = `<div class="editor-message error">模拟失败：${escapeHtml(error.message)}</div>`;
+    } finally {
+      button.disabled = !adminToken;
+      button.textContent = '模拟路由';
+    }
+  }
+
+  function outcomeLabel(outcome) {
+    const labels = { completed: '成功', incomplete: '不完整', provider_error: 'Provider 错误', no_candidate: '无候选', budget_exceeded: '预算拦截', client_aborted: '客户端取消' };
+    return labels[outcome] || outcome || '未知';
+  }
+
+  function renderRequestLogs(logs) {
+    const target = $('request-logs');
+    if (!Array.isArray(logs) || !logs.length) {
+      target.innerHTML = '<div class="empty-state">暂无匹配请求。发送请求后可在这里查看路由结果。</div>';
+      return;
+    }
+    target.innerHTML = logs.map((entry) => {
+      const success = entry.outcome === 'completed';
+      const attempts = Array.isArray(entry.attempts) ? entry.attempts : [];
+      const totalCost = entry.cost?.totalCost;
+      return `<details class="request-log">
+        <summary><span class="request-log-result ${success ? 'success' : 'error'}">${escapeHtml(outcomeLabel(entry.outcome))}</span><strong title="${escapeHtml(entry.requestId)}">${escapeHtml(entry.finalModel || entry.requestId)}</strong><span>${escapeHtml(entry.finalProvider || '—')}</span><span>${number(entry.latencyMs)} ms</span><time>${escapeHtml(entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString('zh-CN') : '—')}</time></summary>
+        <div class="request-log-details">
+          <div class="editor-message">请求 ${escapeHtml(entry.requestId)} · ${escapeHtml(entry.agentId || 'generic')} · ${escapeHtml(entry.protocol || '—')} · ${totalCost == null ? '成本未知' : `成本 $${Number(totalCost).toFixed(6)}`}</div>
+          ${attempts.map((attempt) => `<div class="attempt-row"><span>#${number(attempt.attemptNumber)}</span><strong>${escapeHtml(attempt.model || '—')}</strong><span>${escapeHtml(attempt.provider || '—')}</span><span>${number(attempt.latencyMs)} ms</span><span>${escapeHtml(attempt.errorType || outcomeLabel(attempt.validatedOutcome))}</span></div>`).join('') || '<div class="empty-state">没有 Attempt 明细。</div>'}
+        </div>
+      </details>`;
+    }).join('');
+  }
+
+  async function loadRequestLogs() {
+    if (!adminToken) return;
+    const query = new URLSearchParams({ limit: '30' });
+    const search = $('logs-search').value.trim();
+    const outcome = $('logs-outcome').value;
+    if (search) query.set('q', search);
+    if (outcome) query.set('outcome', outcome);
+    try {
+      const result = await request(`/_smart-router/logs?${query.toString()}`);
+      renderRequestLogs(result.logs);
+    } catch (error) {
+      $('request-logs').innerHTML = `<div class="empty-state">读取日志失败：${escapeHtml(error.message)}</div>`;
     }
   }
 
@@ -303,10 +580,23 @@
     }
     adminToken = value;
     await refresh();
+    await Promise.all([loadBackups(), loadRequestLogs()]);
     beginRefresh();
   });
 
   $('refresh-button').addEventListener('click', refresh);
+  $('simulate-button').addEventListener('click', simulateRoute);
+  $('logs-refresh-button').addEventListener('click', loadRequestLogs);
+  $('backups-refresh-button').addEventListener('click', loadBackups);
+  $('backup-list').addEventListener('click', (event) => {
+    const button = event.target.closest('[data-backup-rollback]');
+    if (button) rollbackBackup(button.dataset.backupRollback, button);
+  });
+  $('logs-outcome').addEventListener('change', loadRequestLogs);
+  $('logs-search').addEventListener('input', () => {
+    if (logsSearchTimer) window.clearTimeout(logsSearchTimer);
+    logsSearchTimer = window.setTimeout(loadRequestLogs, 350);
+  });
   $('kill-button').addEventListener('click', async () => {
     if (!window.confirm('确认停止 Active Canary？系统将停止采样并持久化状态。')) return;
     try {
@@ -354,6 +644,10 @@
   $('config-apply-button').addEventListener('click', async () => {
     if (!window.confirm('确认写入配置？系统会先创建备份，保存后需要重启服务才会加载新配置。')) return;
     const result = await submitConfig('/_smart-router/config/apply', '配置已保存并完成备份。请重启服务使其生效。');
-    if (result?.restartRequired) setEditorMessage(`配置已保存，备份：${result.backupName || '已创建'}；请重启服务后生效。`, 'success');
+    if (result?.restartRequired) {
+      setEditorMessage(`配置已保存，备份：${result.backupName || '已创建'}；请重启服务后生效。`, 'success');
+      showRestartRequired();
+      await loadBackups();
+    }
   });
 })();

@@ -39,15 +39,23 @@ describe('Local Dashboard', { concurrency: false }, () => {
     assert.match(page.headers['content-security-policy'], /default-src 'self'/);
     assert.equal(page.headers['x-frame-options'], 'DENY');
     assert.match(page.body, /Smart Router Control Room/);
+    assert.match(page.body, /路由模拟器/);
+    assert.match(page.body, /请求日志/);
+    assert.match(page.body, /option value="completed">成功/);
+    assert.match(page.body, /备份与回滚/);
 
     const script = await request(router.port, '/dashboard/app.js');
     assert.equal(script.status, 200);
     assert.match(script.body, /adminToken/);
+    assert.match(script.body, /_smart-router\/providers\/test/);
+    assert.match(script.body, /_smart-router\/intelligence\/simulate/);
+    assert.match(script.body, /_smart-router\/config\/rollback/);
     assert.doesNotMatch(script.body, /localStorage|sessionStorage/);
 
     const styles = await request(router.port, '/dashboard/styles.css');
     assert.equal(styles.status, 200);
     assert.match(styles.body, /metric-grid/);
+    assert.match(styles.body, /provider-test-result/);
   });
 
   test('does not expose the dashboard when the server is configured for non-loopback binding', async () => {
