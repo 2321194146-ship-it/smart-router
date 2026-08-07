@@ -210,6 +210,9 @@ describe('Provider and Fallback Integration', () => {
     const configDir = `/tmp/sr-test-three-freefb-${Date.now()}`;
     const configPath = writeConfig(config, configDir);
     const routerInfo = await startSmartRouter(configPath);
+    const chatRequestCountBefore = mockProvider.receivedRequests.filter(
+      (request) => request.method === 'POST' && request.url?.includes('/chat/completions'),
+    ).length;
 
     try {
       const resp = await httpRequest(routerInfo.port, '/v1/chat/completions', {
@@ -219,6 +222,11 @@ describe('Provider and Fallback Integration', () => {
       const body = JSON.parse(resp.body);
       assert.strictEqual(body.model, 'fallback-model-3');
       assert.strictEqual(body.choices[0].message.content, 'Third candidate completed');
+      const chatModels = mockProvider.receivedRequests
+        .filter((request) => request.method === 'POST' && request.url?.includes('/chat/completions'))
+        .slice(chatRequestCountBefore)
+        .map((request) => request.body?.model);
+      assert.deepStrictEqual(chatModels, ['fallback-model-1', 'fallback-model-2', 'fallback-model-3']);
     } finally {
       routerInfo.server.close();
     }
