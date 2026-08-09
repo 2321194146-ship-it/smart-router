@@ -3,14 +3,14 @@
   "version": "1.0.0-phase2c-active-canary",
   "branch": "phase2-shadow",
   "base_commit": "c5f182ad75104b325dfb1d631d6209a052cf2218",
-  "date": "2026-08-07T17:25:08.640Z",
+  "date": "2026-08-09T19:28:20.547Z",
   "description": "Smart Router Mainline Phase 2-C Active Canary 安全控制与决策语义收口 + Safety Sealed + 5% Canary Live Pilot - binary vs graded capability, toolsAvailable vs toolsRequired, protocol-level structured output detection, conservative token estimator, capability source unification, effective policy with deterministic tie-breaker, 208-task holdout eval (all gates PASS), Active Canary controller (SHA-256 sampling, Phase1-legal reorder, Fail Open, Kill Switch, auto-stop); Safety Sealed (blocked never in fallback, Active-only metrics, budget defense maxRequestCost/strictModel/estimatedCost + low-risk eligibility, local admin API with SQLite persisted kill, allowedAgents=[claude-code], truly-consecutive errors, version 1.0.0-phase2c-active-canary); 5% Live Pilot (Claude Code low-risk streaming allowed with anthropic-only + streaming-capable candidates, auto-stop immediate persistence on apply/finalize, 127.0.0.1:28788 internal pilot 456 requests -> 20 active all reordered, Kill Switch restart-persisted, resume-shadow only)",
-  "commit": "f3ef6b0e10226ed9bf4d92090ce89a119bbb8634",
+  "commit": "1cf081d0cb326926bc873aa1e431af7a8c303a86",
   "pilot_summary": {
-    "status": "failed_before_current_changes",
-    "total": 3,
+    "status": "pending_external_pilot",
+    "total": 0,
     "passed": 0,
-    "note": "The previous targeted real pilot attempted 3 requests and completed 0 before this UI and admin-control change set. No real external provider traffic was sent for the current changes; validation used localhost mocks only."
+    "note": "This candidate was validated with local mocks only; no real external pilot was rerun after the current changes."
   },
   "phase2b_summary": {
     "mode": "shadow (no Active)",
@@ -170,12 +170,12 @@
   "test_summary": {
     "unit": {
       "tests": 496,
-      "suites": 94,
+      "suites": 95,
       "failures": 0
     },
     "integration": {
-      "tests": 102,
-      "suites": 27,
+      "tests": 103,
+      "suites": 28,
       "failures": 0
     },
     "audit": {
@@ -184,8 +184,8 @@
       "failures": 0
     },
     "total": {
-      "tests": 631,
-      "suites": 136,
+      "tests": 632,
+      "suites": 137,
       "failures": 0
     }
   },
@@ -252,9 +252,9 @@
   },
   "source_files": {
     ".gitignore": "d8f539b3be74ba11ea4a3da48686e4f879560f358f883e95eba8331d2a242579",
-    "README.md": "aaad49589c24285e2090e9c8aae95b0d1087d8511b9e6ee2e9be2d16de44397b",
+    "README.md": "b0aca14ea5207fa40b11a5027c2e445a5b386da67df79987328e1da196a93a0f",
     "config/config.example.json": "1b21ba046355b3fdc076e6628c2de54d78329d15f4a2e4de8db602d5f669eded",
-    "config/real-pilot-config.template.json": "c0169ab37325768b73da393a12183b9e560ae89ad38b36b7821eea66c9714925",
+    "config/real-pilot-config.template.json": "580f2809c680035d07d660db6827b906759ee36865ee5afecdf7c7948b717776",
     "config/shadow-eval-config.template.json": "273f578711c371689759b51de54057c4fb948b15dc04fffa45c1363e7b87b983",
     "evidence/active-readiness-eval-report.json": "94638b72d516a0e5d16d57c8444926fea754f107a88b37910a0aef5d5e4477bd",
     "evidence/active-readiness-eval-report.md": "672d0aa400117c2d23ab21e33ccc25fd83ca2af20389f934ce9fa0005c72508a",
@@ -312,14 +312,14 @@
     "phase2-docs/TOOL_AVAILABLE_VS_REQUIRED_REPORT.md": "74dccf7970e517d39f18bb9a7df902e6404ad9a7746b8f0b25541dc57eb841f7",
     "scripts/active-readiness-eval.mjs": "8f2caf0d96936f1d3316e65db735ffdd9b005e3d6eda07e09ee828b15df29dc5",
     "scripts/canary-live-pilot.mjs": "c9e95541e2fff89979ea076347dac2dc40a0ac754555080ab7d3d5edcbdff7ee",
-    "scripts/generate-release-manifest.mjs": "99eff3c4f86e0a3a1f13e3fb789bb852a7a32560bd5f5005c0b1a7236057292b",
+    "scripts/generate-release-manifest.mjs": "24949a9d8aaaefaa13c9959e7e5aa8414667d6d56c88d97c09ae6439319d295d",
     "scripts/holdout-eval.mjs": "d34f2aedb081ee74c29b2cec55a74d9b2d8281373352e03ff7c1ea29743df7fb",
     "scripts/holdout-tasks.mjs": "93bc502296682e33d87add673cae034f4c2587680561973de8344d92a98d4f66",
     "scripts/pilot-sanitized.mjs": "1699a261e416d885abe60e26f65039745d527397eeb6cecbae997dcf12380042",
     "scripts/real-claude-pilot.mjs": "754d89a43a745ed31a3aa29f6b03de3283dadbf6c5a99a3e6aaf44705d53196c",
     "scripts/real-daily-report.mjs": "0cb8c147d24937f74681897946e21273fd2a7ac0e5226de6567f92d2e8a83e7f",
     "scripts/release-evidence-check.mjs": "47eb61875c194f561efc311c1ef894ceaeeda1e8847b007c6080bf5a0b8d8a75",
-    "scripts/run-acceptance.mjs": "9f88e2f62a0af28cf3c208309585f85ba48ae735c296794098d2eebd326b78cc",
+    "scripts/run-acceptance.mjs": "b664028575bf2dbfaf7de880991de498c1de95d56b3f461ac50f14821c4fe6b0",
     "scripts/safety-proof.mjs": "ee9b49177236987c257795bec31a53255355f6251efd601d73cbad980fb14766",
     "scripts/shadow-eval.mjs": "0669a992ee5a7be723d5a0015dbd155c3825373970583ff502d2877707f000aa",
     "src/agent/compatibility.js": "9ae2bf023796af50cb6eb234310fd5ce3c5d8287731ff41f6783a450a76ce91a",
@@ -338,6 +338,7 @@
     "src/intelligence/shadow-recorder.js": "a605e4ec17bf4f43e57f7d8387355a65fb6b8f5355c3c552fb251b10dea24510",
     "src/intelligence/task-analyzer.js": "cc6521ca662a6ecd05b1a5b83a8f763d0d62554032c34d43a2b021fb524b38ef",
     "src/intelligence/token-estimator.js": "fe755d960448015bbea38edcaf0260a6dc9a4b35e27e20b99be1b721054f8a5e",
+    "src/legacy-api.js": "f73e522fd62b5cf82e21de947077ea5294bacac594f81fc894dfa1f42e7e9758",
     "src/protocols/anthropic-stream.js": "486a38f8d60c8d952008e8aaaf1a9940afac86b8bab882358413465672abf5e8",
     "src/protocols/anthropic.js": "5f03e157a7fe1cc13f94e4df2f465fd40a5de72ffb0f45cd1267c09dfae7311d",
     "src/protocols/chat-stream.js": "2105e3f7852f0701fd1ad86f3eb9c2268b3bd0deffd251f1c4768d3316d7e2b0",
@@ -357,7 +358,7 @@
     "src/runtime/finalization.js": "5e9eddfdf1ce1a12d3b9e9a83e6825b1f4ab45cb9bfe5572733f797986a26f46",
     "src/runtime/outcomes.js": "6d476e8b7d68c9d53c138f1f339902959c04010f65233eedc841891584cb87bd",
     "src/runtime/request-controls.js": "a5c4cddff360c5a976a27fbb60ddf6aea8f6c83cb53a1a4df99a3cf46c74fd40",
-    "src/server.js": "150d2db598e3101e9ff1010359993b415c7f37197876ede52874699cb045b3d5",
+    "src/server.js": "fd1cbd8b7dd98d8c882f3549883e799855f75b5a244ee84b8e79f23783e3e07d",
     "src/storage/index.js": "146b1e4e61a880d65b08e33e24af109ac656d979c1f9452fdf1d4778b91af7d2",
     "src/storage/interface.js": "4ec042402eb7e0eaedd4bd48026d2d652f1314d69b0b51f0e2b52a048aebf183",
     "src/storage/memory-store.js": "d957f40335636c2771eecdebdf0bb8629314e6a5b7abf3d3b9aad51c0a150d8f",
@@ -372,6 +373,7 @@
     "test/integration/dashboard.test.js": "555da7ecf5fe13d94502b4e23aef9fccf3cef45b903fc82a54ce476586dc9b66",
     "test/integration/helpers.js": "525c4d39c28314a6ad99337a966532b6e2658a4e5947987bf2308e588d27c57e",
     "test/integration/key-cooldown-recovery.test.js": "b52ac19930710dc08a357608db3b62e9c9d5e5619c55884ab99095f3a5c67c0e",
+    "test/integration/legacy-api.test.js": "36b3a3b5d7df07f3e7e31031701e636cd059ae3d1a377d6c81937bdfa94ddba3",
     "test/integration/native-anthropic.test.js": "a135f426ae36be7249c8f8ee90bd1692fa27ccb0c76e865177ef6bcb3835050b",
     "test/integration/no-candidate-atomicity.test.js": "a1cd596880e43adaafdb7ca4fdf74aafd8d64afb6e80004ee7c5fbee8a8b3039",
     "test/integration/persistence.test.js": "3aafb2c8c3474206b369dfea06e6ce070c286e5ce278a4abf237f95c174f02c2",
@@ -430,18 +432,18 @@
     "config_template": "config/shadow-eval-config.template.json"
   },
   "historical_pilot_summary": {
-    "status": "failed_after_current_changes",
+    "status": "failed_before_current_changes",
     "total": 3,
     "passed": 0,
-    "note": "Post-fix targeted real pilot attempted 3 requests; 0 completed. Both configured providers returned incomplete responses at max_tokens=256; traffic stopped after the threshold. A third local Qwen fallback is now configured but has not been re-tested with external traffic."
+    "note": "The previous targeted real pilot attempted 3 requests and completed 0 before this UI and admin-control change set. No real external provider traffic was sent for the current changes; validation used localhost mocks only."
   },
   "release_status": {
     "status": "release_candidate_source_snapshot",
-    "source_commit": "f3ef6b0e10226ed9bf4d92090ce89a119bbb8634",
+    "source_commit": "1cf081d0cb326926bc873aa1e431af7a8c303a86",
     "branch": "phase2-shadow",
-    "generated_at": "2026-08-07T17:25:08.640Z",
-    "tests": 631,
-    "real_external_provider_pilot": "failed_before_current_changes",
+    "generated_at": "2026-08-09T19:28:20.547Z",
+    "tests": 632,
+    "real_external_provider_pilot": "pending_external_pilot",
     "production_deploy": "not_performed",
     "excluded_local_paths": [
       "deliver/",
