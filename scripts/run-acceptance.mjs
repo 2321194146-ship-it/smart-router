@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const expectedTests = Number(process.env.SMART_ROUTER_EXPECTED_TESTS || 631);
+const expectedTests = Number(process.env.SMART_ROUTER_EXPECTED_TESTS || 632);
 const checks = [];
 
 function run(name, command, args) {

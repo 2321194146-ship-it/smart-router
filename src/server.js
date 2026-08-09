@@ -50,6 +50,7 @@ import { handleResponse, responsesToChat } from './protocols/responses.js';
 import { handleResponseStream } from './protocols/responses-stream.js';
 import { handleAnthropicMessage } from './protocols/anthropic.js';
 import { handleAnthropicMessageStream } from './protocols/anthropic-stream.js';
+import { handleLegacyApiRequest } from './legacy-api.js';
 
 // ----------------------------------------------------------------------------
 // 常量
@@ -265,6 +266,9 @@ async function handleRequest(req, res, components) {
       await handleIntelligenceAdmin(req, res, components, pathname);
       return;
     }
+
+    // 旧 7878 管理 API 兼容层：仅回环 + 管理 Token（健康探针除外）。
+    if (await handleLegacyApiRequest(req, res, components, pathname)) return;
 
     // 先限流再认证，避免错误 Token 暴力尝试绕过资源保护。
     const clientKey = req.socket?.remoteAddress || 'unknown';

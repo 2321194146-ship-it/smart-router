@@ -52,8 +52,15 @@
   },
   "providers": [
     {
-      "name": "gateway7878",
-      "base_url": "http://127.0.0.1:7878/v1",
+      "name": "modelscope-direct",
+      "base_url": "https://api-inference.modelscope.cn/v1",
+      "api_key": "REPLACE_VIA_SECRETS_OR_ENV",
+      "auth_header": "Authorization",
+      "auth_prefix": "Bearer "
+    },
+    {
+      "name": "nvidia-direct",
+      "base_url": "https://integrate.api.nvidia.com/v1",
       "api_key": "REPLACE_VIA_SECRETS_OR_ENV",
       "auth_header": "Authorization",
       "auth_prefix": "Bearer "
@@ -62,7 +69,7 @@
   "models": [
     {
       "id": "phase1-primary",
-      "provider": "gateway7878",
+      "provider": "modelscope-direct",
       "apiModel": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
       "tier": "tier1",
       "paid": false,
@@ -81,7 +88,7 @@
     },
     {
       "id": "canary-primary",
-      "provider": "gateway7878",
+      "provider": "modelscope-direct",
       "apiModel": "Qwen/Qwen3-235B-A22B-Instruct-2507",
       "tier": "tier2",
       "paid": false,
@@ -100,7 +107,7 @@
     },
     {
       "id": "redundant-1",
-      "provider": "gateway7878",
+      "provider": "modelscope-direct",
       "apiModel": "Qwen/Qwen3-Next-80B-A3B-Instruct",
       "tier": "tier3",
       "paid": false,
@@ -119,7 +126,7 @@
     },
     {
       "id": "redundant-2",
-      "provider": "gateway7878",
+      "provider": "nvidia-direct",
       "apiModel": "nvidia/nemotron-3-ultra-550b-a55b",
       "tier": "tier3",
       "paid": false,
@@ -155,7 +162,8 @@
           "redundant-2"
         ],
         "allowedProviders": [
-          "gateway7878"
+          "modelscope-direct",
+          "nvidia-direct"
         ],
         "strictModel": false
       }
