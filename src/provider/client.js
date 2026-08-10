@@ -249,6 +249,21 @@ export class ProviderClient {
     });
   }
 
+  /**
+   * 调用受控的 OpenAI 兼容非对话端点（当前用于图片/视频生成）。
+   * 端点白名单放在客户端边界，避免管理 API 被滥用成任意 URL 代理。
+   */
+  async callRaw(model, body, endpoint, options = {}) {
+    if (!['/v1/images/generations', '/v1/video/generations'].includes(endpoint)) {
+      throw new ProviderError(ErrorType.UNKNOWN, `unsupported raw endpoint: ${endpoint}`, {});
+    }
+    return this._execute(model, body, {
+      ...options,
+      endpoint,
+      apiType: 'openai',
+    });
+  }
+
   // --------------------------------------------------------------------------
   // 模型列表（健康检查用）
   // --------------------------------------------------------------------------

@@ -51,6 +51,9 @@ import { handleResponseStream } from './protocols/responses-stream.js';
 import { handleAnthropicMessage } from './protocols/anthropic.js';
 import { handleAnthropicMessageStream } from './protocols/anthropic-stream.js';
 import { handleLegacyApiRequest } from './legacy-api.js';
+import { handleMcpProxyRequest } from './mcp-proxy.js';
+import { handleMediaRequest } from './media-proxy.js';
+import { VirtualKeyManager } from './virtual-keys.js';
 
 // ----------------------------------------------------------------------------
 // 常量
@@ -135,6 +138,7 @@ export async function createServer(configPath) {
   const providerClient = new ProviderClient(config, keyPool, health);
   const costTracker = new CostTracker(config, store);
   const finalizer = new Finalizer(costTracker, store);
+  const virtualKeys = new VirtualKeyManager(config);
   const executionEngine = new ExecutionEngine(
     config,
     providerClient,
@@ -191,6 +195,7 @@ export async function createServer(configPath) {
     providerClient,
     costTracker,
     finalizer,
+    virtualKeys,
     executionEngine,
     intelligence,
     publicAuth,
@@ -249,6 +254,7 @@ export async function createServer(configPath) {
 async function handleRequest(req, res, components) {
   const { config, publicAuth, rateLimiter, concurrencyGate } = components;
   let admitted = false;
+  let virtualKeyRelease = null;
 
   try {
     // 1. 解析 URL
@@ -266,6 +272,8 @@ async function handleRequest(req, res, components) {
       await handleIntelligenceAdmin(req, res, components, pathname);
       return;
     }
+
+    if (await handleMcpProxyRequest(req, res, components, pathname)) return;
 
     // 旧 7878 管理 API 兼容层：仅回环 + 管理 Token（健康探针除外）。
     if (await handleLegacyApiRequest(req, res, components, pathname)) return;
@@ -300,6 +308,8 @@ async function handleRequest(req, res, components) {
       return;
     }
     admitted = true;
+
+    if (await handleMediaRequest(req, res, components, pathname)) return;
 
     // 3. HEAD /v1 探活（Claude Code 兼容）
     if (req.method === 'HEAD') {
@@ -339,6 +349,14 @@ async function handleRequest(req, res, components) {
     if (req.method === 'POST') {
       const body = await parseBody(req, config);
       assertRequestBodyObject(body);
+
+      const virtualKeyDecision = components.virtualKeys?.authorize(req, body.model || null);
+      if (virtualKeyDecision && !virtualKeyDecision.allowed) {
+        res.writeHead(virtualKeyDecision.status || 403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: virtualKeyDecision.reason }));
+        return;
+      }
+      virtualKeyRelease = virtualKeyDecision?.release || null;
 
       // 创建取消令牌（监听客户端断开）
       const cancelToken = CancelToken.fromHttp(req, res);
@@ -437,6 +455,7 @@ async function handleRequest(req, res, components) {
       }
     }
   } finally {
+    virtualKeyRelease?.();
     if (admitted) concurrencyGate.release();
   }
 }

@@ -4,6 +4,7 @@
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { chmod, copyFile, rename, writeFile } from 'node:fs/promises';
 import { validateConfig } from './config/validator.js';
+import { generateVirtualKey, virtualKeyHash } from './virtual-keys.js';
 
 const SUCCESS_OUTCOMES = new Set(['completed', 'success']);
 
@@ -97,7 +98,7 @@ async function persistConfig(components, candidate) {
 
 function prepareCandidate(current, changes) {
   const candidate = clone(current);
-  for (const section of ['routing', 'models', 'providers', 'agent_bindings', 'budget', 'circuit_breaker', 'intelligence', 'mcp_servers']) {
+  for (const section of ['routing', 'models', 'providers', 'agent_bindings', 'budget', 'circuit_breaker', 'intelligence', 'mcp_servers', 'virtual_keys']) {
     if (Object.prototype.hasOwnProperty.call(changes, section)) candidate[section] = clone(changes[section]);
   }
   candidate.server = clone(current.server || {});
@@ -129,7 +130,111 @@ function assertMutationObject(body) {
   }
 }
 
+function virtualKeyEntries(config) {
+  return Object.entries(config.virtual_keys || {}).filter(([rawKey, value]) => rawKey && value && typeof value === 'object');
+}
+
+function virtualKeyEntry(config, hash) {
+  return virtualKeyEntries(config).find(([rawKey]) => virtualKeyHash(rawKey) === hash) || null;
+}
+
+function validNonNegative(value) {
+  return value === undefined || (Number.isFinite(Number(value)) && Number(value) >= 0);
+}
+
+function normalizeVirtualKeyPatch(body, current = {}) {
+  const patch = {};
+  if (body.name !== undefined) {
+    if (typeof body.name !== 'string' || !body.name.trim() || body.name.length > 120) throw Object.assign(new Error('valid_name_required'), { statusCode: 400 });
+    patch.name = body.name.trim();
+  }
+  if (body.tenant !== undefined) {
+    if (typeof body.tenant !== 'string' || body.tenant.length > 120) throw Object.assign(new Error('valid_tenant_required'), { statusCode: 400 });
+    patch.tenant = body.tenant.trim() || 'default';
+  }
+  if (body.models !== undefined) {
+    if (!Array.isArray(body.models) || body.models.some((model) => typeof model !== 'string' || !model.trim())) throw Object.assign(new Error('models_array_required'), { statusCode: 400 });
+    patch.models = [...new Set(body.models.map((model) => model.trim()))];
+  }
+  if (body.enabled !== undefined) {
+    if (typeof body.enabled !== 'boolean') throw Object.assign(new Error('enabled_boolean_required'), { statusCode: 400 });
+    patch.enabled = body.enabled;
+  }
+  if (body.concurrent_max !== undefined) {
+    if (!validNonNegative(body.concurrent_max)) throw Object.assign(new Error('concurrent_max_must_be_non_negative'), { statusCode: 400 });
+    patch.concurrent_max = Number(body.concurrent_max);
+  }
+  if (body.budget_monthly_rmb !== undefined) {
+    if (!validNonNegative(body.budget_monthly_rmb)) throw Object.assign(new Error('budget_monthly_rmb_must_be_non_negative'), { statusCode: 400 });
+    patch.budget_monthly_rmb = Number(body.budget_monthly_rmb);
+  }
+  return { ...current, ...patch };
+}
+
+async function handleVirtualKeyMutation(req, res, components, pathname) {
+  const body = await readJsonBody(req, Math.min(64 * 1024, components.config.server?.max_request_body_bytes || 64 * 1024));
+  assertMutationObject(body);
+  const current = components._legacyPendingConfig || components.config;
+  const virtualKeys = clone(current.virtual_keys || {});
+
+  if (pathname === '/api/virtual-keys' && req.method === 'POST') {
+    if (typeof body.name !== 'string' || !body.name.trim() || body.name.length > 120) throw Object.assign(new Error('valid_name_required'), { statusCode: 400 });
+    if (body.models !== undefined && (!Array.isArray(body.models) || body.models.some((model) => typeof model !== 'string'))) throw Object.assign(new Error('models_array_required'), { statusCode: 400 });
+    const rawKey = generateVirtualKey();
+    virtualKeys[rawKey] = {
+      name: body.name.trim(),
+      tenant: typeof body.tenant === 'string' && body.tenant.trim() ? body.tenant.trim() : 'default',
+      models: Array.isArray(body.models) ? [...new Set(body.models.map((model) => model.trim()).filter(Boolean))] : [],
+      enabled: body.enabled !== false,
+      concurrent_max: body.concurrent_max === undefined ? 5 : Number(body.concurrent_max),
+      budget_monthly_rmb: body.budget_monthly_rmb === undefined ? 0 : Number(body.budget_monthly_rmb),
+      spent_rmb: 0,
+      created_at: new Date().toISOString(),
+    };
+    if (!validNonNegative(virtualKeys[rawKey].concurrent_max) || !validNonNegative(virtualKeys[rawKey].budget_monthly_rmb)) throw Object.assign(new Error('numeric_limits_must_be_non_negative'), { statusCode: 400 });
+    const validation = validateConfig(prepareCandidate(current, { virtual_keys: virtualKeys }));
+    if (!validation.valid) { writeJson(res, 422, { success: false, valid: false, errors: validation.errors, warnings: validation.warnings }); return true; }
+    const backupName = await persistConfig(components, prepareCandidate(current, { virtual_keys: virtualKeys }));
+    components.virtualKeys?.load(components._legacyPendingConfig);
+    writeJson(res, 200, { success: true, key: rawKey, hash: virtualKeyHash(rawKey), applied: true, restartRequired: false, backupCreated: true, backupName });
+    return true;
+  }
+
+  if (pathname === '/api/virtual-keys/reset' && req.method === 'POST') {
+    if (typeof body.hash !== 'string') throw Object.assign(new Error('hash_required'), { statusCode: 400 });
+    const entry = virtualKeyEntry(current, body.hash);
+    if (!entry) throw Object.assign(new Error('virtual_key_not_found'), { statusCode: 404 });
+    virtualKeys[entry[0]] = { ...entry[1], spent_rmb: 0 };
+    const candidate = prepareCandidate(current, { virtual_keys: virtualKeys });
+    const backupName = await persistConfig(components, candidate);
+    components.virtualKeys?.load(candidate);
+    writeJson(res, 200, { success: true, hash: body.hash, reset: true, restartRequired: false, backupCreated: true, backupName });
+    return true;
+  }
+
+  const prefix = '/api/virtual-keys/';
+  if (pathname.startsWith(prefix)) {
+    const hash = decodeURIComponent(pathname.slice(prefix.length));
+    const entry = virtualKeyEntry(current, hash);
+    if (!entry) throw Object.assign(new Error('virtual_key_not_found'), { statusCode: 404 });
+    if (req.method === 'DELETE') delete virtualKeys[entry[0]];
+    else if (req.method === 'PUT') virtualKeys[entry[0]] = normalizeVirtualKeyPatch(body, entry[1]);
+    else return false;
+    const candidate = prepareCandidate(current, { virtual_keys: virtualKeys });
+    const validation = validateConfig(candidate);
+    if (!validation.valid) { writeJson(res, 422, { success: false, valid: false, errors: validation.errors, warnings: validation.warnings }); return true; }
+    const backupName = await persistConfig(components, candidate);
+    components.virtualKeys?.load(candidate);
+    writeJson(res, 200, { success: true, hash, deleted: req.method === 'DELETE', updated: req.method === 'PUT', restartRequired: false, backupCreated: true, backupName });
+    return true;
+  }
+  return false;
+}
+
 async function handleLegacyMutation(req, res, components, pathname) {
+  if (pathname === '/api/virtual-keys' || pathname === '/api/virtual-keys/reset' || pathname.startsWith('/api/virtual-keys/')) {
+    return handleVirtualKeyMutation(req, res, components, pathname);
+  }
   const body = await readJsonBody(req, Math.min(1024 * 1024, components.config.server?.max_request_body_bytes || 1024 * 1024));
   assertMutationObject(body);
   const current = components._legacyPendingConfig || components.config;
@@ -257,6 +362,38 @@ function normalizeRecord(record) {
 async function recordsFor(components) {
   const records = await components.store.getAllAuditRecords();
   return records.map(normalizeRecord).sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp)));
+}
+
+function safeTraceRecord(record, costRecord = null) {
+  const attempts = Array.isArray(record?.attempts) ? record.attempts.map((attempt) => ({
+    attemptNumber: attempt.attemptNumber,
+    model: attempt.model,
+    provider: attempt.provider,
+    transportOutcome: attempt.transportOutcome,
+    validatedOutcome: attempt.validatedOutcome,
+    httpStatus: attempt.httpStatus,
+    latencyMs: attempt.latencyMs,
+    firstByteMs: attempt.firstByteMs,
+    usage: attempt.usage || null,
+    cost: attempt.cost || null,
+    errorType: attempt.errorType || null,
+    budgetBlocked: attempt.budgetBlocked === true,
+  })) : [];
+  return {
+    id: record.requestId,
+    request_id: record.requestId,
+    timestamp: record.timestamp,
+    model: record.finalModel || record.requestedModel || null,
+    provider: record.finalProvider || null,
+    status: SUCCESS_OUTCOMES.has(record.outcome) ? 200 : 502,
+    outcome: record.outcome || 'unknown',
+    latency_ms: attempts.reduce((sum, attempt) => sum + Number(attempt.latencyMs || 0), 0),
+    agent: record.agentId || 'generic',
+    protocol: record.protocol || null,
+    error: SUCCESS_OUTCOMES.has(record.outcome) ? null : record.outcome || 'request_failed',
+    attempts,
+    cost: costRecord?.cost || null,
+  };
 }
 
 function modelStats(config, records) {
@@ -513,10 +650,38 @@ export async function handleLegacyApiRequest(req, res, components, pathname) {
     return true;
   }
 
+  const readConfig = components._legacyPendingConfig || components.config;
   const records = await recordsFor(components);
-  const summary = overview(components.config, records);
+  const summary = overview(readConfig, records);
+  if (pathname === '/api/virtual-keys') {
+    writeJson(res, 200, { success: true, keys: components.virtualKeys?.list?.() || [], stats: components.virtualKeys?.stats?.() || {} });
+    return true;
+  }
+  if (pathname.startsWith('/api/trace/')) {
+    const requestId = decodeURIComponent(pathname.slice('/api/trace/'.length));
+    const record = await components.store.getAuditRecord(requestId);
+    if (!record) {
+      writeJson(res, 404, { success: false, error: 'request_not_found' });
+      return true;
+    }
+    let costRecord = null;
+    try {
+      costRecord = await components.store.getCost(requestId);
+    } catch {
+      // Cost persistence is optional for trace inspection; keep the trace usable.
+    }
+    writeJson(res, 200, safeTraceRecord(record, costRecord));
+    return true;
+  }
+  if (pathname.startsWith('/api/virtual-keys/')) {
+    const hash = decodeURIComponent(pathname.slice('/api/virtual-keys/'.length));
+    const key = (components.virtualKeys?.list?.() || []).find((item) => item.hash === hash);
+    if (!key) writeJson(res, 404, { success: false, error: 'virtual_key_not_found' });
+    else writeJson(res, 200, { success: true, key });
+    return true;
+  }
   if (isHealth) {
-    const providers = providerSummary(components.config, components.health, records);
+    const providers = providerSummary(readConfig, components.health, records);
     writeJson(res, 200, {
       status: 'ok',
       version: '1.0.0-smart-router',
@@ -532,23 +697,23 @@ export async function handleLegacyApiRequest(req, res, components, pathname) {
   }
 
   if (pathname === '/stats' || pathname === '/api/stats') {
-    writeJson(res, 200, statsSnapshot(components.config, components.health, records));
+    writeJson(res, 200, statsSnapshot(readConfig, components.health, records));
     return true;
   }
 
   if (pathname === '/api/models' || pathname === '/api/config/models') {
-    writeJson(res, 200, { success: true, models: modelStats(components.config, records), total: components.config.models?.length || 0 });
+    writeJson(res, 200, { success: true, models: modelStats(readConfig, records), total: readConfig.models?.length || 0 });
     return true;
   }
   if (pathname === '/api/providers' || pathname === '/providers') {
-    writeJson(res, 200, providerSummary(components.config, components.health, records));
+    writeJson(res, 200, providerSummary(readConfig, components.health, records));
     return true;
   }
   if (pathname === '/api/stats' || pathname === '/api/stats/overview') {
     if (pathname === '/api/stats') {
-      writeJson(res, 200, statsSnapshot(components.config, components.health, records));
+      writeJson(res, 200, statsSnapshot(readConfig, components.health, records));
     } else {
-      writeJson(res, 200, { overview: summary, top_models: modelStats(components.config, records).sort((a, b) => b.requests - a.requests).slice(0, 10) });
+      writeJson(res, 200, { overview: summary, top_models: modelStats(readConfig, records).sort((a, b) => b.requests - a.requests).slice(0, 10) });
     }
     return true;
   }
@@ -565,7 +730,7 @@ export async function handleLegacyApiRequest(req, res, components, pathname) {
     return true;
   }
   if (pathname.startsWith('/api/stats/agents')) {
-    writeJson(res, 200, { agents: statsAgents(components.config, records, daysFromRequest(req, 7)) });
+      writeJson(res, 200, { agents: statsAgents(readConfig, records, daysFromRequest(req, 7)) });
     return true;
   }
   if (pathname === '/api/tenants') {
@@ -610,25 +775,25 @@ export async function handleLegacyApiRequest(req, res, components, pathname) {
     return true;
   }
   if (pathname === '/api/agents') {
-    const agents = Object.entries(components.config.agent_bindings || {}).map(([name, binding]) => ({ name, label: name, bound: true, mode: binding.mode || 'group', bound_models: binding.model_ids || [], is_active: true, count: records.filter((record) => record.agentId === name).length }));
+    const agents = Object.entries(readConfig.agent_bindings || {}).map(([name, binding]) => ({ name, label: name, bound: true, mode: binding.mode || 'group', bound_models: binding.model_ids || [], is_active: true, count: records.filter((record) => record.agentId === name).length }));
     writeJson(res, 200, { success: true, agents });
     return true;
   }
   if (pathname === '/api/agents-overview') {
-    const agents = Object.keys(components.config.agent_bindings || {}).map((name) => ({ name, label: name, status: 'running', system: '已绑定模型池', skillCount: components.config.agent_bindings[name]?.model_ids?.length || 0 }));
+    const agents = Object.keys(readConfig.agent_bindings || {}).map((name) => ({ name, label: name, status: 'running', system: '已绑定模型池', skillCount: readConfig.agent_bindings[name]?.model_ids?.length || 0 }));
     writeJson(res, 200, { agents, summary: { onlineCount: agents.length, totalMainAgents: agents.length, totalSubAgents: 0 }, dupSkills: [] });
     return true;
   }
   if (pathname === '/api/config') {
-    writeJson(res, 200, safeConfig(components.config));
+    writeJson(res, 200, safeConfig(readConfig));
     return true;
   }
   if (pathname === '/config') {
-    writeJson(res, 200, safeConfig(components.config));
+    writeJson(res, 200, safeConfig(readConfig));
     return true;
   }
   if (pathname === '/api/graph') {
-    writeJson(res, 200, { nodes: graph(components.config, components.health, records) });
+    writeJson(res, 200, { nodes: graph(readConfig, components.health, records) });
     return true;
   }
   if (pathname === '/api/cost') {
@@ -652,7 +817,7 @@ export async function handleLegacyApiRequest(req, res, components, pathname) {
     return true;
   }
   if (pathname === '/api/mcp-servers') {
-    const servers = Object.entries(components.config.mcp_servers || {}).map(([name, server]) => ({ name, url: server.url, enabled: server.enabled !== false }));
+    const servers = Object.entries(readConfig.mcp_servers || {}).map(([name, server]) => ({ name, url: server.url, enabled: server.enabled !== false }));
     writeJson(res, 200, { servers });
     return true;
   }

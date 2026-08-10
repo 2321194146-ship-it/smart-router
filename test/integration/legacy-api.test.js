@@ -16,8 +16,17 @@ describe('28788 legacy compatibility API', () => {
     process.env.SMART_ROUTER_ADMIN_TOKEN = ADMIN_TOKEN;
     mock = createMockProvider();
     await mock.listen();
+    mock.queueResponse({
+      match: (request) => request.url === '/v1/images/generations',
+      response: { status: 200, body: { created: 1, data: [{ url: 'http://127.0.0.1/image.png' }] } },
+    });
     const dataDir = `/tmp/sr-legacy-api-${Date.now()}`;
     const config = createTestConfig(mock.port, { dataDir });
+    config.models.push({
+      id: 'image-model', provider: 'mock-a', apiModel: 'image-model', tier: 'tier1',
+      enabled: true, paid: false, capability: ['image_generation'],
+    });
+    config.mcp_servers = { local: { url: `http://127.0.0.1:${mock.port}/mcp/local`, enabled: true } };
     const configPath = writeConfig(config, `/tmp/sr-legacy-api-config-${Date.now()}`);
     router = await startSmartRouter(configPath);
     const auth = { Authorization: `Bearer ${ADMIN_TOKEN}` };
@@ -65,6 +74,29 @@ describe('28788 legacy compatibility API', () => {
       assert.equal(circuits.status, 200);
       assert.equal(typeof (await circuits.json()), 'object');
 
+      const image = await fetch(`http://127.0.0.1:${router.port}/v1/images/generations`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'image-model', prompt: 'a local test image' }),
+      });
+      assert.equal(image.status, 200);
+      assert.equal((await image.json()).data[0].url, 'http://127.0.0.1/image.png');
+      assert.ok(mock.receivedRequests.some((request) => request.url === '/v1/images/generations'));
+
+      const auditRecord = (await router.server._components.store.getAllAuditRecords()).find((record) => record.protocol === 'media');
+      assert.ok(auditRecord?.requestId);
+      const trace = await fetch(`http://127.0.0.1:${router.port}/api/trace/${encodeURIComponent(auditRecord.requestId)}`, { headers: auth });
+      assert.equal(trace.status, 200);
+      const traceBody = await trace.json();
+      assert.equal(traceBody.request_id, auditRecord.requestId);
+      assert.ok(!JSON.stringify(traceBody).includes('a local test image'));
+
+      const mcpUnauthorized = await fetch(`http://127.0.0.1:${router.port}/mcp/local`);
+      assert.equal(mcpUnauthorized.status, 401);
+      const mcp = await fetch(`http://127.0.0.1:${router.port}/mcp/local`, { headers: auth });
+      assert.equal(mcp.status, 200);
+      assert.equal((await mcp.json()).object, 'chat.completion');
+      assert.ok(mock.receivedRequests.some((request) => request.url === '/mcp/local'));
+
       const recent = await fetch(`http://127.0.0.1:${router.port}/api/recent?limit=10`, { headers: auth });
       assert.equal(recent.status, 200);
       assert.ok(Array.isArray((await recent.json()).recent));
@@ -74,6 +106,38 @@ describe('28788 legacy compatibility API', () => {
       const safeConfig = await configSummary.json();
       assert.ok(safeConfig.providers.every((item) => !('api_key' in item) && !('api_keys' in item)));
       assert.ok(safeConfig.providers.every((item) => item.hasApiKey === true));
+
+      const createVirtualKey = await fetch(`http://127.0.0.1:${router.port}/api/virtual-keys`, {
+        method: 'POST', headers: { ...auth, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'local-test-key', models: ['test-model-a'], concurrent_max: 1, budget_monthly_rmb: 1 }),
+      });
+      assert.equal(createVirtualKey.status, 200);
+      const virtualKeyBody = await createVirtualKey.json();
+      assert.match(virtualKeyBody.key, /^sk-smart-/);
+      const virtualKeys = await fetch(`http://127.0.0.1:${router.port}/api/virtual-keys`, { headers: auth });
+      assert.equal(virtualKeys.status, 200);
+      const virtualKeyList = await virtualKeys.json();
+      assert.ok(virtualKeyList.keys.some((item) => item.name === 'local-test-key'));
+      assert.ok(!JSON.stringify(virtualKeyList).includes(virtualKeyBody.key));
+
+      const renamedVirtualKey = await fetch(`http://127.0.0.1:${router.port}/api/virtual-keys/${virtualKeyBody.hash}`, {
+        method: 'PUT', headers: { ...auth, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'renamed-local-key', enabled: true }),
+      });
+      assert.equal(renamedVirtualKey.status, 200);
+      const renamedBody = await (await fetch(`http://127.0.0.1:${router.port}/api/virtual-keys/${virtualKeyBody.hash}`, { headers: auth })).json();
+      assert.equal(renamedBody.key.name, 'renamed-local-key');
+      const resetVirtualKey = await fetch(`http://127.0.0.1:${router.port}/api/virtual-keys/reset`, {
+        method: 'POST', headers: { ...auth, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hash: virtualKeyBody.hash }),
+      });
+      assert.equal(resetVirtualKey.status, 200);
+
+      const deniedModel = await fetch(`http://127.0.0.1:${router.port}/v1/chat/completions`, {
+        method: 'POST', headers: { Authorization: `Bearer ${virtualKeyBody.key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'test-model-b', messages: [{ role: 'user', content: 'blocked' }] }),
+      });
+      assert.equal(deniedModel.status, 403);
 
       const addModel = await fetch(`http://127.0.0.1:${router.port}/api/config/models`, {
         method: 'POST', headers: { ...auth, 'Content-Type': 'application/json' },
@@ -104,6 +168,11 @@ describe('28788 legacy compatibility API', () => {
       assert.equal((await addMcp.json()).restartRequired, true);
       const afterMcp = JSON.parse(readFileSync(configPath, 'utf8'));
       assert.equal(afterMcp.mcp_servers['local-mcp'].url, `http://127.0.0.1:${mock.port}/mcp`);
+
+      const deleteVirtualKey = await fetch(`http://127.0.0.1:${router.port}/api/virtual-keys/${virtualKeyBody.hash}`, { method: 'DELETE', headers: auth });
+      assert.equal(deleteVirtualKey.status, 200);
+      const deletedVirtualKey = await fetch(`http://127.0.0.1:${router.port}/api/virtual-keys/${virtualKeyBody.hash}`, { headers: auth });
+      assert.equal(deletedVirtualKey.status, 404);
     } finally {
       await stopSmartRouter(router);
       await mock.close();
