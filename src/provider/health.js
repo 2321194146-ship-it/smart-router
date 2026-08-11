@@ -810,6 +810,9 @@ export class ProviderHealth {
    */
   _buildModelsUrl(provider) {
     const base = String(provider.base_url || '').replace(/\/+$/, '');
+    if (provider.strip_v1_prefix === true) {
+      return `${base}/models`;
+    }
     // 优先 /v1/models，部分 provider 可能不支持 /v1 前缀
     if (base.endsWith('/v1')) {
       return `${base}/models`;
