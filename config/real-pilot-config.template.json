@@ -39,6 +39,7 @@
       "name": "modelscope",
       "base_url": "https://api-inference.modelscope.cn/v1",
       "api_key": "REPLACE_VIA_SECRETS_OR_ENV",
+      "api_keys": ["REPLACE_VIA_SECRETS_OR_ENV", "REPLACE_VIA_SECRETS_OR_ENV"],
       "auth_header": "Authorization",
       "auth_prefix": "Bearer "
     },
@@ -75,6 +76,7 @@
       "name": "opencode-zen",
       "base_url": "https://opencode.ai/zen/v1",
       "api_key": "REPLACE_VIA_SECRETS_OR_ENV",
+      "api_keys": ["REPLACE_VIA_SECRETS_OR_ENV", "REPLACE_VIA_SECRETS_OR_ENV", "REPLACE_VIA_SECRETS_OR_ENV"],
       "auth_header": "Authorization",
       "auth_prefix": "Bearer "
     },
@@ -82,6 +84,7 @@
       "name": "openrouter",
       "base_url": "https://openrouter.ai/api/v1",
       "api_key": "REPLACE_VIA_SECRETS_OR_ENV",
+      "api_keys": ["REPLACE_VIA_SECRETS_OR_ENV", "REPLACE_VIA_SECRETS_OR_ENV", "REPLACE_VIA_SECRETS_OR_ENV"],
       "auth_header": "Authorization",
       "auth_prefix": "Bearer "
     }
