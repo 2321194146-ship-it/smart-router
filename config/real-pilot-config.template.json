@@ -88,6 +88,13 @@
       "api_keys": ["REPLACE_VIA_SECRETS_OR_ENV", "REPLACE_VIA_SECRETS_OR_ENV", "REPLACE_VIA_SECRETS_OR_ENV"],
       "auth_header": "Authorization",
       "auth_prefix": "Bearer "
+    },
+    {
+      "name": "tencenthub",
+      "base_url": "https://tokenhub.tencentmaas.com/v1",
+      "api_key": "REPLACE_VIA_SECRETS_OR_ENV",
+      "auth_header": "Authorization",
+      "auth_prefix": "Bearer "
     }
   ],
   "models": [
@@ -186,16 +193,28 @@
       "max_tokens": 4096,
       "price": { "input_cost_per_1k": 0, "output_cost_per_1k": 0, "currency": "USD" },
       "enabled": true
+    },
+    {
+      "id": "deepseek-v4-flash-th",
+      "provider": "tencenthub",
+      "apiModel": "deepseek-v4-flash",
+      "tier": "tier2",
+      "paid": false,
+      "capability": ["chat", "coding", "reasoning", "tool_use", "streaming"],
+      "context_window": 131072,
+      "max_tokens": 4096,
+      "price": { "input_cost_per_1k": 0, "output_cost_per_1k": 0, "currency": "USD" },
+      "enabled": true
     }
   ],
   "agent_bindings": {
     "claude-code": {
-      "model_ids": ["qwen3-coder-ms", "nemotron-3-ultra-nv", "glm-4-flash-zp", "intern-s1-mini", "agnes-2.0-flash", "nemotron-3-ultra-oc", "north-mini-code-or", "qwen3-235b-ms"],
+      "model_ids": ["qwen3-coder-ms", "nemotron-3-ultra-nv", "glm-4-flash-zp", "intern-s1-mini", "agnes-2.0-flash", "nemotron-3-ultra-oc", "north-mini-code-or", "qwen3-235b-ms", "deepseek-v4-flash-th"],
       "budget": {
         "allowPaid": false,
         "maxRequestCost": 0.02,
-        "allowedModels": ["qwen3-coder-ms", "nemotron-3-ultra-nv", "glm-4-flash-zp", "intern-s1-mini", "agnes-2.0-flash", "nemotron-3-ultra-oc", "north-mini-code-or", "qwen3-235b-ms"],
-        "allowedProviders": ["modelscope", "nvidia", "zhipu", "internlm", "agnes", "opencode-zen", "openrouter"],
+        "allowedModels": ["qwen3-coder-ms", "nemotron-3-ultra-nv", "glm-4-flash-zp", "intern-s1-mini", "agnes-2.0-flash", "nemotron-3-ultra-oc", "north-mini-code-or", "qwen3-235b-ms", "deepseek-v4-flash-th"],
+        "allowedProviders": ["modelscope", "nvidia", "zhipu", "internlm", "agnes", "opencode-zen", "openrouter", "tencenthub"],
         "strictModel": false
       }
     }

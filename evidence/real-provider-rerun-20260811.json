@@ -51,6 +51,10 @@
     { "provider": "openrouter", "accounts": 3, "chatPass": 3, "model": "cohere/north-mini-code:free" },
     { "provider": "modelscope", "accounts": 2, "chatPass": 2, "model": "Qwen/Qwen3-Coder-30B-A3B-Instruct" },
     { "provider": "internlm", "accounts": 5, "chatPass": 5, "model": "intern-s1-mini" },
+    { "provider": "tencenthub", "accounts": 1, "chatPass": 1, "model": "deepseek-v4-flash" },
+    { "provider": "siliconflow", "accounts": 1, "chatPass": 1, "model": "deepseek-ai/DeepSeek-V4-Flash", "migrated": false, "reason": "API 未返回定价，28788 allowPaid=false，暂不自动路由" },
+    { "provider": "github-models", "accounts": 3, "chatPass": 0, "errorType": "endpoint_404_or_410" },
+    { "provider": "lmstudio", "accounts": 1, "chatPass": 0, "errorType": "local_service_unreachable" },
     { "provider": "longcat", "accounts": 2, "chatPass": 0, "errorType": "http_402" }
   ],
   "secrets": "not recorded"
