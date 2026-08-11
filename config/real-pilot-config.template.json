@@ -2,65 +2,71 @@
   "server": {
     "host": "127.0.0.1",
     "port": 28788,
-    "data_dir": "./data",
-    "request_timeout_ms": 120000,
+    "data_dir": "./data/28788-daily",
+    "request_timeout_ms": 60000,
     "shutdown_grace_ms": 5000
   },
   "intelligence": {
-    "mode": "active_canary",
+    "mode": "off",
     "fallback_to_routing": true,
     "activeCanary": {
-      "percentage": 100,
-      "allowedAgents": [
-        "claude-code"
-      ],
-      "allowedProtocols": [
-        "anthropic"
-      ],
-      "allowedTaskTypes": [
-        "general_chat",
-        "writing",
-        "summarization",
-        "translation",
-        "extraction"
-      ]
+      "percentage": 0,
+      "allowedAgents": ["claude-code"],
+      "allowedProtocols": ["anthropic"],
+      "allowedTaskTypes": ["general_chat", "writing", "summarization", "translation", "extraction"]
     },
-    "shadow": {
-      "retentionDays": 30
-    }
+    "shadow": { "retentionDays": 30 }
   },
   "routing": {
     "strategy": "tier_weighted",
-    "tier_weights": {
-      "tier1": 10,
-      "tier2": 5,
-      "tier3": 1
-    },
+    "tier_weights": { "tier1": 10, "tier2": 5, "tier3": 1 },
     "max_concurrent": 4,
-    "max_retries": 2,
-    "retry_backoff_ms": 400,
+    "max_retries": 1,
+    "retry_backoff_ms": 500,
     "cooldown_default_sec": 60,
-    "health_check_interval_sec": 999999,
+    "health_check_interval_sec": 60,
     "failover_on_error": true
   },
   "budget": {
-    "allowPaid": true,
-    "maxRequestCost": 1,
+    "allowPaid": false,
+    "maxRequestCost": 0.02,
     "allowedModels": [],
     "allowedProviders": [],
     "strictModel": false
   },
   "providers": [
     {
-      "name": "modelscope-direct",
+      "name": "modelscope",
       "base_url": "https://api-inference.modelscope.cn/v1",
       "api_key": "REPLACE_VIA_SECRETS_OR_ENV",
       "auth_header": "Authorization",
       "auth_prefix": "Bearer "
     },
     {
-      "name": "nvidia-direct",
+      "name": "nvidia",
       "base_url": "https://integrate.api.nvidia.com/v1",
+      "api_key": "REPLACE_VIA_SECRETS_OR_ENV",
+      "auth_header": "Authorization",
+      "auth_prefix": "Bearer "
+    },
+    {
+      "name": "zhipu",
+      "base_url": "https://open.bigmodel.cn/api/paas/v4",
+      "strip_v1_prefix": true,
+      "api_key": "REPLACE_VIA_SECRETS_OR_ENV",
+      "auth_header": "Authorization",
+      "auth_prefix": "Bearer "
+    },
+    {
+      "name": "internlm",
+      "base_url": "https://chat.intern-ai.org.cn/api/v1",
+      "api_key": "REPLACE_VIA_SECRETS_OR_ENV",
+      "auth_header": "Authorization",
+      "auth_prefix": "Bearer "
+    },
+    {
+      "name": "agnes",
+      "base_url": "https://apihub.agnes-ai.com/v1",
       "api_key": "REPLACE_VIA_SECRETS_OR_ENV",
       "auth_header": "Authorization",
       "auth_prefix": "Bearer "
@@ -68,110 +74,81 @@
   ],
   "models": [
     {
-      "id": "phase1-primary",
-      "provider": "modelscope-direct",
+      "id": "qwen3-coder-ms",
+      "provider": "modelscope",
       "apiModel": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
-      "tier": "tier1",
-      "paid": false,
-      "capability": [
-        "chat",
-        "streaming",
-        "coding"
-      ],
-      "context_window": 64000,
-      "max_tokens": 4096,
-      "price": {
-        "input": 2.8e-7,
-        "output": 4.2e-7
-      },
-      "enabled": true
-    },
-    {
-      "id": "canary-primary",
-      "provider": "modelscope-direct",
-      "apiModel": "Qwen/Qwen3-235B-A22B-Instruct-2507",
       "tier": "tier2",
       "paid": false,
-      "capability": [
-        "chat",
-        "streaming",
-        "coding"
-      ],
-      "context_window": 128000,
+      "capability": ["chat", "coding", "tool_use", "streaming"],
+      "context_window": 64000,
       "max_tokens": 4096,
-      "price": {
-        "input": 2.8e-7,
-        "output": 4.2e-7
-      },
+      "price": { "input_cost_per_1k": 0, "output_cost_per_1k": 0, "currency": "USD" },
       "enabled": true
     },
     {
-      "id": "redundant-1",
-      "provider": "modelscope-direct",
-      "apiModel": "Qwen/Qwen3-Next-80B-A3B-Instruct",
-      "tier": "tier3",
-      "paid": false,
-      "capability": [
-        "chat",
-        "streaming",
-        "fast"
-      ],
-      "context_window": 128000,
-      "max_tokens": 4096,
-      "price": {
-        "input": 2.8e-7,
-        "output": 4.2e-7
-      },
-      "enabled": true
-    },
-    {
-      "id": "redundant-2",
-      "provider": "nvidia-direct",
+      "id": "nemotron-3-ultra-nv",
+      "provider": "nvidia",
       "apiModel": "nvidia/nemotron-3-ultra-550b-a55b",
-      "tier": "tier3",
+      "tier": "tier1",
       "paid": false,
-      "capability": [
-        "chat",
-        "streaming",
-        "reasoning"
-      ],
+      "capability": ["chat", "coding", "reasoning", "tool_use", "streaming"],
       "context_window": 128000,
       "max_tokens": 4096,
-      "price": {
-        "input": 2.8e-7,
-        "output": 4.2e-7
-      },
+      "price": { "input_cost_per_1k": 0, "output_cost_per_1k": 0, "currency": "USD" },
+      "enabled": true
+    },
+    {
+      "id": "glm-4-flash-zp",
+      "provider": "zhipu",
+      "apiModel": "glm-4-flash",
+      "tier": "tier3",
+      "paid": false,
+      "capability": ["chat", "coding", "tool_use", "streaming"],
+      "context_window": 32768,
+      "max_tokens": 4096,
+      "price": { "input_cost_per_1k": 0, "output_cost_per_1k": 0, "currency": "USD" },
+      "enabled": true
+    },
+    {
+      "id": "intern-s1-mini",
+      "provider": "internlm",
+      "apiModel": "intern-s1-mini",
+      "tier": "tier2",
+      "paid": false,
+      "capability": ["chat", "coding", "reasoning", "tool_use", "streaming"],
+      "context_window": 32768,
+      "max_tokens": 4096,
+      "price": { "input_cost_per_1k": 0, "output_cost_per_1k": 0, "currency": "USD" },
+      "enabled": true
+    },
+    {
+      "id": "agnes-2.0-flash",
+      "provider": "agnes",
+      "apiModel": "agnes-2.0-flash",
+      "tier": "tier2",
+      "paid": false,
+      "capability": ["chat", "coding", "reasoning", "tool_use", "streaming"],
+      "context_window": 32768,
+      "max_tokens": 4096,
+      "price": { "input_cost_per_1k": 0, "output_cost_per_1k": 0, "currency": "USD" },
       "enabled": true
     }
   ],
   "agent_bindings": {
     "claude-code": {
-      "model_ids": [
-        "phase1-primary",
-        "canary-primary",
-        "redundant-1",
-        "redundant-2"
-      ],
+      "model_ids": ["qwen3-coder-ms", "nemotron-3-ultra-nv", "glm-4-flash-zp", "intern-s1-mini", "agnes-2.0-flash"],
       "budget": {
-        "allowPaid": true,
-        "maxRequestCost": 1,
-        "allowedModels": [
-          "phase1-primary",
-          "canary-primary",
-          "redundant-1",
-          "redundant-2"
-        ],
-        "allowedProviders": [
-          "modelscope-direct",
-          "nvidia-direct"
-        ],
+        "allowPaid": false,
+        "maxRequestCost": 0.02,
+        "allowedModels": ["qwen3-coder-ms", "nemotron-3-ultra-nv", "glm-4-flash-zp", "intern-s1-mini", "agnes-2.0-flash"],
+        "allowedProviders": ["modelscope", "nvidia", "zhipu", "internlm", "agnes"],
         "strictModel": false
       }
     }
   },
   "circuit_breaker": {
-    "enabled": false,
-    "failure_threshold": 100,
+    "enabled": true,
+    "failure_threshold": 5,
     "failure_window_sec": 60,
     "open_state_sec": 120,
     "half_open_max_calls": 2,

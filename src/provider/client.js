@@ -363,13 +363,16 @@ export class ProviderClient {
    */
   _buildUrl(provider, endpoint) {
     const base = String(provider.base_url || '').replace(/\/+$/, '');
+    const normalizedEndpoint = provider.strip_v1_prefix === true && endpoint.startsWith('/v1/')
+      ? endpoint.slice(3)
+      : endpoint;
 
     // 如果 base 已经以 /v1 结尾，且 endpoint 以 /v1 开头，避免重复
-    if (base.endsWith('/v1') && endpoint.startsWith('/v1/')) {
-      return base + endpoint.slice(3); // 去掉 endpoint 的 /v1
+    if (base.endsWith('/v1') && normalizedEndpoint.startsWith('/v1/')) {
+      return base + normalizedEndpoint.slice(3); // 去掉 endpoint 的 /v1
     }
 
-    return base + endpoint;
+    return base + normalizedEndpoint;
   }
 
   /**

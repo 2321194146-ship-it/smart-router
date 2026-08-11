@@ -74,7 +74,7 @@ curl -H "Authorization: Bearer ${SMART_ROUTER_API_TOKEN}" \
 ## 测试门禁（全部必须退出 0）
 
 ```bash
-npm test                 # unit + integration + audit 全量（当前 632 项）
+npm test                 # unit + integration + audit 全量（当前 633 项）
 npm run test:unit        # 496 项
 npm run test:integration # 103 项（含 SQLite 重启恢复、Finalize 事务原子性回滚与 100 并发事务、
                          #      三协议流式首内容前空 SSE Fallback、真实失败 Fallback、Cancel 证据对齐、
@@ -96,10 +96,10 @@ node scripts/run-acceptance.mjs                  # 一键执行本次发布范�
 - 首内容前（未向客户端发送有效内容）允许尝试下一合法候选；首内容后禁止换模型 / 拼接 / 重复 Tool 调用，标记 incomplete
 - HTTP Provider Failure/Fallback Integration：本地 Mock Provider 测试覆盖 Provider A 401/429/5xx 失败 → Provider B 成功 → Attempt 2 成功，同一 requestId 下完整记录 finalModel / finalProvider / Token / 成本 / 是否付费（本地 Mock 测试不称为真实外部 Provider Pilot）
 
-## 真实外部 Provider Pilot 状态（pending）
+## 真实外部 Provider Pilot 状态（部分完成）
 
-当前 Phase 1 的验证全部基于本地 Mock Provider 的 HTTP Provider Failure/Fallback Integration 测试，
-**尚未执行真实外部 Provider Pilot**（RELEASE_MANIFEST.json 中 pilot_summary.status = "pending_external_pilot"）。
+当前已对 28788 直连的 ModelScope、NVIDIA、智谱、InternLM、Agnes 各执行一次受限真实请求，均通过；
+其余历史 Provider 尚未迁移或未通过当前模型/配额验收，完整外部 Pilot 仍保持 pending。
 不将脚本存在等同于 Pilot 通过；只有实际运行并产出脱敏 pilot-evidence.json 后才能更新为通过。
 
 交付包提供脱敏复跑脚本（不含任何 Key），可按以下步骤执行真实外部 Pilot：
@@ -131,7 +131,7 @@ Decision Engine Active Readiness：把 Shadow 观测升级为具备真实任务�
 Active Readiness 评测：`node scripts/active-readiness-eval.mjs`（105 固定脱敏任务，22 类场景；
 分类 100%、硬违规 0、可接受推荐 100%、终态 100%，门禁全 PASS）。报告见 evidence/active-readiness-eval-report.md。
 
-端点声明：`config/real-pilot-config.template.json` 已改为 28788 直连 ModelScope/NVIDIA；历史 `config/local.real-pilot.json` 仍是 7878 过渡配置，不代表最终独立架构。真实外部 Pilot 仍需在填入本地密钥后单独验收；评测使用确定性本地 Mock。
+端点声明：`config/real-pilot-config.template.json` 已改为 28788 直连五家已验收 Provider；历史 `config/local.real-pilot.json` 仍是 7878 过渡配置，不代表最终独立架构。评测同时使用确定性本地 Mock 与受限真实直连验收。
 
 本阶段未实现：Active 全流量、公网网站、用户系统、商业化、Prompt 注入、
 用户消息改写、Tool 自动控制、多模型并行/拼接、自动学习修改生产权重。5% 低风险 Active 须经独立验收。

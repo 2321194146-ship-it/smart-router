@@ -113,4 +113,22 @@ describe('ProviderClient stream resource guards', () => {
     assert.strictEqual(received.tools[0].name, 'lookup');
     assert.deepStrictEqual(received.tool_choice, { type: 'auto' });
   });
+
+  test('supports providers whose API base path already contains a non-v1 version', async () => {
+    let receivedUrl = null;
+    const server = await listen((req, res) => {
+      receivedUrl = req.url;
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        id: 'chat-1',
+        choices: [{ index: 0, message: { role: 'assistant', content: 'ok' }, finish_reason: 'stop' }],
+      }));
+    });
+    const client = clientFor(server.address().port, {
+      base_url: `http://127.0.0.1:${server.address().port}/api/v4`,
+      strip_v1_prefix: true,
+    });
+    await client.callChat('model', { model: 'model', messages: [{ role: 'user', content: 'Hi' }] });
+    assert.strictEqual(receivedUrl, '/api/v4/chat/completions');
+  });
 });
