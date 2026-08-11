@@ -3,9 +3,9 @@
   "version": "1.0.0-phase2c-active-canary",
   "branch": "phase2-shadow",
   "base_commit": "c5f182ad75104b325dfb1d631d6209a052cf2218",
-  "date": "2026-08-11T08:15:28.613Z",
+  "date": "2026-08-11T08:20:14.490Z",
   "description": "Smart Router Mainline Phase 2-C Active Canary 安全控制与决策语义收口 + Safety Sealed + 5% Canary Live Pilot - binary vs graded capability, toolsAvailable vs toolsRequired, protocol-level structured output detection, conservative token estimator, capability source unification, effective policy with deterministic tie-breaker, 208-task holdout eval (all gates PASS), Active Canary controller (SHA-256 sampling, Phase1-legal reorder, Fail Open, Kill Switch, auto-stop); Safety Sealed (blocked never in fallback, Active-only metrics, budget defense maxRequestCost/strictModel/estimatedCost + low-risk eligibility, local admin API with SQLite persisted kill, allowedAgents=[claude-code], truly-consecutive errors, version 1.0.0-phase2c-active-canary); 5% Live Pilot (Claude Code low-risk streaming allowed with anthropic-only + streaming-capable candidates, auto-stop immediate persistence on apply/finalize, 127.0.0.1:28788 internal pilot 456 requests -> 20 active all reordered, Kill Switch restart-persisted, resume-shadow only)",
-  "commit": "29c52193f720d13b9b89952e548b84a4fd7ed57b",
+  "commit": "461976b89c101e09782b3c272ca052510aa42d55",
   "pilot_summary": {
     "status": "partial_external_pilot",
     "total": 5,
@@ -350,7 +350,7 @@
     "src/protocols/responses.js": "e2920584f846ead3317ef99fcce5242524c4d51e7bd784a8849701c7a94248cf",
     "src/provider/client.js": "c05250819ee94ab8230f774bac53088325b4e2b7b676ac15e219721425bd7699",
     "src/provider/errors.js": "01495b49e22b7089ce21600259dabe9e169215537a6b7c42c1eaa8c5a44a19f5",
-    "src/provider/health.js": "12ba7e9885c1b34256d6924b89187c2cf6743d7f2e5709146a52541be145e161",
+    "src/provider/health.js": "50ca483f3a1ac1d1019467b7105129a472f3c9f18da1d58b46c2b20697866a59",
     "src/provider/key-pool.js": "e0d3068ca22aa4f63752b7bd75db908189e39c2d25f3bd45d2402d12fb718cd5",
     "src/router/candidates.js": "65a44c38f87d464ad4f813d335f0a03a9b5bae663b79c64a0e72cdcc23fede88",
     "src/router/execution.js": "facd794b9fae94e0928c89e20ccd2115180aab022ce33c13fad39ab866575520",
@@ -435,16 +435,16 @@
     "config_template": "config/shadow-eval-config.template.json"
   },
   "historical_pilot_summary": {
-    "status": "pending_external_pilot",
-    "total": 0,
-    "passed": 0,
-    "note": "This candidate was validated with local mocks only; no real external pilot was rerun after the current changes."
+    "status": "partial_external_pilot",
+    "total": 5,
+    "passed": 5,
+    "note": "Five real 28788 direct Provider smoke checks passed: ModelScope, NVIDIA, Zhipu, InternLM, Agnes; legacy providers remain pending or excluded after bounded tests."
   },
   "release_status": {
     "status": "release_candidate_source_snapshot",
-    "source_commit": "29c52193f720d13b9b89952e548b84a4fd7ed57b",
+    "source_commit": "461976b89c101e09782b3c272ca052510aa42d55",
     "branch": "phase2-shadow",
-    "generated_at": "2026-08-11T08:15:28.613Z",
+    "generated_at": "2026-08-11T08:20:14.490Z",
     "tests": 633,
     "real_external_provider_pilot": "partial_external_pilot",
     "production_deploy": "not_performed",
