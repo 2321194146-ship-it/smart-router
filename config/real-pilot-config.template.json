@@ -62,6 +62,7 @@
       "name": "internlm",
       "base_url": "https://chat.intern-ai.org.cn/api/v1",
       "api_key": "REPLACE_VIA_SECRETS_OR_ENV",
+      "api_keys": ["REPLACE_VIA_SECRETS_OR_ENV", "REPLACE_VIA_SECRETS_OR_ENV", "REPLACE_VIA_SECRETS_OR_ENV", "REPLACE_VIA_SECRETS_OR_ENV", "REPLACE_VIA_SECRETS_OR_ENV"],
       "auth_header": "Authorization",
       "auth_prefix": "Bearer "
     },

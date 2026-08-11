@@ -99,7 +99,7 @@ node scripts/run-acceptance.mjs                  # 一键执行本次发布范�
 ## 真实外部 Provider Pilot 状态（部分完成）
 
 当前已对 28788 直连的 ModelScope、NVIDIA、智谱、InternLM、Agnes、OpenCode Zen、OpenRouter 执行受限真实请求，均通过；
-可用池为 7 个 Provider、8 个模型；其中 OpenCode Zen 使用 3 把 Key，OpenRouter 使用 3 把 Key，ModelScope 使用 2 把 Key。OpenCode Zen 使用 `nemotron-3-ultra-free`，OpenRouter 使用 `cohere/north-mini-code:free`，魔搭新增 `Qwen/Qwen3-235B-A22B-Instruct-2507`；
+可用池为 7 个 Provider、8 个模型；其中 OpenCode Zen 使用 3 把 Key，OpenRouter 使用 3 把 Key，ModelScope 使用 2 把 Key，InternLM 使用 5 把 Key。OpenCode Zen 使用 `nemotron-3-ultra-free`，OpenRouter 使用 `cohere/north-mini-code:free`，魔搭新增 `Qwen/Qwen3-235B-A22B-Instruct-2507`；
 OpenCode 的 `north-mini-code-free` 本轮超时但不影响已通过模型。龙猫 `LongCat-2.0` 返回 HTTP 402（账号/模型权限或计费限制），未接入可用池。
 不将脚本存在等同于 Pilot 通过；只有实际运行并产出脱敏 pilot-evidence.json 后才能更新为通过。
 

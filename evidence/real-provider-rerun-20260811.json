@@ -50,6 +50,7 @@
     { "provider": "opencode-zen", "accounts": 3, "chatPass": 3, "notes": "account 1 passed with nemotron-3-ultra-free; account 2 passed with longcat-2.0-free; account 3 passed with nemotron-3-ultra-free" },
     { "provider": "openrouter", "accounts": 3, "chatPass": 3, "model": "cohere/north-mini-code:free" },
     { "provider": "modelscope", "accounts": 2, "chatPass": 2, "model": "Qwen/Qwen3-Coder-30B-A3B-Instruct" },
+    { "provider": "internlm", "accounts": 5, "chatPass": 5, "model": "intern-s1-mini" },
     { "provider": "longcat", "accounts": 2, "chatPass": 0, "errorType": "http_402" }
   ],
   "secrets": "not recorded"
