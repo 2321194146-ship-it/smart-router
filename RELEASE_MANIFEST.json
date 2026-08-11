@@ -3,14 +3,14 @@
   "version": "1.0.0-phase2c-active-canary",
   "branch": "phase2-shadow",
   "base_commit": "c5f182ad75104b325dfb1d631d6209a052cf2218",
-  "date": "2026-08-11T09:07:50.439Z",
+  "date": "2026-08-11T09:19:39.853Z",
   "description": "Smart Router Mainline Phase 2-C Active Canary 安全控制与决策语义收口 + Safety Sealed + 5% Canary Live Pilot - binary vs graded capability, toolsAvailable vs toolsRequired, protocol-level structured output detection, conservative token estimator, capability source unification, effective policy with deterministic tie-breaker, 208-task holdout eval (all gates PASS), Active Canary controller (SHA-256 sampling, Phase1-legal reorder, Fail Open, Kill Switch, auto-stop); Safety Sealed (blocked never in fallback, Active-only metrics, budget defense maxRequestCost/strictModel/estimatedCost + low-risk eligibility, local admin API with SQLite persisted kill, allowedAgents=[claude-code], truly-consecutive errors, version 1.0.0-phase2c-active-canary); 5% Live Pilot (Claude Code low-risk streaming allowed with anthropic-only + streaming-capable candidates, auto-stop immediate persistence on apply/finalize, 127.0.0.1:28788 internal pilot 456 requests -> 20 active all reordered, Kill Switch restart-persisted, resume-shadow only)",
-  "commit": "b23656c2ba977f18dbd8be98d4da12a387c89b48",
+  "commit": "fce69461168b4f92e6350ad40f167d7eba41a7a6",
   "pilot_summary": {
     "status": "partial_external_pilot",
     "total": 19,
     "passed": 16,
-    "note": "Validated current account pools and missing-provider inventory. ModelScope 2/2, InternLM 5/5, OpenRouter 3/3, OpenCode Zen 3 accounts with model-specific fallback, TencentHub chat passed; LongCat 2/2 returned HTTP 402. SiliconFlow chat passed but pricing was absent and remains excluded while allowPaid=false; GitHub Models endpoints returned 404/410; LMStudio local service was unreachable."
+    "note": "Validated 8-provider 28788 pool with ModelScope 2/2, InternLM 5/5, OpenRouter 3/3, OpenCode Zen 3 accounts with model-specific fallback, TencentHub passed; LongCat 2/2 returned HTTP 402. SiliconFlow passed but remains excluded while pricing is unknown and allowPaid=false. Failover policy is primary plus up to 3 backups before first byte."
   },
   "phase2b_summary": {
     "mode": "shadow (no Active)",
@@ -252,9 +252,9 @@
   },
   "source_files": {
     ".gitignore": "d8f539b3be74ba11ea4a3da48686e4f879560f358f883e95eba8331d2a242579",
-    "README.md": "fd7a08822b3459ea050f9ca6ce5d5b6f72137dc13bc2aadaa1162633512ddc36",
+    "README.md": "19ac6d86d900c02f11935d017989ae2cdc09081823b969b4e5222078eb86a862",
     "config/config.example.json": "1b21ba046355b3fdc076e6628c2de54d78329d15f4a2e4de8db602d5f669eded",
-    "config/real-pilot-config.template.json": "f98b302213835011807a88a9f3e8d5ce2202577d44621ae2df30b86f154c45c1",
+    "config/real-pilot-config.template.json": "8334146d466f4c29e6ab2028f9be58c1934df369df5eb556948a1f6916f1d074",
     "config/shadow-eval-config.template.json": "273f578711c371689759b51de54057c4fb948b15dc04fffa45c1363e7b87b983",
     "evidence/active-readiness-eval-report.json": "94638b72d516a0e5d16d57c8444926fea754f107a88b37910a0aef5d5e4477bd",
     "evidence/active-readiness-eval-report.md": "672d0aa400117c2d23ab21e33ccc25fd83ca2af20389f934ce9fa0005c72508a",
@@ -438,13 +438,13 @@
     "status": "partial_external_pilot",
     "total": 19,
     "passed": 16,
-    "note": "Validated account-level pools: ModelScope 2/2, InternLM 5/5, OpenRouter 3/3, OpenCode Zen 3 accounts with model-specific fallback, plus previously validated NVIDIA, Zhipu, and Agnes; LongCat 2/2 returned HTTP 402 and remains excluded."
+    "note": "Validated current account pools and missing-provider inventory. ModelScope 2/2, InternLM 5/5, OpenRouter 3/3, OpenCode Zen 3 accounts with model-specific fallback, TencentHub chat passed; LongCat 2/2 returned HTTP 402. SiliconFlow chat passed but pricing was absent and remains excluded while allowPaid=false; GitHub Models endpoints returned 404/410; LMStudio local service was unreachable."
   },
   "release_status": {
     "status": "release_candidate_source_snapshot",
-    "source_commit": "b23656c2ba977f18dbd8be98d4da12a387c89b48",
+    "source_commit": "fce69461168b4f92e6350ad40f167d7eba41a7a6",
     "branch": "phase2-shadow",
-    "generated_at": "2026-08-11T09:07:50.439Z",
+    "generated_at": "2026-08-11T09:19:39.853Z",
     "tests": 633,
     "real_external_provider_pilot": "partial_external_pilot",
     "production_deploy": "not_performed",
