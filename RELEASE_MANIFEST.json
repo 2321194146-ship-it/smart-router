@@ -3,14 +3,14 @@
   "version": "1.0.0-phase2c-active-canary",
   "branch": "phase2-shadow",
   "base_commit": "c5f182ad75104b325dfb1d631d6209a052cf2218",
-  "date": "2026-08-10T02:30:51.488Z",
+  "date": "2026-08-11T08:15:28.613Z",
   "description": "Smart Router Mainline Phase 2-C Active Canary 安全控制与决策语义收口 + Safety Sealed + 5% Canary Live Pilot - binary vs graded capability, toolsAvailable vs toolsRequired, protocol-level structured output detection, conservative token estimator, capability source unification, effective policy with deterministic tie-breaker, 208-task holdout eval (all gates PASS), Active Canary controller (SHA-256 sampling, Phase1-legal reorder, Fail Open, Kill Switch, auto-stop); Safety Sealed (blocked never in fallback, Active-only metrics, budget defense maxRequestCost/strictModel/estimatedCost + low-risk eligibility, local admin API with SQLite persisted kill, allowedAgents=[claude-code], truly-consecutive errors, version 1.0.0-phase2c-active-canary); 5% Live Pilot (Claude Code low-risk streaming allowed with anthropic-only + streaming-capable candidates, auto-stop immediate persistence on apply/finalize, 127.0.0.1:28788 internal pilot 456 requests -> 20 active all reordered, Kill Switch restart-persisted, resume-shadow only)",
-  "commit": "36b8e8ed0bf347841178ed5275103587a9618dec",
+  "commit": "29c52193f720d13b9b89952e548b84a4fd7ed57b",
   "pilot_summary": {
-    "status": "pending_external_pilot",
-    "total": 0,
-    "passed": 0,
-    "note": "This candidate was validated with local mocks only; no real external pilot was rerun after the current changes."
+    "status": "partial_external_pilot",
+    "total": 5,
+    "passed": 5,
+    "note": "Five real 28788 direct Provider smoke checks passed: ModelScope, NVIDIA, Zhipu, InternLM, Agnes; legacy providers remain pending or excluded after bounded tests."
   },
   "phase2b_summary": {
     "mode": "shadow (no Active)",
@@ -169,7 +169,7 @@
   },
   "test_summary": {
     "unit": {
-      "tests": 496,
+      "tests": 497,
       "suites": 95,
       "failures": 0
     },
@@ -184,7 +184,7 @@
       "failures": 0
     },
     "total": {
-      "tests": 632,
+      "tests": 633,
       "suites": 137,
       "failures": 0
     }
@@ -252,9 +252,9 @@
   },
   "source_files": {
     ".gitignore": "d8f539b3be74ba11ea4a3da48686e4f879560f358f883e95eba8331d2a242579",
-    "README.md": "b0aca14ea5207fa40b11a5027c2e445a5b386da67df79987328e1da196a93a0f",
+    "README.md": "88a7fa4a81ced92bdf71d30756b8e7772e0176307070a8806b3b59945faa3f2f",
     "config/config.example.json": "1b21ba046355b3fdc076e6628c2de54d78329d15f4a2e4de8db602d5f669eded",
-    "config/real-pilot-config.template.json": "580f2809c680035d07d660db6827b906759ee36865ee5afecdf7c7948b717776",
+    "config/real-pilot-config.template.json": "ee6ff9a8b36df71f883c777d3cca0dee83a258bce40dabe6174a0bf6ffc52f17",
     "config/shadow-eval-config.template.json": "273f578711c371689759b51de54057c4fb948b15dc04fffa45c1363e7b87b983",
     "evidence/active-readiness-eval-report.json": "94638b72d516a0e5d16d57c8444926fea754f107a88b37910a0aef5d5e4477bd",
     "evidence/active-readiness-eval-report.md": "672d0aa400117c2d23ab21e33ccc25fd83ca2af20389f934ce9fa0005c72508a",
@@ -319,7 +319,7 @@
     "scripts/real-claude-pilot.mjs": "754d89a43a745ed31a3aa29f6b03de3283dadbf6c5a99a3e6aaf44705d53196c",
     "scripts/real-daily-report.mjs": "0cb8c147d24937f74681897946e21273fd2a7ac0e5226de6567f92d2e8a83e7f",
     "scripts/release-evidence-check.mjs": "47eb61875c194f561efc311c1ef894ceaeeda1e8847b007c6080bf5a0b8d8a75",
-    "scripts/run-acceptance.mjs": "b664028575bf2dbfaf7de880991de498c1de95d56b3f461ac50f14821c4fe6b0",
+    "scripts/run-acceptance.mjs": "01bdb60e420bf71469fd72c57a2fa8f6e9721466705fc25523bcf741435822fa",
     "scripts/safety-proof.mjs": "ee9b49177236987c257795bec31a53255355f6251efd601d73cbad980fb14766",
     "scripts/shadow-eval.mjs": "0669a992ee5a7be723d5a0015dbd155c3825373970583ff502d2877707f000aa",
     "src/agent/compatibility.js": "9ae2bf023796af50cb6eb234310fd5ce3c5d8287731ff41f6783a450a76ce91a",
@@ -348,7 +348,7 @@
     "src/protocols/response-normalization.js": "3d68e280f2a2d7732231ba4d1ef9f67d52882d039c65537763cf3caef0480664",
     "src/protocols/responses-stream.js": "80df87b071b1bea528549b725ebe39c5d19740f9081e8dd8ed687900bee1ce95",
     "src/protocols/responses.js": "e2920584f846ead3317ef99fcce5242524c4d51e7bd784a8849701c7a94248cf",
-    "src/provider/client.js": "9daf95e8f34d317acdf3f138bfeef6330dc0f86c8f006f2e0650d45a00ea6a42",
+    "src/provider/client.js": "c05250819ee94ab8230f774bac53088325b4e2b7b676ac15e219721425bd7699",
     "src/provider/errors.js": "01495b49e22b7089ce21600259dabe9e169215537a6b7c42c1eaa8c5a44a19f5",
     "src/provider/health.js": "12ba7e9885c1b34256d6924b89187c2cf6743d7f2e5709146a52541be145e161",
     "src/provider/key-pool.js": "e0d3068ca22aa4f63752b7bd75db908189e39c2d25f3bd45d2402d12fb718cd5",
@@ -399,7 +399,7 @@
     "test/unit/protocol-anthropic.test.js": "36efe0f466f315424acb00c292d91d1ce84d9af85a98d1a6c5942aa8a75254ba",
     "test/unit/protocol-chat.test.js": "e25445d6530c6de5455429e085d912a59f50eda91b3464bc8eb4db5ddf5c6346",
     "test/unit/protocol-responses.test.js": "bf47c72bb1af9a2db586780df7e0c4fb5e67432b42231e489d16ff04c95d0bfc",
-    "test/unit/provider-client-stream.test.js": "3fbca9574e242e631ea1f2d6598dfbaa5700cde7545ae342a754e7186e833e25",
+    "test/unit/provider-client-stream.test.js": "534faa028d43b84dc7fd4a5ebe48844ca95f8a6b85c1713739b2e02c2e1110f7",
     "test/unit/provider-errors.test.js": "c44e8335a091f113ce27c7d5b8e02e691c79e1e4710214ca969165974d4c260b",
     "test/unit/provider-health.test.js": "6e892776f8edf681627789b154b502691b0686b5f684a11b64823319ff08afce",
     "test/unit/provider-key-pool.test.js": "3711744740cc77840cd5663aa61dc49f6083f237bc681561bc480e9a62742fa2",
@@ -442,11 +442,11 @@
   },
   "release_status": {
     "status": "release_candidate_source_snapshot",
-    "source_commit": "36b8e8ed0bf347841178ed5275103587a9618dec",
+    "source_commit": "29c52193f720d13b9b89952e548b84a4fd7ed57b",
     "branch": "phase2-shadow",
-    "generated_at": "2026-08-10T02:30:51.488Z",
-    "tests": 632,
-    "real_external_provider_pilot": "pending_external_pilot",
+    "generated_at": "2026-08-11T08:15:28.613Z",
+    "tests": 633,
+    "real_external_provider_pilot": "partial_external_pilot",
     "production_deploy": "not_performed",
     "excluded_local_paths": [
       "deliver/",
