@@ -70,6 +70,20 @@
       "api_key": "REPLACE_VIA_SECRETS_OR_ENV",
       "auth_header": "Authorization",
       "auth_prefix": "Bearer "
+    },
+    {
+      "name": "opencode-zen",
+      "base_url": "https://opencode.ai/zen/v1",
+      "api_key": "REPLACE_VIA_SECRETS_OR_ENV",
+      "auth_header": "Authorization",
+      "auth_prefix": "Bearer "
+    },
+    {
+      "name": "openrouter",
+      "base_url": "https://openrouter.ai/api/v1",
+      "api_key": "REPLACE_VIA_SECRETS_OR_ENV",
+      "auth_header": "Authorization",
+      "auth_prefix": "Bearer "
     }
   ],
   "models": [
@@ -132,16 +146,52 @@
       "max_tokens": 4096,
       "price": { "input_cost_per_1k": 0, "output_cost_per_1k": 0, "currency": "USD" },
       "enabled": true
+    },
+    {
+      "id": "nemotron-3-ultra-oc",
+      "provider": "opencode-zen",
+      "apiModel": "nemotron-3-ultra-free",
+      "tier": "tier2",
+      "paid": false,
+      "capability": ["chat", "coding", "reasoning", "tool_use", "streaming"],
+      "context_window": 65536,
+      "max_tokens": 4096,
+      "price": { "input_cost_per_1k": 0, "output_cost_per_1k": 0, "currency": "USD" },
+      "enabled": true
+    },
+    {
+      "id": "north-mini-code-or",
+      "provider": "openrouter",
+      "apiModel": "cohere/north-mini-code:free",
+      "tier": "tier2",
+      "paid": false,
+      "capability": ["chat", "coding", "tool_use", "streaming"],
+      "context_window": 65536,
+      "max_tokens": 4096,
+      "price": { "input_cost_per_1k": 0, "output_cost_per_1k": 0, "currency": "USD" },
+      "enabled": true
+    },
+    {
+      "id": "qwen3-235b-ms",
+      "provider": "modelscope",
+      "apiModel": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "tier": "tier2",
+      "paid": false,
+      "capability": ["chat", "coding", "reasoning", "tool_use", "streaming"],
+      "context_window": 131072,
+      "max_tokens": 4096,
+      "price": { "input_cost_per_1k": 0, "output_cost_per_1k": 0, "currency": "USD" },
+      "enabled": true
     }
   ],
   "agent_bindings": {
     "claude-code": {
-      "model_ids": ["qwen3-coder-ms", "nemotron-3-ultra-nv", "glm-4-flash-zp", "intern-s1-mini", "agnes-2.0-flash"],
+      "model_ids": ["qwen3-coder-ms", "nemotron-3-ultra-nv", "glm-4-flash-zp", "intern-s1-mini", "agnes-2.0-flash", "nemotron-3-ultra-oc", "north-mini-code-or", "qwen3-235b-ms"],
       "budget": {
         "allowPaid": false,
         "maxRequestCost": 0.02,
-        "allowedModels": ["qwen3-coder-ms", "nemotron-3-ultra-nv", "glm-4-flash-zp", "intern-s1-mini", "agnes-2.0-flash"],
-        "allowedProviders": ["modelscope", "nvidia", "zhipu", "internlm", "agnes"],
+        "allowedModels": ["qwen3-coder-ms", "nemotron-3-ultra-nv", "glm-4-flash-zp", "intern-s1-mini", "agnes-2.0-flash", "nemotron-3-ultra-oc", "north-mini-code-or", "qwen3-235b-ms"],
+        "allowedProviders": ["modelscope", "nvidia", "zhipu", "internlm", "agnes", "opencode-zen", "openrouter"],
         "strictModel": false
       }
     }

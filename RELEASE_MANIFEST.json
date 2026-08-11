@@ -3,14 +3,14 @@
   "version": "1.0.0-phase2c-active-canary",
   "branch": "phase2-shadow",
   "base_commit": "c5f182ad75104b325dfb1d631d6209a052cf2218",
-  "date": "2026-08-11T08:20:14.490Z",
+  "date": "2026-08-11T08:32:38.688Z",
   "description": "Smart Router Mainline Phase 2-C Active Canary 安全控制与决策语义收口 + Safety Sealed + 5% Canary Live Pilot - binary vs graded capability, toolsAvailable vs toolsRequired, protocol-level structured output detection, conservative token estimator, capability source unification, effective policy with deterministic tie-breaker, 208-task holdout eval (all gates PASS), Active Canary controller (SHA-256 sampling, Phase1-legal reorder, Fail Open, Kill Switch, auto-stop); Safety Sealed (blocked never in fallback, Active-only metrics, budget defense maxRequestCost/strictModel/estimatedCost + low-risk eligibility, local admin API with SQLite persisted kill, allowedAgents=[claude-code], truly-consecutive errors, version 1.0.0-phase2c-active-canary); 5% Live Pilot (Claude Code low-risk streaming allowed with anthropic-only + streaming-capable candidates, auto-stop immediate persistence on apply/finalize, 127.0.0.1:28788 internal pilot 456 requests -> 20 active all reordered, Kill Switch restart-persisted, resume-shadow only)",
-  "commit": "461976b89c101e09782b3c272ca052510aa42d55",
+  "commit": "f89963d698e75b978b3d1b8bf1e4c57a150e9f99",
   "pilot_summary": {
     "status": "partial_external_pilot",
-    "total": 5,
-    "passed": 5,
-    "note": "Five real 28788 direct Provider smoke checks passed: ModelScope, NVIDIA, Zhipu, InternLM, Agnes; legacy providers remain pending or excluded after bounded tests."
+    "total": 8,
+    "passed": 8,
+    "note": "Eight real 28788 direct and gateway smoke checks passed across ModelScope, NVIDIA, Zhipu, InternLM, Agnes, OpenCode Zen, and OpenRouter; LongCat catalog is reachable but LongCat-2.0 returns HTTP 402 and remains excluded."
   },
   "phase2b_summary": {
     "mode": "shadow (no Active)",
@@ -252,9 +252,9 @@
   },
   "source_files": {
     ".gitignore": "d8f539b3be74ba11ea4a3da48686e4f879560f358f883e95eba8331d2a242579",
-    "README.md": "88a7fa4a81ced92bdf71d30756b8e7772e0176307070a8806b3b59945faa3f2f",
+    "README.md": "366e98d262c2a23f6b3bf5f0dd835673780b115c3fbc2089d1ecbd137eceb740",
     "config/config.example.json": "1b21ba046355b3fdc076e6628c2de54d78329d15f4a2e4de8db602d5f669eded",
-    "config/real-pilot-config.template.json": "ee6ff9a8b36df71f883c777d3cca0dee83a258bce40dabe6174a0bf6ffc52f17",
+    "config/real-pilot-config.template.json": "8b45281b369e90fc6566d10adc2b3c9263b24c1dc63c71e2e6eb5e8613042078",
     "config/shadow-eval-config.template.json": "273f578711c371689759b51de54057c4fb948b15dc04fffa45c1363e7b87b983",
     "evidence/active-readiness-eval-report.json": "94638b72d516a0e5d16d57c8444926fea754f107a88b37910a0aef5d5e4477bd",
     "evidence/active-readiness-eval-report.md": "672d0aa400117c2d23ab21e33ccc25fd83ca2af20389f934ce9fa0005c72508a",
@@ -442,9 +442,9 @@
   },
   "release_status": {
     "status": "release_candidate_source_snapshot",
-    "source_commit": "461976b89c101e09782b3c272ca052510aa42d55",
+    "source_commit": "f89963d698e75b978b3d1b8bf1e4c57a150e9f99",
     "branch": "phase2-shadow",
-    "generated_at": "2026-08-11T08:20:14.490Z",
+    "generated_at": "2026-08-11T08:32:38.688Z",
     "tests": 633,
     "real_external_provider_pilot": "partial_external_pilot",
     "production_deploy": "not_performed",

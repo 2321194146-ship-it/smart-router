@@ -1,0 +1,50 @@
+{
+  "generatedAt": "2026-08-11",
+  "scope": "bounded real provider rerun after current model catalog refresh",
+  "requestPlan": {
+    "catalogProbe": "GET /models",
+    "chatProbe": "one sequential non-streaming request per candidate",
+    "maxTokens": 256,
+    "promptContents": "not recorded"
+  },
+  "results": [
+    {
+      "provider": "opencode-zen",
+      "catalog": { "httpStatus": 200, "modelCount": 61 },
+      "directChat": [
+        { "model": "north-mini-code-free", "httpStatus": 0, "ok": false, "errorType": "timeout" },
+        { "model": "nemotron-3-ultra-free", "httpStatus": 200, "ok": true, "finishReason": "stop" }
+      ],
+      "gatewayChat": { "model": "nemotron-3-ultra-free", "httpStatus": 200, "ok": true, "finishReason": "stop" },
+      "migrated": true
+    },
+    {
+      "provider": "openrouter",
+      "catalog": { "httpStatus": 200, "modelCount": 402 },
+      "directChat": [
+        { "model": "cohere/north-mini-code:free", "httpStatus": 200, "ok": true, "finishReason": "stop" }
+      ],
+      "gatewayChat": { "model": "cohere/north-mini-code:free", "httpStatus": 200, "ok": true, "finishReason": "stop" },
+      "migrated": true
+    },
+    {
+      "provider": "longcat",
+      "catalog": { "httpStatus": 200, "modelCount": 1 },
+      "directChat": [
+        { "model": "LongCat-2.0", "httpStatus": 402, "ok": false, "errorType": "auth_or_permission" }
+      ],
+      "migrated": false,
+      "reason": "账号/模型权限或计费限制，未伪装为可用模型"
+    },
+    {
+      "provider": "modelscope",
+      "catalog": { "httpStatus": 200, "modelCount": 43 },
+      "directChat": [
+        { "model": "Qwen/Qwen3-235B-A22B-Instruct-2507", "httpStatus": 200, "ok": true, "finishReason": "stop" }
+      ],
+      "gatewayChat": { "model": "Qwen/Qwen3-235B-A22B-Instruct-2507", "httpStatus": 200, "ok": true, "finishReason": "stop" },
+      "migrated": true
+    }
+  ],
+  "secrets": "not recorded"
+}
