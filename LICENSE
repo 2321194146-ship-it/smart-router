@@ -1,0 +1,33 @@
+# Business Source License 1.1
+# (with a 4-year Source Available Restriction)
+
+## License
+
+Copyright © 2025 Smart Router Mainline Contributors.
+
+The software is licensed under the Business Source License 1.1 (BSL), with the following Source Available Restriction:
+
+> **Source Available Restriction:** You may not make a use of the Covered Software that (i) provides the Covered Software as a Service, or (ii) is intended to compete with the Offerings.
+
+- **Offerings** means the services provided by Smart Router Mainline Contributors that are based on the Covered Software (including but not limited to managed hosting, commercial support, enterprise features).
+- **Covered Software** means the software code distributed under this License.
+
+This restriction applies only for a period of **four (4) years** after the Covered Software is first made available under this License.
+
+Upon the expiration of the Source Available Restriction period, the License automatically converts to the Apache License 2.0.
+
+## Permitted Uses
+
+You may freely use, modify, and distribute the Covered Software for:
+- Internal use within your organization
+- Local self-hosted deployment
+- Development, testing, and research
+- Personal or educational projects
+
+## Commercial Use
+
+If you wish to use the Covered Software to provide a service to others, or to compete with our Offerings, please contact us for a commercial license.
+
+## After 4 Years
+
+After the four-year restriction period, this License automatically converts to Apache License 2.0. All future versions will be Apache 2.0 only.
