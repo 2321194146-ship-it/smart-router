@@ -1,6 +1,6 @@
 {
   "name": "smart-router",
-  "version": "6.1.0",
+  "version": "6.2.1",
   "description": "AI Gateway with intelligent model routing, circuit breaker, semantic cache, rate limiting, and real-time dashboard",
   "type": "module",
   "main": "src/index.js",
@@ -15,8 +15,8 @@
     "dev": "node --watch src/index.js",
     "test": "node --test test/*.test.js",
     "test:watch": "node --test --watch test/*.test.js",
-    "lint": "eslint src/*.js test/*.js",
-    "syntax:check": "for f in src/*.js test/*.js; do node --check \"$f\" || exit 1; done"
+    "lint": "eslint src/*.js src/protocols/*.js test/*.js",
+    "syntax:check": "for f in src/*.js src/protocols/*.js test/*.js; do node --check \"$f\" || exit 1; done"
   },
   "devDependencies": {
     "eslint": "^8.57.0"

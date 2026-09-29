@@ -12,7 +12,7 @@ COPY . .
 # Create data directory
 RUN mkdir -p data && chmod 777 data
 
-EXPOSE 7878
+EXPOSE 17878
 
 ENV NODE_ENV=production
 

@@ -1,4 +1,4 @@
-# Smart Router v6.1.0 🔀
+# Smart Router v6.2.1 🔀
 
 **AI Gateway** — Intelligent model routing, circuit breaker, rate limiting, semantic cache, and real-time dashboard.
 
@@ -52,13 +52,16 @@ cp config/config.example.json config/config.json
 npm start
 ```
 
-Open `http://127.0.0.1:7878/dashboard` to see the dashboard.
+Open `http://127.0.0.1:17878/dashboard` to see the dashboard.
+
+> The default port is **17878** (the modular test port). `7878` is the OLD production gateway and
+> is used ONLY when you explicitly run `PORT=7878 npm start`; nothing starts on 7878 by default.
 
 ### Docker
 
 ```bash
 docker build -t smart-router .
-docker run -p 7878:7878 \
+docker run -p 17878:17878 \
   -v $(pwd)/config:/app/config \
   -v $(pwd)/data:/app/data \
   smart-router
@@ -181,7 +184,7 @@ The built-in dashboard provides:
 import OpenAI from 'openai';
 
 const client = new OpenAI({
-  baseURL: 'http://127.0.0.1:7878/v1',
+  baseURL: 'http://127.0.0.1:17878/v1',
   apiKey: 'any-key',  // or your configured admin_token
 });
 

@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 /**
- * Smart Router v6.1.0 — AI Gateway
+ * Smart Router v6.2.1 — AI Gateway
  * Intelligent model routing with circuit breaker, rate limiting, caching, and dashboard
  * 
  * Usage:
- *   node src/index.js
- *   PORT=7878 node src/index.js
+ *   node src/index.js               # defaults to PORT=17878 (modular test port)
+ *   PORT=17878 node src/index.js    # explicit modular test port
+ *   PORT=7878 node src/index.js     # OLD production port — human-only, never automated
  */
 import { loadConfig } from './config.js';
 import { createServer } from './server.js';
@@ -27,7 +28,7 @@ srv.on('error', (e) => {
 srv.listen(PORT, HOST, () => {
   console.log(`
 ╔══════════════════════════════════════╗
-║     Smart Router v6.1.0 — AI Gateway     ║
+║     Smart Router v6.2.1 — AI Gateway     ║
 ╠══════════════════════════════════════╣
 ║  📡 ${HOST}:${PORT}                    ║
 ║  📊 Dashboard: http://${HOST}:${PORT}/dashboard  ║

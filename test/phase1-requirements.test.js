@@ -54,7 +54,7 @@ describe('Phase 1 — multi-key state machine (401/403/429)', () => {
     assert.ok(calls[1].includes('sk-401-k2'), 'second call used key2');
   });
 
-  it('switches to next key IMMEDIATELY after 403 (key forbidden, no repeated 403)', async () => {
+  it('switches to next key IMMEDIATELY after 403 (no repeated 403) and does NOT permanently invalidate on an unclassifiable 403', async () => {
     const { executeCandidates, getKeyState } = await import('../src/provider-client.js');
     const cfg = getConfig();
     cfg.providers['p1k403'] = {
@@ -78,7 +78,10 @@ describe('Phase 1 — multi-key state machine (401/403/429)', () => {
     assert.ok(result.success, 'succeeded with key2 after 403 on key1');
     assert.strictEqual(calls.length, 2, 'key1 got 403, key2 got 200 (no repeated 403 to key1)');
     assert.ok(calls[1].includes('sk-403-k2'), 'second call used key2');
-    assert.strictEqual(getKeyState('p1k403', 'k1').invalid, true, '403 key marked invalid immediately');
+    // Phase-2 rule: an UNCLASSIFIABLE plain 403 must NOT permanently invalidate the key — it is
+    // only temporarily cooled, and the request immediately retries the next key.
+    assert.strictEqual(getKeyState('p1k403', 'k1').invalid, false, 'unclassifiable 403 only cools the key temporarily, never invalidates');
+    assert.ok(getKeyState('p1k403', 'k1').cooldownUntil > Date.now(), 'a temporary cooldown was applied to the 403-struck key');
   });
 
   it('switches provider after ALL keys of a provider fail', async () => {

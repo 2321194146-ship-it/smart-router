@@ -7,7 +7,9 @@ import { dirname, join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { getConfig, reloadConfig, loadRawConfig, saveRawConfigAtomic } from './config.js';
-import { routeChatCompletion, getRecentLogs, getStats, getModelLatency, getModelCounts, getStatusDistribution, getProviderHealth, sanitizeConfigForClient } from './provider-client.js';
+import { routeChatCompletion, routeResponses, getRecentLogs, getStats, getModelLatency, getModelCounts, getStatusDistribution, getProviderHealth, sanitizeConfigForClient } from './provider-client.js';
+import { chatToResponses, validateResponsesRequest, responsesError } from './protocols/responses.js';
+import { pipeChatStreamToResponses, forwardNativeStream } from './protocols/responses-stream.js';
 import { handleAnthropicMessage, pipeAnthropicSSE } from './anthropic.js';
 import { checkRateLimit } from './rate-limit.js';
 import { checkInput, logGuardrail } from './guardrails.js';
@@ -546,7 +548,7 @@ export function createServer() {
       if (path === '/health' && method === 'GET') {
         const cfg = getConfig();
         jsonResponse(res, {
-          status: 'ok', version: '6.1.0', uptime: process.uptime(),
+          status: 'ok', version: '6.2.1', uptime: process.uptime(),
           models_available: (cfg.models || []).filter(m => m.enabled !== false).length,
           providers_available: Object.keys(cfg.providers || {}).filter(k => cfg.providers[k].enabled !== false).length,
         });
@@ -774,6 +776,128 @@ export function createServer() {
           });
           res.writeHead(502, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: sanitizeLog(err.message) || 'All providers unavailable' }));
+        }
+        return;
+      }
+
+      // ── OpenAI Responses API (Codex compatible) ──
+      if ((path === '/v1/responses' || path === '/responses') && method === 'POST') {
+        const requestId = generateId();
+        const rlResult = checkRateLimit(ip, path);
+        if (!rlResult.allowed) {
+          res.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': String(rlResult.retryAfter || 1) });
+          res.end(JSON.stringify({ error: 'Rate limited', retry_after: rlResult.retryAfter }));
+          return;
+        }
+
+        const body = await parseJsonBody(req);
+        const v = validateResponsesRequest(body);
+        if (!v.ok) {
+          res.writeHead(v.status, { 'Content-Type': 'application/json', 'X-Request-Id': requestId });
+          res.end(JSON.stringify(responsesError(v.status, v.type, v.message)));
+          persistRequest(db, stmts, {
+            requestId, status: v.status, model: body.model || 'unknown', provider: '',
+            latencyMs: 0, agent, error: v.message, requestedModel: body.model || '', finalModel: '', protocol: 'responses',
+          });
+          return;
+        }
+
+        const preferredModel = req.headers['x-preferred-model'] || '';
+        const excludedModels = (req.headers['x-excluded-models'] || '').split(',').map((s) => s.trim()).filter(Boolean);
+        const preferredProvider = req.headers['x-preferred-provider'] || '';
+        const excludedProviders = (req.headers['x-excluded-providers'] || '').split(',').map((s) => s.trim()).filter(Boolean);
+
+        const ac = new AbortController();
+        req.on('close', () => { try { ac.abort(); } catch {} });
+
+        try {
+          const result = await routeResponses(body, agent, {
+            requestId, preferredModel, excludedModels, preferredProvider, excludedProviders,
+            externalSignal: ac.signal,
+          });
+
+          if (result.error) {
+            res.writeHead(result.status, { 'Content-Type': 'application/json', 'X-Request-Id': requestId });
+            res.end(result.body);
+            persistRequest(db, stmts, {
+              requestId, status: result.status, model: result.model, provider: result.provider,
+              latencyMs: result.latencyMs, agent, error: result.status === 400 ? 'Bad request' : 'Unprocessable',
+              requestedModel: body.model, finalModel: result.model, protocol: 'responses', attemptLog: result.attemptLog,
+            });
+            return;
+          }
+
+          const { provider: providerName, model, latencyMs, isStream, mode } = result;
+
+          if (isStream) {
+            res.writeHead(200, {
+              'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive',
+              'X-Accel-Buffering': 'no', 'X-Model': model, 'X-Provider': providerName, 'X-Request-Id': requestId,
+            });
+            let totalIn = 0, totalOut = 0;
+            const stallTimeoutMs = getConfig().routing?.streamStallTimeoutMs ?? 60000;
+            const onUsage = (u) => { totalIn = u.input_tokens || 0; totalOut = u.output_tokens || 0; };
+            let streamResult;
+            if (mode === 'native') {
+              streamResult = await forwardNativeStream(result.remainingStream, res, {
+                requestId, externalSignal: ac.signal, stallTimeoutMs, onUsage,
+              });
+            } else {
+              streamResult = await pipeChatStreamToResponses(result.remainingStream, res, {
+                requestId, model, externalSignal: ac.signal, stallTimeoutMs, onUsage,
+              });
+            }
+            streamResult = streamResult || { outcome: 'completed', statusCode: 200 };
+            // Persist the TRUE outcome — never blindly record status 200 for a stream that
+            // failed / stalled / was aborted mid-flight.
+            const outcome = streamResult.outcome || 'completed';
+            const persistStatus = streamResult.statusCode
+              || (outcome === 'completed' ? 200 : outcome === 'incomplete' ? 200 : outcome === 'client_aborted' ? 499 : 502);
+            log(`[${requestId}] responses ${mode} stream ${model} (${providerName}) ${latencyMs}ms outcome=${outcome} status=${persistStatus}`);
+            // Cost is recorded only from real usage; a failed/aborted half-stream must not
+            // pollute success statistics — only completed/incomplete count as billable.
+            if ((totalIn > 0 || totalOut > 0) && (outcome === 'completed' || outcome === 'incomplete')) {
+              recordCost(db, stmts.dbUpsertCost, model, providerName, totalIn, totalOut, agent);
+            }
+            persistRequest(db, stmts, {
+              requestId, status: persistStatus, model, provider: providerName,
+              latencyMs, ttft: result.ttft || 0, tokensIn: totalIn, tokensOut: totalOut, agent,
+              requestedModel: body.model, finalModel: model, protocol: 'responses', attemptLog: result.attemptLog,
+              error: outcome === 'completed' || outcome === 'incomplete' ? undefined : `${outcome}:${streamResult.code || ''}`,
+            });
+          } else {
+            let responseData;
+            if (mode === 'native') {
+              responseData = JSON.parse(result.body);
+            } else {
+              responseData = chatToResponses(JSON.parse(result.body), body, model);
+            }
+            const tokensIn = responseData.usage?.input_tokens || 0;
+            const tokensOut = responseData.usage?.output_tokens || 0;
+            recordCost(db, stmts.dbUpsertCost, model, providerName, tokensIn, tokensOut, agent);
+            res.writeHead(200, {
+              'Content-Type': 'application/json', 'X-Model': model, 'X-Provider': providerName, 'X-Request-Id': requestId,
+            });
+            res.end(JSON.stringify(responseData));
+            log(`[${requestId}] responses ${mode} ${model} (${providerName}) ${latencyMs}ms`);
+            persistRequest(db, stmts, {
+              requestId, status: 200, model, provider: providerName,
+              latencyMs, tokensIn, tokensOut, agent, requestedModel: body.model, finalModel: model, protocol: 'responses', attemptLog: result.attemptLog,
+            });
+          }
+        } catch (err) {
+          log(`[${requestId}] responses failed:`, sanitizeLog(err.message));
+          const status = err.statusCode || 502;
+          const errBody = err.responsesValidationError
+            ? responsesError(status, 'invalid_request_error', err.message)
+            : { error: sanitizeLog(err.message) || 'All providers unavailable' };
+          persistRequest(db, stmts, {
+            requestId, status, model: body.model || 'unknown', provider: '',
+            latencyMs: 0, agent, error: sanitizeLog(err.message),
+            requestedModel: body.model || '', finalModel: '', protocol: 'responses', attemptLog: err.attemptLog || [],
+          });
+          res.writeHead(status, { 'Content-Type': 'application/json', 'X-Request-Id': requestId });
+          res.end(JSON.stringify(errBody));
         }
         return;
       }

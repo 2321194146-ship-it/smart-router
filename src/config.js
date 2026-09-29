@@ -17,7 +17,9 @@ if (existsSync(envPath)) {
 }
 
 const DEFAULTS = {
-  port: 7878,
+  // Default to 17878 (the modular 6.1 test port). 7878 is the OLD production gateway and must
+  // ONLY be used when a human explicitly sets PORT=7878; nothing here auto-targets 7878.
+  port: 17878,
   host: '127.0.0.1',
   adminToken: '',
   configFile: join(ROOT, 'config', 'config.json'),
@@ -88,6 +90,9 @@ export function normalizeConfig(raw) {
       maxKeysPerProvider: raw.routing?.max_keys_per_provider ?? 0,
       maxProvidersPerRequest: raw.routing?.max_providers_per_request ?? 0,
       maxTotalUpstreamCalls: raw.routing?.max_total_upstream_calls ?? 20,
+      // Streaming stall watchdog for Responses SSE (ms). No upstream bytes within this
+      // window -> the stream is failed (never faked as completed). 0 disables the watchdog.
+      streamStallTimeoutMs: raw.routing?.stream_stall_timeout_ms ?? 60000,
     },
     models: raw.models || [],
     apiKeys: raw.api_keys || [],

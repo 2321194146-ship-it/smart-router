@@ -3,6 +3,7 @@
  * Supports OpenAI-compatible streaming and non-streaming chat completions
  */
 import { getConfig } from './config.js';
+import { responsesToChat } from './protocols/responses.js';
 
 const requestLog = [];
 const MAX_LOG_ENTRIES = 5000;
@@ -176,6 +177,20 @@ function markKeyModelForbidden(providerName, keyId, model) {
   state.lastUsed = Date.now();
 }
 
+// An unclassifiable (plain) 403 must NEVER permanently invalidate a key. Apply a TEMPORARY
+// cooldown only; once it elapses the key becomes eligible again. (phase-1 stability rule:
+// a key must not be killed for a 403 we cannot attribute to a concrete key/account problem.)
+function markKeyTempCooldown(providerName, keyId, reason = 'forbidden_unknown') {
+  const state = ensureKeyState(providerName, keyId);
+  state.consecutiveFailures++;
+  state.failureCount++;
+  state.lastStatus = 403;
+  state.lastErrorType = reason;
+  const cooldownSeconds = (getConfig().routing && getConfig().routing.cooldownSeconds) || 30;
+  state.cooldownUntil = Date.now() + cooldownSeconds * 1000;
+  state.lastUsed = Date.now();
+}
+
 export function resetKeyState(providerName, keyId) {
   const sk = `${providerName}:${keyId}`;
   const state = keyState.get(sk);
@@ -245,21 +260,31 @@ export function getStatusDistribution() {
   const d = {}; for (const e of requestLog) { const k = String(e.status); d[k] = (d[k] || 0) + 1; } return d;
 }
 
-export async function callProviderChat(provider, key, model, body, timeoutMs = 20000, externalSignal) {
+export async function callProviderChat(provider, key, model, body, timeoutMs = 20000, externalSignal, opts = {}) {
+  const endpoint = opts.endpoint || 'chat';
+  const passthrough = opts.passthrough === true;
   const baseUrl = provider.base_url.replace(/\/+$/, '');
-  const url = `${baseUrl}/chat/completions`;
+  const url = endpoint === 'responses' ? `${baseUrl}/responses` : `${baseUrl}/chat/completions`;
   const isStream = body.stream === true;
   const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key.api_key}` };
   if (provider.api_version) headers['api-version'] = provider.api_version;
   if (provider.custom_headers) { for (const [k, v] of Object.entries(provider.custom_headers)) headers[k] = v; }
-  const config = getConfig();
-  const messages = applySafeInjection(body.messages || [], config.system_prompt || '', config.provider_prompts?.[provider.display || provider.base_url], config.model_prompts?.[model], config.disable_prompt_injection === true);
-  const bodyToSend = { ...body, model, messages };
-  delete bodyToSend.stream;
-  const apiType = provider.api_type || 'openai';
-  const removeFields = PROVIDER_UNSUPPORTED[apiType] || [];
-  for (const field of removeFields) { if (field in bodyToSend) { log(`[passthrough] ${sanitize(provider.display || provider.base_url)} does not support '${field}', removing`); delete bodyToSend[field]; } }
-  bodyToSend.stream = isStream;
+  let bodyToSend;
+  if (endpoint === 'responses' && passthrough) {
+    // Native Responses passthrough: forward the request as-is (model swapped to the
+    // provider's apiModel). Unknown fields are preserved; the caller (routeResponses)
+    // is responsible for any request-level validation.
+    bodyToSend = { ...body, model };
+  } else {
+    const config = getConfig();
+    const messages = applySafeInjection(body.messages || [], config.system_prompt || '', config.provider_prompts?.[provider.display || provider.base_url], config.model_prompts?.[model], config.disable_prompt_injection === true);
+    bodyToSend = { ...body, model, messages };
+    delete bodyToSend.stream;
+    const apiType = provider.api_type || 'openai';
+    const removeFields = PROVIDER_UNSUPPORTED[apiType] || [];
+    for (const field of removeFields) { if (field in bodyToSend) { log(`[passthrough] ${sanitize(provider.display || provider.base_url)} does not support '${field}', removing`); delete bodyToSend[field]; } }
+    bodyToSend.stream = isStream;
+  }
   const controller = new AbortController();
   if (externalSignal) { try { externalSignal.addEventListener('abort', () => controller.abort()); } catch {} }
   // The timeout timer MUST be cleared even when fetch throws (network error / abort),
@@ -288,20 +313,50 @@ function classifyStatus(status) {
 
 // Distinguish 403 flavours so we never permanently kill a key for a model-level
 // permission issue or a transient provider restriction.
+// Classify a 403 body. ORDER MATTERS. The overriding safety rule (phase-2): a 403 must never
+// permanently kill a key unless the body EXPLICITLY proves the credential itself is bad. Model
+// permission and region/policy restrictions must NOT be mistaken for a dead key.
 function classifyForbidden(bodyText) {
   const t = (bodyText || '').toLowerCase();
-  // 1) key / account itself lacks permission → invalidate the key
-  if (/(api[_ ]?key|token).*(invalid|expired|incorrect|not valid|wrong|revoked|deactivat)/i.test(t)) return 'key_forbidden';
-  if (/(authentication|unauthor|permission denied|access denied|not authorized|invalid.*(credential|api)|api key.{0,20}(not|invalid|missing))/i.test(t)) return 'key_forbidden';
-  // 2) provider region / geo / policy / compliance restriction → provider-level cooldown (NOT a key ban).
-  //    Checked BEFORE the model rule: a region-restricted model ("model X not supported in your
-  //    region") is a provider-level issue, not a per-model key ban.
-  if (/region|country|geo|location|policy|compliance|not available in your (region|country)|rate.?limit|quota/i.test(t)) return 'provider_cooldown';
-  // 3) this key cannot call THIS model → skip only this key+model, keep key alive
-  if (/model.*(not|unauthor|access|permission|allowed|support|found|available)|(does not|don't|do not).*(access|support).*model|no access to (the )?model|model.*forbidden|you (do not|don't) have access/i.test(t)) return 'model_forbidden';
-  // 3b) temporary restriction (overloaded / maintenance / try again later) → provider cooldown, NOT a key ban
-  if (/temporarily|overload|maintenance|try again later|currently unavailable|service (is )?unavailable|temporarily (blocked|restricted)/i.test(t)) return 'temp_restricted';
-  // 4) unknown 403 → conservative cooldown, never invalidate the key
+
+  // Region / geo / location evidence makes this a PROVIDER-level issue even when a model is named
+  // ("model X not available in your region"), so detect it up front and let it win over the model
+  // rule below.
+  const mentionsRegion = /region|country|geo(graph)?|location|jurisdiction|not available in your (region|country)/i.test(t);
+
+  // (1) MODEL-LEVEL permission FIRST. If the message is about a specific model, only the key+model
+  //     pair should be skipped — the key itself stays valid for other models. A "permission denied"
+  //     / "access denied" / "not authorized" that names a model is MODEL-level, NOT proof the whole
+  //     key is dead. (Fixes: "Permission denied for model gpt-4", "You are not authorized to access
+  //     this model", "Access denied: model X is not enabled for your account", "This API key does
+  //     not have access to model gpt-4" — all must be model_forbidden, never key_forbidden.)
+  if (!mentionsRegion && /model/i.test(t) &&
+      /(permission|denied|not authoriz|unauthor|no access|does not have access|do not have access|don't have access|not enabled|not allowed|not permitted|cannot access|access denied|not support|forbidden|access)/i.test(t)) {
+    return 'model_forbidden';
+  }
+
+  // (2) EXPLICIT key/credential failure. Require BOTH a credential noun AND concrete evidence that
+  //     the credential itself is bad (invalid / expired / revoked / incorrect / deactivated /
+  //     disabled / malformed). A standalone "permission denied" is NOT enough to permanently kill a
+  //     key.
+  if (/(api[_ ]?key|token|credential|bearer|authentication)/i.test(t) &&
+      /(invalid|expired|revoked|incorrect|deactivat|disabled|not valid|no longer valid|malformed)/i.test(t)) {
+    return 'key_forbidden';
+  }
+
+  // (3) Region / policy / compliance / quota / rate-limit → provider-level cooldown (NOT a key ban).
+  if (/region|country|geo|location|jurisdiction|policy|compliance|not available in your (region|country)|rate.?limit|quota/i.test(t)) {
+    return 'provider_cooldown';
+  }
+
+  // (3b) Temporary restriction (overloaded / maintenance / try again later) → provider cooldown.
+  if (/temporarily|overload|maintenance|try again later|currently unavailable|service (is )?unavailable|temporarily (blocked|restricted)/i.test(t)) {
+    return 'temp_restricted';
+  }
+
+  // (4) Anything else — a standalone "permission denied" / "access denied" / "not authorized" with
+  //     NO model, region, or credential-invalidity evidence, and a plain "Forbidden" — is
+  //     UNCLASSIFIABLE. Apply a temporary key cooldown only; NEVER permanently invalidate the key.
   return 'conservative_cooldown';
 }
 
@@ -416,7 +471,10 @@ export async function executeCandidates(candidates, body, context) {
     const entry = { model: candidate.model, provider: candidate.providerName, keyId: key.id };
     attemptLog.push(entry);
     try {
-      const response = await callProviderChat(candidate.provider, key, candidate.model, body, timeoutMs);
+      const ups = context.makeUpstream ? context.makeUpstream(candidate) : { endpoint: 'chat', upstreamBody: body };
+      const endpoint = ups.endpoint || 'chat';
+      const mode = endpoint === 'responses' ? 'native' : 'adapter';
+      const response = await callProviderChat(candidate.provider, key, candidate.model, ups.upstreamBody, timeoutMs, context.externalSignal, { endpoint, passthrough: endpoint === 'responses' });
       const latencyMs = Date.now() - attemptStart;
       entry.status = response.status;
       entry.latencyMs = latencyMs;
@@ -438,7 +496,7 @@ export async function executeCandidates(candidates, body, context) {
           });
           log(`[${requestId}] ${candidate.model} ✓ (stream, TTFT=${ttft}ms)`);
           logRequest({ model: candidate.model, provider: candidate.providerName, status: 200, latencyMs, agent: context.agent });
-          return { type: 'success', value: { success: true, isStream: true, provider: candidate.providerName, model: candidate.model, latencyMs, ttft, remainingStream, response, attemptLog } };
+          return { type: 'success', value: { success: true, isStream: true, provider: candidate.providerName, model: candidate.model, latencyMs, ttft, remainingStream, response, mode, attemptLog } };
         }
         const cloneResp = response.clone();
         const text = await cloneResp.text();
@@ -450,7 +508,7 @@ export async function executeCandidates(candidates, body, context) {
         }
         log(`[${requestId}] ${candidate.model} ✓ (${response.status})`);
         logRequest({ model: candidate.model, provider: candidate.providerName, status: response.status, latencyMs, agent: context.agent });
-        return { type: 'success', value: { success: true, isStream: false, provider: candidate.providerName, model: candidate.model, latencyMs, body: text, status: response.status, attemptLog } };
+        return { type: 'success', value: { success: true, isStream: false, provider: candidate.providerName, model: candidate.model, latencyMs, body: text, status: response.status, mode, attemptLog } };
       }
 
       if (cls === 'client_error') {
@@ -474,19 +532,27 @@ export async function executeCandidates(candidates, body, context) {
         logRequest({ model: candidate.model, provider: candidate.providerName, status: 403, latencyMs, agent: context.agent, error: `Forbidden (403): ${cat}` });
         log(`[${requestId}] ${candidate.model} (${key.id}) → 403 (${cat})`);
         entry.error = `403:${cat}`;
-        if (cat === 'key_forbidden' || cat === 'conservative_cooldown') {
-          // Key-level or unknown 403 → invalidate the key immediately (phase-1 Bug B: a 403
-          // must never be retried on the same key). Model-level 403 (model_forbidden) keeps the
-          // key alive for other models.
+        if (cat === 'key_forbidden') {
+          // Explicit key/account invalid (e.g. "Invalid API key") → permanently disable the key.
           markKeyForbidden(candidate.providerName, key.id);
+          return { type: 'key_forbidden' };
+        }
+        if (cat === 'model_forbidden') {
+          // This key lacks permission for THIS model only → skip key+model, keep key alive.
+          markKeyModelForbidden(candidate.providerName, key.id, candidate.model);
+          return { type: 'model_forbidden' };
+        }
+        if (cat === 'provider_cooldown' || cat === 'temp_restricted') {
+          // Region / policy / temporary restriction → provider-level cooldown; the key is NOT
+          // invalidated (it may simply be the wrong region / a transient outage).
+          providerCool.set(candidate.providerName, Date.now() + providerCooldownMs);
+          markKeyTempFailure(candidate.providerName, key.id, 'forbidden_' + cat);
           return { type: cat };
         }
-        if (cat === 'model_forbidden') { markKeyModelForbidden(candidate.providerName, key.id, candidate.model); return { type: 'model_forbidden' }; }
-        // provider_cooldown / temp_restricted → provider-level cooldown plus a temporary key
-        // cooldown. These do NOT permanently invalidate the key.
-        providerCool.set(candidate.providerName, Date.now() + providerCooldownMs);
-        markKeyTempFailure(candidate.providerName, key.id, 'forbidden_' + cat, candidate.model);
-        return { type: cat };
+        // conservative_cooldown (unclassifiable plain 403) → TEMPORARY key cooldown ONLY.
+        // Never permanently invalidate the key — an unknown 403 must not kill a good key.
+        markKeyTempCooldown(candidate.providerName, key.id, 'forbidden_unknown');
+        return { type: 'conservative_cooldown' };
       }
 
       if (cls === 'not_found') {
@@ -548,14 +614,47 @@ export async function executeCandidates(candidates, body, context) {
     }
   }
 
-  // Loop hierarchy: candidates (providers) → keys → per-key retries
+  // Request-scoped, per-PROVIDER state SHARED across ALL candidates of the same provider. A
+  // provider serving multiple models is ONE provider, not many — so its failure budget and
+  // cooldown must be tracked by providerName for the whole request, never re-created per
+  // (provider+model) candidate. This is what stops a single dead provider from re-earning a
+  // fresh retry budget on every one of its models and burning the global call cap before any
+  // healthy provider is ever reached.
+  const providerAttemptsByName = new Map(); // providerName → provider-level failures so far this request
+  const skippedProviders = new Set();       // providers ruled out this request (budget spent OR in cooldown)
+  const attemptedProviders = new Set();     // UNIQUE providers actually attempted (for maxProvidersPerRequest)
+  const providerRetryBudget = maxAttemptsPerKey;
+
+  // Loop hierarchy: candidates (provider+model) → keys → per-key retries
   for (let ci = 0; ci < candidates.length; ci++) {
     const candidate = candidates[ci];
-    if (maxProvidersPerRequest > 0 && ci >= maxProvidersPerRequest) break;
+    const pName = candidate.providerName;
     if (totalCalls >= maxTotalUpstreamCalls) break;
 
-    const keys = getAvailableKeys(candidate.provider, candidate.providerName, candidate.model, maxKeysPerProvider);
-    if (keys.length === 0) continue; // no usable key on this provider → next provider
+    // Provider already ruled out earlier in THIS request (its shared retry budget was spent, or
+    // it entered cooldown) → skip every remaining model candidate that belongs to it.
+    if (skippedProviders.has(pName)) continue;
+
+    // Provider is in cooldown (set by an earlier candidate this request, a 429 storm, or a prior
+    // request) → skip all of its remaining candidates too.
+    if (providerCool.has(pName) && Date.now() < providerCool.get(pName)) {
+      skippedProviders.add(pName);
+      continue;
+    }
+
+    // maxProvidersPerRequest limits the number of DISTINCT providers, NOT the candidate index.
+    // A provider already attempted may still be served by its other model candidates; only a
+    // brand-new provider counts against the budget.
+    if (maxProvidersPerRequest > 0 && !attemptedProviders.has(pName) && attemptedProviders.size >= maxProvidersPerRequest) {
+      continue;
+    }
+
+    const keys = getAvailableKeys(candidate.provider, pName, candidate.model, maxKeysPerProvider);
+    if (keys.length === 0) continue; // no usable key on this provider → next candidate
+
+    attemptedProviders.add(pName);
+    let providerAttempts = providerAttemptsByName.get(pName) || 0;
+    let providerExhausted = false;
 
     for (const key of keys) {
       if (totalCalls >= maxTotalUpstreamCalls) break;
@@ -566,12 +665,33 @@ export async function executeCandidates(candidates, body, context) {
         const r = await tryOnce(candidate, key);
         if (r.type === 'success') return r.value;
         if (r.type === 'stop') return r.value;
-        // auth_invalid / key_forbidden / model_forbidden / rate_limited /
-        // provider_cooldown / conservative → move to the NEXT KEY (no retry of this key)
-        if (r.type !== 'server_error' && r.type !== 'timeout' && r.type !== 'network') break;
-        // server_error / timeout / network → retry SAME key (key stays valid)
+
+        // KEY-LEVEL errors (401 / key-level 403 / model-level 403 / 429 / unclassifiable 403) are
+        // specific to this key, so trying the NEXT key on the same provider is meaningful. They do
+        // NOT consume the shared provider-level retry budget.
+        if (r.type === 'auth_invalid' || r.type === 'key_forbidden' || r.type === 'model_forbidden' || r.type === 'rate_limited' || r.type === 'conservative_cooldown') {
+          break; // → next key
+        }
+
+        // PROVIDER-LEVEL errors (5xx / 408 / timeout / network / provider_cooldown /
+        // temp_restricted): the provider itself is unhealthy. Rotating through all its keys against
+        // the same failing server is pointless. Charge the SHARED provider budget; once it is
+        // spent, abandon this provider — AND all its remaining model candidates — immediately.
+        providerAttempts++;
+        providerAttemptsByName.set(pName, providerAttempts);
+        if (providerAttempts >= providerRetryBudget) {
+          providerExhausted = true;
+          break;
+        }
       }
+      if (providerExhausted) break; // → stop trying keys of this provider
     }
+
+    // A provider-level failure that spent the budget, OR a cooldown set during tryOnce (timeout /
+    // network / provider_cooldown / temp_restricted) → skip all remaining candidates of this
+    // provider for the rest of this request, so a healthy later provider gets its turn.
+    if (providerExhausted) skippedProviders.add(pName);
+    if (providerCool.has(pName) && Date.now() < providerCool.get(pName)) skippedProviders.add(pName);
   }
 
   const lastEntry = attemptLog[attemptLog.length - 1];
@@ -594,6 +714,75 @@ export async function routeChatCompletion(body, agent = '', overrides = {}) {
     maxProvidersPerRequest: overrides.max_providers_per_request ?? routing.maxProvidersPerRequest ?? 0,
     maxTotalUpstreamCalls: overrides.max_total_upstream_calls ?? routing.maxTotalUpstreamCalls ?? 20,
     timeoutMs: routing.perModelTimeoutMs ?? 20000,
+  });
+}
+
+/**
+ * Decide how a provider should serve an OpenAI Responses request.
+ *  - 'native'      : provider exposes /responses and the request is passed through as-is.
+ *  - 'chat-adapter': provider only supports /chat/completions; request is converted.
+ * Unset → safe default 'chat-adapter' (most providers only expose chat) with an explicit log.
+ * We never randomly guess; a misconfigured native provider simply degrades to adapter behaviour.
+ */
+export function resolveResponsesMode(provider, name) {
+  const m = provider && provider.responses_mode;
+  if (m === 'native' || m === 'chat-adapter') return m;
+  log(`[responses] provider '${name}' has no responses_mode set; defaulting to chat-adapter (safe). Set responses_mode explicitly to enable native passthrough.`);
+  return 'chat-adapter';
+}
+
+/**
+ * Route an OpenAI Responses API request. Reuses the exact same Provider/Model/Key
+ * three-layer fallback machinery as chat completions (buildCandidates + executeCandidates).
+ * Each candidate selects its endpoint (native /responses passthrough vs chat /chat/completions
+ * adapter) via `makeUpstream`. The returned `mode` ('native' | 'adapter') tells the caller how
+ * to transform the result.
+ */
+export async function routeResponses(body, agent = '', overrides = {}) {
+  const config = getConfig();
+  const routing = config.routing || {};
+  const candidates = buildCandidates(body, overrides, config);
+  if (candidates.length === 0) throw new Error('No available candidates for the requested model');
+
+  // Build the chat-adapter request body once. If it throws (unsupported field for adapter mode,
+  // e.g. previous_response_id / reasoning / non-function tool), adapter candidates are dropped and
+  // only native candidates can serve the request. If none remain, we surface a clear 422.
+  let chatBody = null;
+  let adapterError = null;
+  try {
+    chatBody = responsesToChat(body);
+  } catch (e) {
+    adapterError = e.message;
+  }
+
+  const eligible = [];
+  for (const c of candidates) {
+    const prov = config.providers[c.providerName] || {};
+    const mode = resolveResponsesMode(prov, c.providerName);
+    if (mode === 'chat-adapter' && adapterError) continue; // adapter cannot serve this request
+    eligible.push(c);
+  }
+  if (eligible.length === 0) {
+    const err = new Error(adapterError || 'No available candidates for the requested model');
+    err.responsesValidationError = true;
+    err.statusCode = 422;
+    throw err;
+  }
+
+  return executeCandidates(eligible, body, {
+    agent,
+    requestId: overrides.requestId || 'unknown',
+    externalSignal: overrides.externalSignal,
+    maxAttemptsPerKey: overrides.maxAttemptsPerKey ?? routing.maxAttemptsPerKey ?? 2,
+    maxKeysPerProvider: overrides.max_keys_per_provider ?? routing.maxKeysPerProvider ?? 0,
+    maxProvidersPerRequest: overrides.max_providers_per_request ?? routing.maxProvidersPerRequest ?? 0,
+    maxTotalUpstreamCalls: overrides.max_total_upstream_calls ?? routing.maxTotalUpstreamCalls ?? 20,
+    timeoutMs: routing.perModelTimeoutMs ?? 20000,
+    makeUpstream: (candidate) => {
+      const mode = resolveResponsesMode(config.providers[candidate.providerName] || {}, candidate.providerName);
+      if (mode === 'native') return { endpoint: 'responses', upstreamBody: body };
+      return { endpoint: 'chat', upstreamBody: chatBody };
+    },
   });
 }
 
@@ -677,14 +866,14 @@ export function sanitizeConfigForClient(obj) {
 
 export {
   markKeyInvalid, markKeyForbidden, markKeyModelForbidden, markKeyTempFailure,
-  markKeyRateLimited, markKeySucceeded, markProviderCooldown,
+  markKeyTempCooldown, markKeyRateLimited, markKeySucceeded, markProviderCooldown,
   getActiveKey, getAvailableKeys, classifyForbidden, isQuotaExhausted,
 };
 
 export default {
   logRequest, getRecentLogs, getStats,
   getModelLatency, getModelCounts, getStatusDistribution,
-  callProviderChat, routeChatCompletion, executeCandidates, buildCandidates,
+  callProviderChat, routeChatCompletion, routeResponses, resolveResponsesMode, executeCandidates, buildCandidates,
   getProviderHealth, checkProviderHealth, resetProviderState,
   sanitizeConfigForClient,
   markKeyInvalid, markKeyForbidden, markKeyModelForbidden, markKeyTempFailure,
