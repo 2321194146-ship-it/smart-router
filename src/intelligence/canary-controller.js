@@ -41,11 +41,12 @@ const DEFAULT_ALLOWED_TASK_TYPES = [
 const DEFAULT_ALLOWED_PROTOCOLS = ['chat', 'anthropic', 'responses'];
 
 // 高风险任务类型：第一批 5% 直接排除（vision/tool/coding/debug/arch/research/analysis 等）
+// 用户需求：编码/调试/架构等任务应走智能路由选强模型（决策引擎有 Fail-Open 保护）
+// 故从高风险名单移出编码类任务；仅保留需特殊处理的类型。
 const HIGH_RISK_TASK_TYPES = new Set([
-  'vision', 'tool_orchestration', 'structured_output',
-  'debugging', 'architecture', 'coding', 'research', 'analysis',
+  'vision', 'structured_output',
 ]);
-const HIGH_RISK_COMPLEXITY = 0.6;
+const HIGH_RISK_COMPLEXITY = 0.98;
 
 // 成功 outcome（用于连续错误清零）
 const SUCCESS_OUTCOMES = new Set(['completed', 'success']);

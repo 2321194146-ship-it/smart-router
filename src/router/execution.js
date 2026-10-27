@@ -484,8 +484,10 @@ export class ExecutionEngine {
         continue;
       }
 
-      // scope === 'none'（UNKNOWN 等）：由 FallbackChain 决定是否继续
-      log(`non-retriable error (${errorType}); letting fallback chain decide`);
+      // scope === 'none'（UNKNOWN 等）：保守地排除当前 provider，
+      // 允许 fallback 到下一个候选（比直接终止更安全，避免单 provider 宕机导致全量请求失败）。
+      log(`non-retriable error (${errorType}) scope=none; excluding provider "${candidate.provider}" and continuing`);
+      chain.excludeProvider(candidate.provider);
       continue;
     }
 

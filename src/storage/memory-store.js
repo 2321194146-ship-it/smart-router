@@ -24,11 +24,59 @@ export class MemoryStore extends StorageInterface {
     this._auditRecords = [];
     this._shadowDecisions = new Map();
     this._appState = new Map();
+    this._users = new Map();
   }
 
   async init() { /* no-op for memory store */ }
 
   async close() { /* no-op for memory store */ }
+
+  // --- users ---
+
+  async saveUser(user) {
+    if (!user?.id) return false;
+    for (const [id, existing] of this._users) {
+      if (id !== user.id && existing.username === user.username) return false;
+    }
+    this._users.set(user.id, { ...user });
+    return true;
+  }
+
+  async getUser(id) {
+    const user = this._users.get(id);
+    return user ? { ...user } : null;
+  }
+
+  async getUserByUsername(username) {
+    for (const user of this._users.values()) {
+      if (user.username === username) return { ...user };
+    }
+    return null;
+  }
+
+  async getUserByToken(apiToken) {
+    for (const user of this._users.values()) {
+      if (user.apiToken === apiToken) return { ...user };
+    }
+    return null;
+  }
+
+  async listUsers() {
+    return [...this._users.values()].map((user) => ({ ...user }));
+  }
+
+  async updateUserUsage(id, bytesDelta, costDelta) {
+    const user = this._users.get(id);
+    if (!user) return false;
+    user.usageBytes = (user.usageBytes || 0) + (bytesDelta || 0);
+    user.costTotal = (user.costTotal || 0) + (costDelta || 0);
+    user.updatedAt = new Date().toISOString();
+    return true;
+  }
+
+  async deleteUser(id) {
+    return this._users.delete(id);
+  }
 
   // --- requests ---
 
@@ -94,6 +142,10 @@ export class MemoryStore extends StorageInterface {
   async getCost(requestId) {
     const c = this._costs.get(requestId);
     return c ? { ...c } : null;
+  }
+
+  async getAllCosts() {
+    return [...this._costs.values()].map((c) => ({ ...c }));
   }
 
   // --- key_status ---

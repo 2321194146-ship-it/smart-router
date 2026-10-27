@@ -7,6 +7,7 @@
 import { readFileSync, existsSync, statSync, accessSync, constants } from 'node:fs';
 import { resolve, dirname, join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { mergeSecrets, maskKey, maskSecrets } from '../secrets-merge.js';
 
 // ----------------------------------------------------------------------------
 // 模块级状态
@@ -347,6 +348,10 @@ export function loadConfig(configPath, options = {}) {
     if (!merged.server) merged.server = {};
     merged.server.data_dir = process.env.SMART_ROUTER_DATA_DIR;
   }
+
+  // 密钥注入：从 secrets.local.json 合并到配置
+  mergeSecrets(merged, _configPath, options.secretsPath || _secretsPath);
+
   _configTemplate = deepClone(merged);
 
   // 记录 mtime 用于热重载

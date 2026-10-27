@@ -139,9 +139,22 @@ export function deriveValidatedOutcome(executionResult, responseBody) {
     for (const choice of body.choices) {
       if (!choice) continue;
       const finishReason = choice.finish_reason;
-      // finish_reason='length'：输出被 max_tokens 截断
-      // finish_reason='content_filter'：内容被过滤
-      if (finishReason === 'length' || finishReason === 'content_filter') {
+      // finish_reason='length'：输出被 max_tokens 截断——这是正常截断，
+      // 只要该 choice 有实际内容（message.content 非空）就视为有效完成。
+      // 只有内容也为空时才判定为无效（上游真正返回了空 body）。
+      if (finishReason === 'length') {
+        const msg = choice.message || {};
+        const hasContent =
+          (typeof msg.content === 'string' && msg.content.trim().length > 0) ||
+          (msg.content && typeof msg.content === 'object') ||
+          (msg.reasoning_content && msg.reasoning_content.length > 0) ||
+          (msg.reasoning && msg.reasoning.length > 0);
+        if (!hasContent) {
+          return 'incomplete';
+        }
+      }
+      // finish_reason='content_filter'：内容被过滤 → 无效
+      if (finishReason === 'content_filter') {
         return 'incomplete';
       }
       // finish_reason 为 null 或 undefined 且无 message → 可能是流式异常中断
@@ -158,8 +171,23 @@ export function deriveValidatedOutcome(executionResult, responseBody) {
 
   // 6. Anthropic 格式检查：stop_reason
   const stopReason = body.stop_reason;
-  if (stopReason === 'max_tokens' || stopReason === 'content_filter') {
+  if (stopReason === 'content_filter') {
     return 'incomplete';
+  }
+  // stop_reason='max_tokens' 同样是正常截断：有内容即视为有效
+  if (stopReason === 'max_tokens') {
+    const hasContent = Array.isArray(body.content)
+      ? body.content.some((c) => {
+          if (!c || typeof c !== 'object') return false;
+          return (
+            (typeof c.text === 'string' && c.text.trim().length > 0) ||
+            (c.type === 'thinking' && c.thinking && c.thinking.length > 0)
+          );
+        })
+      : Boolean(body.content);
+    if (!hasContent) {
+      return 'incomplete';
+    }
   }
 
   // 7. 流式响应检查：检查是否有 data 数组为空（SSE 格式）

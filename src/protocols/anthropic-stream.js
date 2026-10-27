@@ -1128,6 +1128,8 @@ export async function handleAnthropicMessageStream(req, res, body, context) {
       health: executionEngine.health,
       circuitBreaker: executionEngine.circuitBreaker,
       keyPool: executionEngine.keyPool,
+      user: context.user,
+      userManager: context.userManager,
     });
 
     // 3b. Shadow 智能建议（执行前生成；await 保证建议落库后才执行；off 模式 no-op）

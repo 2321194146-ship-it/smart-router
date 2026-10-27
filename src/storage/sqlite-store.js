@@ -13,7 +13,14 @@
 // 仅使用 Node.js 内置模块，无第三方依赖。
 
 import { DatabaseSync } from 'node:sqlite';
+import { createHash } from 'node:crypto';
 import { StorageInterface } from './interface.js';
+
+function hashToken(token) {
+  return typeof token === 'string' && token
+    ? createHash('sha256').update(token, 'utf8').digest('hex')
+    : null;
+}
 
 export class SQLiteStore extends StorageInterface {
   /**
@@ -100,6 +107,28 @@ export class SQLiteStore extends StorageInterface {
         updated_at TEXT NOT NULL
       );
 
+       CREATE TABLE IF NOT EXISTS users (
+         id TEXT PRIMARY KEY,
+         username TEXT UNIQUE NOT NULL,
+         display_name TEXT NOT NULL,
+         role TEXT NOT NULL DEFAULT 'employee',
+         status TEXT NOT NULL DEFAULT 'active',
+         department TEXT DEFAULT 'general',
+         api_token TEXT,
+         api_token_hash TEXT,
+         monthly_quota_bytes INTEGER,
+         model_whitelist TEXT DEFAULT '[]',
+         provider_whitelist TEXT DEFAULT '[]',
+         usage_bytes INTEGER DEFAULT 0,
+         usage_month TEXT,
+         cost_total REAL DEFAULT 0,
+         created_at TEXT NOT NULL,
+         updated_at TEXT NOT NULL
+       );
+       CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+       CREATE INDEX IF NOT EXISTS idx_users_token ON users(api_token);
+       CREATE INDEX IF NOT EXISTS idx_users_token_hash ON users(api_token_hash);
+
       CREATE TABLE IF NOT EXISTS finalized_requests (
         request_id TEXT PRIMARY KEY,
         outcome TEXT,
@@ -159,6 +188,13 @@ export class SQLiteStore extends StorageInterface {
     try { this._db.exec('ALTER TABLE key_status ADD COLUMN last_error_type TEXT'); } catch {}
     try { this._db.exec('ALTER TABLE key_status ADD COLUMN last_failure_at TEXT'); } catch {}
     try { this._db.exec('ALTER TABLE key_status ADD COLUMN last_success_at TEXT'); } catch {}
+    try { this._db.exec('ALTER TABLE users ADD COLUMN api_token_hash TEXT'); } catch {}
+    try { this._db.exec('ALTER TABLE users ADD COLUMN usage_month TEXT'); } catch {}
+    try { this._db.exec('CREATE INDEX IF NOT EXISTS idx_users_token_hash ON users(api_token_hash)'); } catch {}
+    for (const row of this._db.prepare('SELECT id, api_token FROM users WHERE api_token IS NOT NULL AND api_token_hash IS NULL').all()) {
+      this._db.prepare('UPDATE users SET api_token_hash = ?, api_token = NULL WHERE id = ?')
+        .run(hashToken(row.api_token), row.id);
+    }
     // requests: add external_request_id column
     try { this._db.exec('ALTER TABLE requests ADD COLUMN external_request_id TEXT'); } catch {}
     try { this._db.exec('CREATE INDEX IF NOT EXISTS idx_requests_external_id ON requests(external_request_id)'); } catch {}
@@ -357,6 +393,19 @@ export class SQLiteStore extends StorageInterface {
       dateKey: row.date_key,
       timestamp: row.timestamp,
     };
+  }
+
+  async getAllCosts() {
+    const rows = this._db.prepare('SELECT * FROM cost_records ORDER BY timestamp ASC').all();
+    return rows.map((row) => ({
+      requestId: row.request_id,
+      modelId: row.model_id,
+      provider: row.provider,
+      usage: JSON.parse(row.usage || '{}'),
+      cost: JSON.parse(row.cost || '{}'),
+      dateKey: row.date_key,
+      timestamp: row.timestamp,
+    }));
   }
 
   // --- key_status ---
@@ -815,6 +864,107 @@ export class SQLiteStore extends StorageInterface {
       'INSERT INTO app_state (key, value, updated_at) VALUES (?, ?, ?) ' +
       'ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at'
     ).run(key, String(value), new Date().toISOString());
+  }
+
+  // ---- users (Phase 2: Multi-user management) ----
+
+  async saveUser(user) {
+    if (!user || !user.id) return false;
+    try {
+      // 先尝试直接插入/更新，使用REPLACE来处理所有冲突
+      this._db.prepare(`
+        INSERT INTO users (id, username, display_name, role, status, department,
+          api_token, api_token_hash, monthly_quota_bytes, model_whitelist, provider_whitelist,
+          usage_bytes, usage_month, cost_total, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+          username=excluded.username, display_name=excluded.display_name, role=excluded.role,
+          status=excluded.status, department=excluded.department, api_token=excluded.api_token,
+          api_token_hash=excluded.api_token_hash, monthly_quota_bytes=excluded.monthly_quota_bytes,
+          model_whitelist=excluded.model_whitelist, provider_whitelist=excluded.provider_whitelist,
+          usage_bytes=excluded.usage_bytes, usage_month=excluded.usage_month, cost_total=excluded.cost_total,
+          created_at=excluded.created_at, updated_at=excluded.updated_at
+      `).run(
+        user.id, user.username, user.displayName, user.role, user.status, user.department,
+        null, user.apiTokenHash || hashToken(user.apiToken), user.monthlyQuotaBytes ?? null,
+        JSON.stringify(user.modelWhitelist || []), JSON.stringify(user.providerWhitelist || []),
+        user.usageBytes || 0, user.usageMonth || new Date().toISOString().slice(0, 7), user.costTotal || 0, user.createdAt, user.updatedAt
+      );
+      return true;
+    } catch (err) {
+      console.error(`[sqlite] saveUser failed: ${err.message}`);
+      return false;
+    }
+  }
+
+  async getUser(id) {
+    try {
+      const row = this._db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+      return row ? this._parseUser(row) : null;
+    } catch { return null; }
+  }
+
+  async getUserByUsername(username) {
+    try {
+      const row = this._db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+      return row ? this._parseUser(row) : null;
+    } catch { return null; }
+  }
+
+  async getUserByToken(token) {
+    try {
+      const row = this._db.prepare('SELECT * FROM users WHERE api_token_hash = ? AND status = ?').get(hashToken(token), 'active');
+      return row ? this._parseUser(row) : null;
+    } catch { return null; }
+  }
+
+  async listUsers() {
+    try {
+      const rows = this._db.prepare('SELECT * FROM users ORDER BY role ASC, username ASC').all();
+      return rows.map((r) => this._parseUser(r));
+    } catch { return []; }
+  }
+
+  async updateUserUsage(id, bytesDelta, costDelta) {
+    try {
+      this._db.prepare(
+        'UPDATE users SET usage_bytes = usage_bytes + ?, cost_total = cost_total + ?, updated_at = ? WHERE id = ?'
+      ).run(bytesDelta, costDelta, new Date().toISOString(), id);
+      return true;
+    } catch (err) {
+      console.error(`[sqlite] updateUserUsage failed: ${err.message}`);
+      return false;
+    }
+  }
+
+  async deleteUser(id) {
+    try {
+      this._db.prepare('DELETE FROM users WHERE id = ?').run(id);
+      return true;
+    } catch { return false; }
+  }
+
+  _parseUser(row) {
+    return {
+      id: row.id,
+      username: row.username,
+      displayName: row.display_name,
+      role: row.role,
+      status: row.status,
+      department: row.department,
+      apiToken: null,
+      apiTokenHash: row.api_token_hash || null,
+      monthlyQuotaBytes: row.monthly_quota_bytes === null || row.monthly_quota_bytes === undefined
+        ? null
+        : row.monthly_quota_bytes,
+      modelWhitelist: row.model_whitelist ? JSON.parse(row.model_whitelist) : [],
+      providerWhitelist: row.provider_whitelist ? JSON.parse(row.provider_whitelist) : [],
+      usageBytes: row.usage_bytes || 0,
+      usageMonth: row.usage_month || new Date().toISOString().slice(0, 7),
+      costTotal: row.cost_total || 0,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
   }
 }
 

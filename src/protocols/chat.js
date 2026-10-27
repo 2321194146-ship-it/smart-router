@@ -380,7 +380,10 @@ export async function handleChatCompletion(req, res, body, context) {
       health: executionEngine.health,
       circuitBreaker: executionEngine.circuitBreaker,
       keyPool: executionEngine.keyPool,
+      user: context.user,
+      userManager: context.userManager,
     });
+
 
     // 3b. Shadow 智能建议（执行前生成；await 保证建议落库后才执行；off 模式 no-op）
     //     无候选/预算拦截也记录；真实结果由 Finalizer 事务成功后观察钩子回填

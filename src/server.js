@@ -54,6 +54,7 @@ import { handleLegacyApiRequest } from './legacy-api.js';
 import { handleMcpProxyRequest } from './mcp-proxy.js';
 import { handleMediaRequest } from './media-proxy.js';
 import { VirtualKeyManager } from './virtual-keys.js';
+import { UserManager } from './management/users.js';
 
 // ----------------------------------------------------------------------------
 // 常量
@@ -137,6 +138,7 @@ export async function createServer(configPath) {
   const circuitBreaker = new CircuitBreaker(config.circuit_breaker || {}, store);
   const providerClient = new ProviderClient(config, keyPool, health);
   const costTracker = new CostTracker(config, store);
+  await costTracker.restore();
   const finalizer = new Finalizer(costTracker, store);
   const virtualKeys = new VirtualKeyManager(config);
   const executionEngine = new ExecutionEngine(
@@ -173,6 +175,11 @@ export async function createServer(configPath) {
   await intelligence.restoreCanaryState();
   log(`server: intelligence layer initialized (mode=${intelligence.mode})`);
 
+  // 4c. 初始化用户管理系统（Phase 2: Multi-user management）
+  const userManager = new UserManager(store);
+  await userManager.initDefaultAdmin();
+  log('server: user management initialized');
+
   log('server: all components initialized');
 
   // 5. 启动健康检查
@@ -198,6 +205,7 @@ export async function createServer(configPath) {
     virtualKeys,
     executionEngine,
     intelligence,
+    userManager,
     publicAuth,
     rateLimiter,
     concurrencyGate,
@@ -290,7 +298,21 @@ async function handleRequest(req, res, components) {
       return;
     }
 
-    if (publicAuth.enabled && !isPublicRequestAuthorized(req, publicAuth.token)) {
+    const authHeader = req.headers['authorization'];
+    const bearerToken = typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+      ? authHeader.slice(7)
+      : '';
+    const requestUser = bearerToken && components.userManager
+      ? await components.userManager.getUserByToken(bearerToken)
+      : null;
+    const publicAuthorized = publicAuth.enabled && isPublicRequestAuthorized(req, publicAuth.token);
+
+    if (requestUser && requestUser.status !== 'active') {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: { message: 'User account is disabled' } }));
+      return;
+    }
+    if (publicAuth.enabled && !publicAuthorized && !requestUser) {
       res.writeHead(401, {
         'Content-Type': 'application/json',
         'WWW-Authenticate': 'Bearer',
@@ -350,6 +372,21 @@ async function handleRequest(req, res, components) {
       const body = await parseBody(req, config);
       assertRequestBodyObject(body);
 
+      if (requestUser) {
+        const quota = components.userManager.checkQuota(requestUser);
+        if (!quota.allowed) {
+          res.writeHead(429, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: { message: 'User monthly quota exceeded' } }));
+          return;
+        }
+        if (body.model && body.model !== 'auto' && !components.userManager.canAccessModel(requestUser, body.model)) {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: { message: 'Requested model is not allowed for this user' } }));
+          return;
+        }
+      }
+      const requestBytes = Buffer.byteLength(JSON.stringify(body), 'utf8');
+
       const virtualKeyDecision = components.virtualKeys?.authorize(req, body.model || null);
       if (virtualKeyDecision && !virtualKeyDecision.allowed) {
         res.writeHead(virtualKeyDecision.status || 403, { 'Content-Type': 'application/json' });
@@ -387,7 +424,17 @@ async function handleRequest(req, res, components) {
         requestId: generateRequestId(req),
         externalRequestId: extractExternalRequestId(req),
         protocol,
+        user: requestUser,
       };
+      if (requestUser) {
+        res.once('finish', () => {
+          setImmediate(() => {
+            const costRecord = components.costTracker.getRecord(context.requestId);
+            const cost = costRecord?.cost?.totalCost || 0;
+            components.userManager.recordUsage(requestUser.id, requestBytes, cost).catch(() => {});
+          });
+        });
+      }
 
       if (isChat) {
         // Chat Completions 协议
@@ -1100,7 +1147,7 @@ function secureTokenEqual(expected, provided) {
  * 安全约束：仅回环地址 + Bearer Token；未配置 Token 时返回 503。
  */
 async function handleIntelligenceAdmin(req, res, components, pathname) {
-  const { config, intelligence } = components;
+  const { config, intelligence, userManager } = components;
   const token = resolveAdminToken(config);
   const auth = req.headers['authorization'] || '';
   const provided = auth.startsWith('Bearer ') ? auth.slice(7) : '';
@@ -1113,10 +1160,7 @@ async function handleIntelligenceAdmin(req, res, components, pathname) {
   }
   if (!token) {
     res.writeHead(503, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      ok: false, error: 'admin_disabled',
-      hint: 'set SMART_ROUTER_ADMIN_TOKEN to enable admin endpoints',
-    }));
+    res.end(JSON.stringify({ ok: false, error: 'admin_disabled' }));
     return;
   }
   if (!secureTokenEqual(provided, token)) {
@@ -1124,7 +1168,6 @@ async function handleIntelligenceAdmin(req, res, components, pathname) {
     res.end(JSON.stringify({ ok: false, error: 'unauthorized' }));
     return;
   }
-
   try {
     if (req.method === 'GET' && pathname === ADMIN_STATUS) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -1182,6 +1225,120 @@ async function handleIntelligenceAdmin(req, res, components, pathname) {
       res.end(JSON.stringify({ ok: true, ...result }));
       return;
     }
+
+    // ---- 用户管理 API (Phase 2: Multi-user) ----
+    const uAdmin = userManager;
+    if (!uAdmin) {
+      res.writeHead(503, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: 'user_manager_unavailable' }));
+      return;
+    }
+
+    // GET /_smart-router/users/stats - 用户统计
+    if (req.method === 'GET' && pathname === '/_smart-router/users/stats') {
+      const stats = uAdmin.getStats();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, ...stats }));
+      return;
+    }
+
+    // GET /_smart-router/users - 列出所有用户
+    if (req.method === 'GET' && pathname === '/_smart-router/users') {
+      const users = await uAdmin.listUsers();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, users }));
+      return;
+    }
+
+    // GET /_smart-router/users/:id - 获取单个用户
+    if (req.method === 'GET' && pathname.startsWith('/_smart-router/users/')) {
+      const userId = pathname.split('/').pop();
+      const user = await uAdmin.getUser(userId);
+      if (!user) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, error: 'user_not_found' }));
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, user }));
+      return;
+    }
+
+    // POST /_smart-router/users - 创建用户
+    if (req.method === 'POST' && pathname === '/_smart-router/users') {
+      const body = await parseBody(req, config);
+      assertRequestBodyObject(body);
+      try {
+        const user = await uAdmin.createUser(body);
+        res.writeHead(201, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, user }));
+      } catch (err) {
+        res.writeHead(422, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, error: 'user_create_failed', message: err.message }));
+      }
+      return;
+    }
+
+    // PUT /_smart-router/users/:id - 更新用户
+    if (req.method === 'PUT' && pathname.startsWith('/_smart-router/users/')) {
+      const userId = pathname.split('/').pop();
+      const body = await parseBody(req, config);
+      assertRequestBodyObject(body);
+      try {
+        const user = await uAdmin.updateUser(userId, body);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, user }));
+      } catch (err) {
+        res.writeHead(err.message.includes('not found') ? 404 : 422, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, error: 'user_update_failed', message: err.message }));
+      }
+      return;
+    }
+
+    // DELETE /_smart-router/users/:id - 删除用户
+    if (req.method === 'DELETE' && pathname.startsWith('/_smart-router/users/')) {
+      const userId = pathname.split('/').pop();
+      try {
+        await uAdmin.deleteUser(userId);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, deleted: userId }));
+      } catch (err) {
+        res.writeHead(err.message.includes('not found') ? 404 : 422, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, error: 'user_delete_failed', message: err.message }));
+      }
+      return;
+    }
+
+    // POST /_smart-router/users/:id/rotate-token - 轮换用户密钥
+    if (req.method === 'POST' && pathname.match(/^\/_smart-router\/users\/[^/]+\/rotate-token$/)) {
+      const userId = pathname.split('/')[4];
+      try {
+        const newToken = await uAdmin.rotateToken(userId);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, token: newToken }));
+      } catch (err) {
+        res.writeHead(422, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, error: 'token_rotation_failed', message: err.message }));
+      }
+      return;
+    }
+
+    // ---- 成本报表 API ----
+    if (req.method === 'GET' && pathname === '/_smart-router/cost/report') {
+      const params = new URL(req.url, 'http://localhost').searchParams;
+      const groupBy = params.get('groupBy') || 'model';
+      const days = parseInt(params.get('days') || '30', 10);
+      if (!['model', 'provider', 'date', 'user'].includes(groupBy) || !Number.isInteger(days) || days < 1 || days > 3650) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, error: 'invalid_report_parameters' }));
+        return;
+      }
+      const result = await components.costTracker.getReport(groupBy, days);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, groupBy, days, ...result }));
+      return;
+    }
+
     if (req.method === 'POST' && (pathname === '/_smart-router/config/validate' || pathname === '/_smart-router/config/apply')) {
       const body = await parseBody(req, config);
       assertRequestBodyObject(body);
@@ -1219,6 +1376,15 @@ async function handleIntelligenceAdmin(req, res, components, pathname) {
         warnings: validation.warnings,
         config: buildConfigSummary(candidate),
       }));
+      return;
+    }
+    // 滚动重启：触发热重载
+    if (req.method === 'POST' && pathname === '/_smart-router/restart') {
+      const msg = `server: 收到管理端重启请求（Admin Token）`;
+      log(msg);
+      process.emit('SIGUSR2');
+      res.writeHead(202, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, restarting: true, message: '热重载已触发，进程即将重启' }));
       return;
     }
     if (req.method === 'POST' && pathname === ADMIN_KILL) {

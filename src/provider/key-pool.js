@@ -2,6 +2,7 @@
 // Smart Router Mainline - Phase 1
 // Key 池管理器：管理每个 provider 的 API key 生命周期，
 // 包括轮换、冷却、永久失效与手动禁用。
+
 //
 // 设计要点（参考 7878 key-pool 与 6.5.0 改进）：
 //   - Key 轮换：按 lastUsed 时间戳排序，选择最久未使用的可用 key
@@ -117,6 +118,8 @@ export class KeyPool {
         log(`warning: provider "${name}" has no API keys configured`);
       } else if (keyValues.length > 1) {
         log(`provider "${name}" initialized with ${keyValues.length} keys`);
+      } else {
+        log(`provider "${name}" initialized with 1 key`);
       }
     }
   }
@@ -152,20 +155,17 @@ export class KeyPool {
    */
   getKeys(providerName) {
     const keyIds = this._providerKeyIds.get(providerName);
-    if (!keyIds || keyIds.length === 0) return [];
+    if (!keyIds || keyIds.length === 0) {
+      return [];
+    }
 
     const now = Date.now();
     const result = [];
     for (const keyId of keyIds) {
       const rec = this._keys.get(keyId);
       if (!rec) continue;
-      if (this._checkAndRecover(rec, now)) {
-        result.push({
-          keyId: rec.keyId,
-          key: rec.key,
-          provider: rec.provider,
-        });
-      }
+      if (!this._checkAndRecover(rec, now)) continue;
+      result.push({ keyId: rec.keyId, key: rec.key, provider: rec.provider });
     }
     return result;
   }
@@ -273,7 +273,7 @@ export class KeyPool {
    * 策略：
    *   - AUTH_INVALID (401)              → 永久失效 (INVALID)
    *   - FORBIDDEN_KEY (403 key 级)      → 冷却 2h
-   *   - RATE_LIMIT_TRANSIENT (429 瞬时)  → 冷却 30s
+   *   - RATE_LIMIT_TRANSIENT (429 瞬时)  → 冷却 5s
    *   - RATE_LIMIT_QUOTA (429 配额)      → 冷却 10min
    *   - SERVER_ERROR (5xx)              → 指数退避（30s * 2^n，上限 5min）
    *   - NETWORK_ERROR                   → 指数退避（5s * 2^n，上限 60s）

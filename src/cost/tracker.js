@@ -288,6 +288,13 @@ export class CostTracker {
     this.daily = new Map();
   }
 
+  async restore() {
+    if (!this.store || typeof this.store.getAllCosts !== 'function') return 0;
+    const records = await this.store.getAllCosts();
+    for (const record of records) this.updateMemoryAggregation(record);
+    return records.length;
+  }
+
   // --------------------------------------------------------------------------
   // 预算解析
   // --------------------------------------------------------------------------
@@ -791,6 +798,76 @@ export class CostTracker {
    */
   listDailyKeys() {
     return [...this.daily.keys()].sort();
+  }
+
+  /**
+   * 获取成本报告：按指定维度聚合过去 N 天的成本。
+   * @param {'model'|'provider'|'date'|'user'} groupBy 聚合维度
+   * @param {number} days 天数
+   * @param {string|null} [userId] 可选：按用户过滤
+   * @returns {{ groupBy, days, totalCost, totalRequests, items: Array }}
+   */
+  getReport(groupBy, days, userId = null) {
+    const results = [];
+    let totalCost = 0;
+    let totalRequests = 0;
+    const now = Date.now();
+    const cutoffMs = now - days * 86400000;
+
+    for (const record of this.records.values()) {
+      // 时间过滤
+      const recordTs = record.timestamp || record._createdAt;
+      if (recordTs) {
+        const ts = typeof recordTs === 'number' ? recordTs : new Date(recordTs).getTime();
+        if (!Number.isNaN(ts) && ts < cutoffMs) continue;
+      }
+
+      // 用户过滤
+      if (userId && record.userId && record.userId !== userId) continue;
+
+      const cost = normalizeCost(record.cost || {});
+      totalCost += cost.totalCost || 0;
+      totalRequests++;
+
+      // 按维度聚合
+      const key = groupBy === 'date'
+        ? resolveDateKey(recordTs)
+        : groupBy === 'model'
+          ? record.modelId || 'unknown'
+          : groupBy === 'provider'
+            ? record.provider || 'unknown'
+            : groupBy === 'user'
+              ? record.userId || 'anonymous'
+              : record.modelId || 'unknown';
+
+      const existing = results.find((r) => r.name === key);
+      if (existing) {
+        existing.cost += cost.totalCost || 0;
+        existing.inputCost += cost.inputCost || 0;
+        existing.outputCost += cost.outputCost || 0;
+        existing.requests++;
+      } else {
+        results.push({
+          name: key,
+          cost: cost.totalCost || 0,
+          inputCost: cost.inputCost || 0,
+          outputCost: cost.outputCost || 0,
+          requests: 1,
+          currency: record.cost && record.cost.currency ? record.cost.currency : DEFAULT_CURRENCY,
+        });
+      }
+    }
+
+    // 按成本降序排列
+    results.sort((a, b) => b.cost - a.cost);
+
+    return {
+      groupBy,
+      days,
+      totalCost: roundCost(totalCost),
+      totalRequests,
+      items: results,
+    };
   }
 
   // --------------------------------------------------------------------------

@@ -327,7 +327,10 @@ export class ProviderClient {
       );
 
       if (keyId && this.keyPool && errorType !== ErrorType.CLIENT_ABORTED) {
-        this.keyPool.markKeyFailed(providerName, keyId, errorType);
+        // 健康探测只记录临时网络/服务端问题；鉴权失败不能证明真实请求 Key 失效。
+        if ([ErrorType.NETWORK_ERROR, ErrorType.SERVER_ERROR, ErrorType.RATE_LIMIT_TRANSIENT].includes(errorType)) {
+          this.keyPool.markKeyFailed(providerName, keyId, errorType);
+        }
       }
 
       log(

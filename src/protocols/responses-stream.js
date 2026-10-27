@@ -26,6 +26,7 @@ import { getAgentModels, getAgentBudget } from '../agent/identity.js';
 import { isAbortError } from '../runtime/cancellation.js';
 import { parseSSEChunk, isDoneMarker } from './chat-stream.js';
 import { responsesToChat, buildResponsesError } from './responses.js';
+import { randomUUID } from 'node:crypto';
 
 // ----------------------------------------------------------------------------
 // 日志
@@ -203,7 +204,7 @@ function isResWritable(res) {
  * 生成简短唯一 ID。
  */
 function generateItemId(prefix) {
-  return `${prefix}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+  return `${prefix}_${randomUUID().replaceAll('-', '')}`;
 }
 
 // ----------------------------------------------------------------------------
@@ -620,10 +621,14 @@ export function chatDeltaToResponsesEvents(chunk, state, context = {}) {
     closeAllToolCalls(state, events);
 
     // 构建 usage（从 Chat 格式转换为 Responses 格式）
+    // 必须包含 total_tokens，否则 codex 客户端解析 response.completed 会失败
     const responsesUsage = state.usage
       ? {
           input_tokens: state.usage.prompt_tokens ?? state.usage.input_tokens ?? 0,
           output_tokens: state.usage.completion_tokens ?? state.usage.output_tokens ?? 0,
+          total_tokens:
+            (state.usage.prompt_tokens ?? state.usage.input_tokens ?? 0) +
+            (state.usage.completion_tokens ?? state.usage.output_tokens ?? 0),
         }
       : null;
 
@@ -1095,7 +1100,7 @@ export async function handleResponseStream(req, res, body, context) {
     // 1. 将 Responses 请求转换为 Chat Completions 格式
     const chatBody = responsesToChat(parsedBody);
     chatBody.stream = true;
-
+        
     // 2. 应用 Claude Code 兼容补丁
     const headers = req?.headers || {};
     const pathname = req?.url || '';
@@ -1122,6 +1127,8 @@ export async function handleResponseStream(req, res, body, context) {
       health: executionEngine.health,
       circuitBreaker: executionEngine.circuitBreaker,
       keyPool: executionEngine.keyPool,
+      user: context.user,
+      userManager: context.userManager,
     });
 
     // 3b. Shadow 智能建议（执行前生成；await 保证建议落库后才执行；off 模式 no-op）

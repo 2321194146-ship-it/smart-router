@@ -17,6 +17,7 @@
 
 import { handleChatCompletion } from './chat.js';
 import { normalizeChatCompletionResponse } from './response-normalization.js';
+import { randomUUID } from 'node:crypto';
 
 // ----------------------------------------------------------------------------
 // 日志
@@ -55,7 +56,7 @@ function sendJsonResponse(res, statusCode, data) {
  * 生成简短唯一 ID（用于 output item 的 id 字段）。
  */
 function generateItemId(prefix) {
-  return `${prefix}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+  return `${prefix}_${randomUUID().replaceAll('-', '')}`;
 }
 
 // ----------------------------------------------------------------------------
@@ -80,7 +81,7 @@ function generateItemId(prefix) {
 function convertContentPartsToChat(parts) {
   if (!Array.isArray(parts)) return parts;
 
-  return parts.map((part) => {
+  const converted = parts.map((part) => {
     if (!part || typeof part !== 'object') return part;
 
     switch (part.type) {
@@ -111,6 +112,17 @@ function convertContentPartsToChat(parts) {
         return part;
     }
   });
+
+  // Chat Completions API：纯文本消息的 content 应为字符串，而非数组。
+  // 若全部为文本部分，合并为字符串；含图片时保留数组格式。
+  const allText = converted.length > 0 && converted.every(
+    (p) => p && typeof p === 'object' && p.type === 'text'
+  );
+  if (allText) {
+    return converted.map((p) => p.text || '').join('');
+  }
+
+  return converted;
 }
 
 /**
@@ -161,17 +173,21 @@ function convertToolChoice(toolChoice) {
 function convertToolsToChat(tools) {
   if (!Array.isArray(tools)) return tools;
 
-  return tools.map((tool) => {
-    if (!tool || typeof tool !== 'object') return tool;
+  // 只保留上游普遍支持的 function 类型工具；web_search/file_search/custom
+  // 等特殊类型原样透传给智谱/bai 等上游会触发 400（tools[N].type invalid）。
+  const out = [];
+  for (const tool of tools) {
+    if (!tool || typeof tool !== 'object') continue;
 
     // 已经是 Chat 格式（有 function 嵌套）
     if (tool.function && typeof tool.function === 'object') {
-      return tool;
+      out.push(tool);
+      continue;
     }
 
     // Responses 格式：扁平结构
     if (tool.type === 'function') {
-      return {
+      out.push({
         type: 'function',
         function: {
           name: tool.name,
@@ -179,12 +195,14 @@ function convertToolsToChat(tools) {
           parameters: tool.parameters || { type: 'object', properties: {} },
           ...(tool.strict !== undefined ? { strict: tool.strict } : {}),
         },
-      };
+      });
+      continue;
     }
 
-    // 其他类型（web_search, file_search 等）原样透传
-    return tool;
-  });
+    // 其他类型（web_search, file_search, custom 等）：过滤，避免上游 400
+    // 保留 function 类型工具即可满足编码 Agent 的核心工具调用需求。
+  }
+  return out;
 }
 
 /**
@@ -219,7 +237,7 @@ export function responsesToChat(body) {
   if (body.model) chatBody.model = body.model;
 
   // 构建 messages
-  const messages = [];
+  let messages = [];
 
   // instructions → system message（前置）
   if (body.instructions && typeof body.instructions === 'string') {
@@ -237,7 +255,9 @@ export function responsesToChat(body) {
       switch (item.type) {
         case 'message': {
           // Responses message item → Chat message
-          const msg = { role: item.role || 'user' };
+          // developer 角色（OpenAI Responses 新角色，替代 system）上游普遍不支持，转为 system
+          const rawRole = item.role || 'user';
+          const msg = { role: rawRole === 'developer' ? 'system' : rawRole };
 
           // content 可以是字符串或数组
           if (typeof item.content === 'string') {
@@ -309,6 +329,16 @@ export function responsesToChat(body) {
           break;
       }
     }
+  }
+
+  // 合并多条 system message 为一条（上游普遍只支持单条 system，多条会返回空）
+  const sysMsgs = messages.filter((m) => m.role === 'system');
+  if (sysMsgs.length > 1) {
+    const mergedContent = sysMsgs
+      .map((m) => (typeof m.content === 'string' ? m.content : JSON.stringify(m.content)))
+      .join('\n\n');
+    const otherMsgs = messages.filter((m) => m.role !== 'system');
+    messages = [{ role: 'system', content: mergedContent }, ...otherMsgs];
   }
 
   chatBody.messages = messages;
@@ -482,9 +512,13 @@ export function chatToResponses(chatResponse, originalBody) {
         output_tokens: rawUsage.completion_tokens ?? rawUsage.output_tokens ?? 0,
         ...(rawUsage.total_tokens !== undefined
           ? { total_tokens: rawUsage.total_tokens }
-          : {}),
+          : {
+              total_tokens:
+                (rawUsage.prompt_tokens ?? rawUsage.input_tokens ?? 0) +
+                (rawUsage.completion_tokens ?? rawUsage.output_tokens ?? 0),
+            }),
       }
-    : { input_tokens: 0, output_tokens: 0 };
+    : { input_tokens: 0, output_tokens: 0, total_tokens: 0 };
 
   // 确定状态：finish_reason='length' 或 'content_filter' 时为 incomplete
   let status = 'completed';

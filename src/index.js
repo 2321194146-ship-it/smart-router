@@ -129,6 +129,26 @@ function gracefulShutdown(signal) {
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
+// 滚动重启：SIGUSR2 触发热重载（退出码42标识，由包装器自动重启）
+process.on('SIGUSR2', () => {
+  if (shuttingDown) return;
+  log('server: 收到 SIGUSR2，触发热重载...');
+  const components = server._components;
+  if (components?.health && typeof components.health.stopHealthCheck === 'function') {
+    components.health.stopHealthCheck();
+    log('server: 健康检查已停止');
+  }
+  server.close(() => {
+    log('server: 连接已关闭，以退出码42退出触发自动重启');
+    process.exit(42);
+  });
+  // 超时兜底
+  setTimeout(() => {
+    log('server: 热重载超时，强制退出');
+    process.exit(42);
+  }, shutdownGraceMs + 2000).unref();
+});
+
 // 未捕获异常兜底（防止进程崩溃）
 process.on('uncaughtException', (err) => {
   log(`server: 未捕获异常: ${err.message}`);

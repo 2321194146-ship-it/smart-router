@@ -325,6 +325,8 @@ function _buildCandidatesFromModels(modelList, config, options, source) {
   const circuitBreaker = options.circuitBreaker || null;
   const keyPool = options.keyPool || null;
   const budget = options.budget || {};
+  const user = options.user || null;
+  const userManager = options.userManager || null;
 
   const allowPaid =
     typeof budget.allowPaid === 'boolean' ? budget.allowPaid : true;
@@ -333,6 +335,12 @@ function _buildCandidatesFromModels(modelList, config, options, source) {
 
   for (const model of modelList) {
     if (!model || !model.id || !model.provider) continue;
+
+    if (user && userManager) {
+      if (!userManager.canAccessModel(user, model.id) || !userManager.canAccessProvider(user, model.provider)) {
+        continue;
+      }
+    }
 
     // 过滤 excludeModels
     if (excludeModels.has(model.id)) continue;
@@ -415,6 +423,8 @@ function _sortCandidates(candidates) {
 
     return 0;
   });
+
+  return candidates;
 }
 
 export default {

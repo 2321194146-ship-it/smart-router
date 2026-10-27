@@ -113,6 +113,10 @@ export class StorageInterface {
     throw new Error('StorageInterface.getCost() not implemented');
   }
 
+  async getAllCosts() {
+    throw new Error('StorageInterface.getAllCosts() not implemented');
+  }
+
   // --- key_status ---
 
   /**
